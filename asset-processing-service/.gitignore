@@ -1,0 +1,7 @@
+# env files (can opt-in for commiting if needed)
+.env*
+.env
+.env*.local
+
+__pycache__/
+
