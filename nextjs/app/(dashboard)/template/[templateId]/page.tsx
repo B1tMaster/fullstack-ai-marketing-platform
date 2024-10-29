@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
 import React from "react";
 
-interface TemplatePageProps {
-  params: {
-    templateId: string;
-  };
-}
+type TemplatePageProps = Promise<{
+  templateId: string;
+}>;
 
-export default function TemplatePage({ params }: TemplatePageProps) {
+export default async function TemplatePage(props: {
+  params: TemplatePageProps;
+}) {
+  const params = await props.params;
+
   if (params.templateId != "123") {
     return notFound();
   }
