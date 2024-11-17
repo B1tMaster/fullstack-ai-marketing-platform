@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { X, Menu, Settings, Layout, User } from "lucide-react";
+import { X, Menu, Settings, Layout } from "lucide-react";
 
 const SpaceMonkeyIcon = () => (
   <svg viewBox="0 0 100 100" className="w-8 h-8 min-w-[32px]">
