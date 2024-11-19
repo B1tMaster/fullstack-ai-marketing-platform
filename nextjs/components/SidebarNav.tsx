@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
 interface SidebarNavProps {
-  isMobile: boolean;
   isCollapsed: boolean;
 }
 
@@ -17,7 +16,7 @@ interface NavItem {
   isActive: (pathname: string) => boolean;
 }
 
-function SidebarNav({ isMobile, isCollapsed }: SidebarNavProps) {
+function SidebarNav({ isCollapsed }: SidebarNavProps) {
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
@@ -44,7 +43,7 @@ function SidebarNav({ isMobile, isCollapsed }: SidebarNavProps) {
   ];
 
   return (
-    <div className="space-y4 overflow-hidden mb-auto">
+    <div className="space-y-4 overflow-hidden mb-auto">
       {navItems.map((item) => (
         <Button
           key={item.href}
@@ -52,15 +51,18 @@ function SidebarNav({ isMobile, isCollapsed }: SidebarNavProps) {
           asChild
           className={cn(
             "w-full justify-start hover:text-main hover:bg-gray-200 flex items-center text-lg font-medium",
-            !isMobile && isCollapsed && "justify-center p-2",
+            isCollapsed && "lg:justify-center lg:p-2",
             item.isActive(pathname) && "bg-gray-200 text-main"
           )}
         >
           <Link href={item.href}>
             <item.icon className="h-[22px] w-[22px]" />
-            {(isMobile || !isCollapsed) && (
-              <span className="ml-3">{item.label}</span>
+            {/* DESKTOP */}
+            {!isCollapsed && (
+              <span className="ml-3 hidden lg:inline">{item.label}</span>
             )}
+            {/* MOBILE */}
+            <span className="ml-3 lg:hidden">{item.label}</span>
           </Link>
         </Button>
       ))}

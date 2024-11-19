@@ -12,7 +12,7 @@ function SidebarToggle({ isCollapsed, toggleSidebar }: SidebarToggleProps) {
   return (
     <div
       className={cn(
-        "flex border-t border-gray-200",
+        "hidden lg:flex border-t border-gray-200",
         isCollapsed ? "p-4 justify-center" : "p-4 justify-end"
       )}
     >
