@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProjectDetailBody from "./ProjectDetailBody";
 
-const ManageUploadStep = lazy(() => import("../ManageUploadStep"));
+const ManageUploadStep = lazy(() => import("../upload-step/ManageUploadStep"));
 const ConfigurePromptsStep = lazy(() => import("../ConfigurePromptsStep"));
 const GenerateContentStep = lazy(() => import("../GenerateContentStep"));
 
@@ -76,11 +76,13 @@ function ProjectDetailView({ project }: ProjectDetailViewProps) {
         handleStepClick={handleStepClick}
         steps={steps}
       />
-      <ProjectDetailBody
-        currentStep={currentStep}
-        steps={steps}
-        projectId={project.id}
-      />
+      <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm mt-10 sm:mt-12 lg:mt-10">
+        <ProjectDetailBody
+          currentStep={currentStep}
+          steps={steps}
+          projectId={project.id}
+        />
+      </div>
 
       <ConfirmationModal
         isOpen={showDeleteConfirmation}
