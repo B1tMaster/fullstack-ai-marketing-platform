@@ -9,12 +9,13 @@ const updateProjectSchema = z.object({
   title: z.string().min(1),
 });
 
+type Params = Promise<{ projectId: string }>;
+
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Params }
 ) {
-  /* @next-codemod-ignore */
-  const projectId = params.projectId;
+  const projectId = (await params).projectId;
 
   const { userId } = getAuth(request);
   if (!userId) {
@@ -50,15 +51,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Params }
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  /* @next-codemod-ignore */
-  const projectId = params.projectId;
+  const projectId = (await params).projectId;
 
   const deletedProject = await db
     .delete(projectsTable)

@@ -3,14 +3,17 @@ import { getProject } from "@/server/queries";
 import { notFound } from "next/navigation";
 import React from "react";
 
-interface ProjectPageProps {
-  params: {
-    projectId: string;
-  };
-}
+// interface  ProjectPageProps {
+//   params: {
+//     projectId: string;
+//   };
+// }
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const projectId = params.projectId;
+type Params = Promise<{ projectId: string }>;
+
+export default async function ProjectPage(props: { params: Params }) {
+  //export default async function ProjectPage({ params }: ProjectPageProps) {
+  const projectId = (await props.params).projectId;
 
   const project = await getProject(projectId);
 
