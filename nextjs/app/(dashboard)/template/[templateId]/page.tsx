@@ -1,18 +1,28 @@
-import { notFound } from "next/navigation";
 import React from "react";
 
-type TemplatePageProps = Promise<{
-  templateId: string;
-}>;
+type Template = {
+  name: string;
+};
 
-export default async function TemplatePage(props: {
-  params: TemplatePageProps;
-}) {
-  const params = await props.params;
+export default async function TemplatesPage() {
+  const templatePromise = new Promise<Template[]>((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { name: "Template 4" },
+        { name: "Template 5" },
+        { name: "Template 6" },
+      ]);
+    }, 5000);
+  });
 
-  if (params.templateId != "123") {
-    return notFound();
-  }
+  const templates = await templatePromise;
 
-  return <div>TemplatePage: {params.templateId}</div>;
+  return (
+    <div>
+      <h1>Templates Page</h1>
+      {templates.map((template, idx) => (
+        <div key={idx}>{template.name}</div>
+      ))}
+    </div>
+  );
 }

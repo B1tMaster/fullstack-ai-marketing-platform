@@ -8,7 +8,6 @@ import { eq } from "drizzle-orm";
 export async function getProjectsForUser(): Promise<Project[]> {
   // Figure out who the user is
   const { userId } = await auth();
-  console.log(userId);
 
   // Verify the user exists
   if (!userId) {
@@ -22,4 +21,21 @@ export async function getProjectsForUser(): Promise<Project[]> {
   });
 
   return projects;
+}
+
+export async function getProject(projectId: string) {
+  // Figure out who the user is
+  const { userId } = await auth();
+
+  // Verify the user exists
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  const project = await db.query.projectsTable.findFirst({
+    where: (project, { eq, and }) =>
+      and(eq(project.id, projectId), eq(project.userId, userId)),
+  });
+
+  return project;
 }
