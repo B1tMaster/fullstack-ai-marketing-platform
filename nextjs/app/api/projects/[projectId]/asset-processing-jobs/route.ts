@@ -3,6 +3,7 @@ import { assetProcessingJobTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { HttpStatus } from "@/constants/http";
 
 type Params = Promise<{ projectId: string }>;
 
@@ -15,7 +16,10 @@ export async function GET(
   // Auth check
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   try {
@@ -30,7 +34,7 @@ export async function GET(
     console.error("Failed to fetch asset processing jobs", error);
     return NextResponse.json(
       { error: "Failed to fetch asset processing jobs" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }

@@ -4,6 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { HttpStatus } from "@/constants/http";
 
 const updateProjectSchema = z.object({
   title: z.string().min(1),
@@ -19,7 +20,10 @@ export async function PATCH(
 
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   const body = await request.json();
@@ -28,7 +32,7 @@ export async function PATCH(
   if (!validatedData.success) {
     return NextResponse.json(
       { error: validatedData.error.errors },
-      { status: 400 }
+      { status: HttpStatus.BAD_REQUEST }
     );
   }
 
@@ -43,7 +47,10 @@ export async function PATCH(
     .returning();
 
   if (updatedProject.length === 0) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Project not found" },
+      { status: HttpStatus.NOT_FOUND }
+    );
   }
 
   return NextResponse.json(updatedProject[0]);
@@ -55,7 +62,10 @@ export async function DELETE(
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   const projectId = (await params).projectId;
@@ -68,7 +78,10 @@ export async function DELETE(
     .returning();
 
   if (deletedProject.length === 0) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Project not found" },
+      { status: HttpStatus.NOT_FOUND }
+    );
   }
 
   return NextResponse.json(deletedProject[0]);

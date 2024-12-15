@@ -4,6 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { del } from "@vercel/blob";
+import { HttpStatus } from "@/constants/http";
 
 type Params = Promise<{ projectId: string }>;
 
@@ -16,7 +17,10 @@ export async function GET(
   // Auth check
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   try {
@@ -31,7 +35,7 @@ export async function GET(
     console.error("Failed to fetch assets", error);
     return NextResponse.json(
       { error: "Failed to fetch assets" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -43,14 +47,17 @@ export async function DELETE(request: NextRequest) {
   if (!assetId) {
     return NextResponse.json(
       { error: "Asset ID is required" },
-      { status: 400 }
+      { status: HttpStatus.BAD_REQUEST }
     );
   }
 
   // TODO: AUTH
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   try {
@@ -60,7 +67,10 @@ export async function DELETE(request: NextRequest) {
       .returning();
 
     if (deletedAsset.length === 0) {
-      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Asset not found" },
+        { status: HttpStatus.NOT_FOUND }
+      );
     }
 
     await del(deletedAsset[0].fileUrl);
@@ -70,7 +80,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Failed to delete asset", error);
     return NextResponse.json(
       { error: "Failed to delete asset" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
