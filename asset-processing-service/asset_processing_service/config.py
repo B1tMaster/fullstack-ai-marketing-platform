@@ -18,6 +18,7 @@ class Config:
     API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000/api")
     STUCK_JOB_THRESHOLD_SECONDS = int(os.getenv("STUCK_JOB_THRESHOLD_SECONDS", "30"))
     MAX_JOB_ATTEMPTS = int(os.getenv("MAX_JOB_ATTEMPTS", "3"))
+    MAX_NUM_WORKERS = int(os.getenv("MAX_NUM_WORKERS", "2"))
 
 
 config = Config()

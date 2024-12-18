@@ -1,4 +1,5 @@
 import asyncio
+from collections import defaultdict
 from datetime import datetime
 
 from asset_processing_service.api_client import fetch_jobs, update_job_details
@@ -22,6 +23,42 @@ def remove_job_from_pending(
         if reason:
             log_message += f". Reason: {reason}"
         print(log_message)
+
+
+async def worker(
+    worker_id: int,
+    job_queue: asyncio.Queue,
+    jobs_pending_or_in_progress: set,
+    job_locks: dict,
+):
+    while True:
+        try:
+            job = await job_queue.get()
+
+            async with job_locks[job.id]:
+                print(f"Worker {worker_id} processing job {job.id}...")
+                try:
+                    #  await process_job(job)
+                    await update_job_details(
+                        job_id=job.id, status="completed", attempts=job.attempts + 1
+                    )
+                except Exception as e:
+                    print(f"Error processing job {job.id}: {e}")
+                    error_message = str(e)
+                    await update_job_details(
+                        job_id=job.id,
+                        status="failed",
+                        error_message=error_message,
+                        attempts=job.attempts + 1,
+                    )
+                finally:
+                    jobs_pending_or_in_progress.remove(job.id)
+                    job_locks.pop(job.id, None)
+
+            job_queue.task_done()
+        except Exception as e:
+            print(f"Error in worker {worker_id}: {e}")
+            await asyncio.sleep(3)
 
 
 async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set):
@@ -93,20 +130,30 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                         remove_job_from_pending(
                             job.id, jobs_pending_or_in_progress, "Max attempts exceeded"
                         )
-
+                ## sleep to avoid busy-waiting
+                await asyncio.sleep(3)
         except Exception as e:
             print(f"Error in job fetcher: {e}", flush=True)
+            await asyncio.sleep(3)
 
 
 async def async_main():
     job_queue = asyncio.Queue()
     jobs_pending_or_in_progress = set()
+    job_locks = defaultdict(asyncio.Lock)
 
     job_fetcher_task = asyncio.create_task(
         job_fetcher(job_queue, jobs_pending_or_in_progress)
     )
 
-    await asyncio.gather(job_fetcher_task)
+    workers = [
+        asyncio.create_task(
+            worker(i + 1, job_queue, jobs_pending_or_in_progress, job_locks)
+        )
+        for i in range(config.MAX_NUM_WORKERS)
+    ]
+
+    await asyncio.gather(job_fetcher_task, *workers)
 
 
 def main():
