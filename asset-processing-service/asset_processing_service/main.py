@@ -1,6 +1,27 @@
 import asyncio
+from datetime import datetime
 
-from asset_processing_service.api_client import fetch_jobs
+from asset_processing_service.api_client import fetch_jobs, update_job_details
+from asset_processing_service.config import config
+from asset_processing_service.constants.job_status import JobStatus
+
+
+def remove_job_from_pending(
+    job_id: str, jobs_pending_or_in_progress: set, reason: str = ""
+) -> None:
+    """Remove a job from the pending or in progress set and log the action.
+
+    Args:
+        job_id: The ID of the job to remove
+        jobs_pending_or_in_progress: The set containing pending/in-progress jobs
+        reason: Optional reason for removal for logging purposes
+    """
+    if job_id in jobs_pending_or_in_progress:
+        jobs_pending_or_in_progress.remove(job_id)
+        log_message = f"Job {job_id} removed from pending or in progress set"
+        if reason:
+            log_message += f". Reason: {reason}"
+        print(log_message)
 
 
 async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set):
@@ -10,31 +31,74 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
 
         try:
             jobs = await fetch_jobs()
-            print(f"Fetched jobs: {jobs}", flush=True)
+            # print(f"Fetched jobs: {jobs}", flush=True)
 
-            # Process each job that isn't already being handled
             for job in jobs:
-                job_id = job.id
+                current_time = datetime.now().timestamp()
+                last_heartbeat_time = job.lastHeartBeat.timestamp()
+                time_since_last_heartbeat = abs(current_time - last_heartbeat_time)
 
-                # instructions in sudocode
-                # use match python case statements to process all the jobs based on their status
-                # print error messages when appropriate, make sure use best practices for error handling
-                # if the job status is in_progress, do nothing
-                # if the job status is created, add it to the job_queue and also add it to the jobs_pending_or_in_progress set
-                # if the job status is failed and job.attempts >= config.MAX_JOB_ATTEMPTS, print the job details and message that it has exceeded the max attempts. update job status to max_attempts_exceeded and remove it from the jobs_pending_or_in_progress set
-                # if the job status is stuck, set the job status to jobstatus.failed and remove it from the jobs_pending_or_in_progress set
-                # if the job is max_attempts_exceeded, do nothing
+                match job.status:
+                    case "in_progress":
+                        if (
+                            time_since_last_heartbeat
+                            > config.STUCK_JOB_THRESHOLD_SECONDS
+                            and job.attempts < config.MAX_JOB_ATTEMPTS
+                        ):
+                            print(f"Job {job.id} is stuck. Resetting job.")
+                            remove_job_from_pending(
+                                job.id, jobs_pending_or_in_progress, "Job is stuck"
+                            )
 
-                if job_id and job_id not in jobs_pending_or_in_progress:
-                    jobs_pending_or_in_progress.add(job_id)
-                    await job_queue.put(job)
+                            await update_job_details(
+                                job.id,
+                                status=JobStatus.STUCK.value,
+                                error_message="Job is stuck",
+                                attempts=job.attempts + 1,
+                                last_heartbeat=datetime.now(),
+                            )
+                            print(f"Job {job.id} Updated in DB.")
+                            print(f"Job {job.id} is still processing.")
+
+                        if job.attempts >= config.MAX_JOB_ATTEMPTS:
+                            print(
+                                f"Job {job.id} has exceeded max attempts. Failing job."
+                            )
+                            await update_job_details(
+                                job.id,
+                                status=JobStatus.MAX_ATTEMPTS_EXCEEDED.value,
+                                error_message="Max attempts exceeded",
+                                attempts=job.attempts,
+                            )
+                            print(
+                                f"Job {job.id} Updated in DB to max attempts exceeded."
+                            )
+                    case "created" | "failed":
+                        if job.attempts >= config.MAX_JOB_ATTEMPTS:
+                            print(
+                                f"Job {job.id} has exceeded max attempts. Failing job."
+                            )
+                            await update_job_details(
+                                job.id,
+                                status=JobStatus.MAX_ATTEMPTS_EXCEEDED.value,
+                                error_message="Max attempts exceeded",
+                                attempts=job.attempts,
+                            )
+                        elif job.id not in jobs_pending_or_in_progress:
+                            print("Adding job to queue: ", job.id)
+                            jobs_pending_or_in_progress.add(job.id)
+                            await job_queue.put(job)
+
+                    case "max_attempts_exceeded":
+                        remove_job_from_pending(
+                            job.id, jobs_pending_or_in_progress, "Max attempts exceeded"
+                        )
 
         except Exception as e:
             print(f"Error in job fetcher: {e}", flush=True)
 
 
 async def async_main():
-
     job_queue = asyncio.Queue()
     jobs_pending_or_in_progress = set()
 

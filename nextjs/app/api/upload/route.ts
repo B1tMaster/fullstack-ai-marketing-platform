@@ -39,8 +39,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         if (!tokenPayload) return;
 
-        const { projectId, fileType, mimeType, size } =
-          JSON.parse(tokenPayload);
+        const { projectId, fileType, mimeType, size } = JSON.parse(tokenPayload);
 
         console.log(
           `Saving blob URL ${blob.url} to database for project ${projectId} with filename ${blob.pathname}`
@@ -66,6 +65,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             status: "created",
           });
         } catch (error) {
+          console.error("Database insertion error:", error);
           throw new Error(
             `Could not save asset or asset processing job to database ${error}`
           );
@@ -75,9 +75,10 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(jsonResponse);
   } catch (error) {
+    console.error("Upload error:", error);
     return NextResponse.json(
       { error: (error as Error).message },
-      { status: HttpStatus.BAD_REQUEST } // The webhook will retry 5 times waiting for a 200
+      { status: HttpStatus.BAD_REQUEST }
     );
   }
 }
