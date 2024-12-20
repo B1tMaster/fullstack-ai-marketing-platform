@@ -23,6 +23,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             "video/mp4",
             "video/quicktime",
             "audio/mpeg",
+            "audio/mp4",
             "audio/wav",
             "audio/ogg",
             "text/plain",
@@ -39,7 +40,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         if (!tokenPayload) return;
 
-        const { projectId, fileType, mimeType, size } = JSON.parse(tokenPayload);
+        const { projectId, fileType, mimeType, size } =
+          JSON.parse(tokenPayload);
 
         console.log(
           `Saving blob URL ${blob.url} to database for project ${projectId} with filename ${blob.pathname}`

@@ -13,53 +13,92 @@ from asset_processing_service.models import AssetProcessingJob
 
 
 async def process_job(job: AssetProcessingJob) -> None:
+    print(f"\n{'='*50}")
     print(f"Processing job {job.id}...")
+    print(f"Asset ID: {job.assetId}")
+    print(f"{'='*50}\n")
 
     heartbeat_task = asyncio.create_task(heeatbeat_updater(job.id))
 
     try:
-        #  Update job status to "in_progress"
-        await update_job_details(job.id, {"status": "in_progress"})
+        # Update job status to "in_progress"
+        await update_job_details(job.id, status="in_progress")
 
-        # Fetch assset associated with asset processing job
+        # Fetch asset associated with asset processing job
+        print(f"Fetching asset details for ID: {job.assetId}")
         asset = await fetch_asset(job.assetId)
         if asset is None:
             raise ValueError(f"Asset with ID {job.assetId} not found")
 
+        print(f"\nAsset details:")
+        print(f"- File name: {asset.fileName}")
+        print(f"- File type: {asset.fileType}")
+        print(f"- MIME type: {asset.mimeType}")
+        print(f"- Size: {asset.size} bytes\n")
+
+        print(f"Processing asset: {asset.fileName}")
+        print(f"File type: {asset.fileType}")
+        print(f"MIME type: {asset.mimeType}")
+
         file_buffer = await fetch_asset_file(asset.fileUrl)
 
-        content_type = "images"
-        content = ""
-
-        if content_type in ["text", "markdown"]:
-            print(f"Text file detected. Ready content of {asset.fileName}")
+        if asset.fileType == "text" or asset.fileType == "markdown":
+            print(f"Text file detected. Reading content of {asset.fileName}")
             content = file_buffer.decode("utf-8")
-        elif content_type == "audio":
-            print("Processing audio file...")
-            chunks = await split_audio_file(
+        elif asset.fileType == "audio":
+            print(f"Processing audio file: {asset.fileName}")
+            chunks, mp3_files = await split_audio_file(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
+                job.id,  # Pass the job ID for temp directory management
             )
-            transcribed_chunks = await transcribe_chunks(chunks)
-            content = "\n\n".join(transcribed_chunks)
-        elif content_type == "video":
-            #print("Processing video file...")
+            print(f"\nSuccessfully split audio file into {len(chunks)} chunks")
+            print("\nMP3 files ready for transcription:")
+            for file_path in mp3_files:
+                print(f"- {file_path}")
+
+            # TODO: DELETE THIS TESTING CODE
+            os.makedirs(os.path.expanduser("~/Downloads/audio"), exist_ok=True)
+            for i, chunk in enumerate(chunks):
+                chunk_path = os.path.join(
+                    os.path.expanduser("~/Downloads/audio"), f"chunk_{i}.mp3"
+                )
+                with open(chunk_path, "wb") as f:
+                    f.write(chunk)
+                print(f"Wrote test chunk to file://{os.path.abspath(chunk_path)}")
+
+            # transcribed_chunks = await transcribe_chunks(chunks)
+            # content = "\n\n".join(transcribed_chunks)
+        elif asset.fileType == "video":
+            print(f"Video processing not implemented yet: {asset.fileName}")
             # chunks = await extract_audio_and_split()
             # transcribed_chunks = await transcribe_chunks(chunks)
             # content = "\n\n".join(transcribed_chunks)
-
+            pass
         else:
-            raise ValueError(f"Unsupported content type: {content_type}")
+            raise ValueError(f"Unsupported content type: {asset.fileType}")
 
         # TODO: update asset content
 
         # TODO: Update job status to completed
+        await update_job_details(job.id, status="completed")
 
-        # TODO: Cancel heartbeat updater
+        # Cancel heartbeat updater
+        heartbeat_task.cancel()
+        try:
+            await heartbeat_task
+        except asyncio.CancelledError:
+            pass
 
     except Exception as e:
-        pass
+        print(f"Error processing job {job.id}: {str(e)}")
+        await update_job_details(job.id, status="failed", error_message=str(e))
+        heartbeat_task.cancel()
+        try:
+            await heartbeat_task
+        except asyncio.CancelledError:
+            pass
 
 
 async def heeatbeat_updater(job_id: str):

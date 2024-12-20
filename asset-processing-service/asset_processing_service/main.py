@@ -5,6 +5,7 @@ from datetime import datetime
 from asset_processing_service.api_client import fetch_jobs, update_job_details
 from asset_processing_service.config import config
 from asset_processing_service.constants.job_status import JobStatus
+from asset_processing_service.job_processor import process_job
 
 
 def remove_job_from_pending(
@@ -38,10 +39,7 @@ async def worker(
             async with job_locks[job.id]:
                 print(f"Worker {worker_id} processing job {job.id}...")
                 try:
-                    #  await process_job(job)
-                    await update_job_details(
-                        job_id=job.id, status="completed", attempts=job.attempts + 1
-                    )
+                    await process_job(job)
                 except Exception as e:
                     print(f"Error processing job {job.id}: {e}")
                     error_message = str(e)

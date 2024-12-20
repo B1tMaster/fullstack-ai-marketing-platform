@@ -99,24 +99,38 @@ async def update_job_heartbeat(job_id: str) -> bool:
 
 
 async def fetch_asset(asset_id: str) -> Optional[Asset]:
+    """Fetch an asset by ID.
+
+    Args:
+        asset_id: The ID of the asset to fetch
+
+    Returns:
+        The asset if found, None otherwise
+    """
     if not asset_id:
         print("Error: asset_id cannot be empty")
         return None
 
     base_url = config.API_BASE_URL.rstrip("/")
     url = f"{base_url}/asset/{asset_id}"
+    print(f"\nFetching asset from URL: {url}")
+    print(f"Using headers: {HEADERS}")
 
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=HEADERS) as response:
+                print(f"Response status: {response.status}")
                 if response.status == 200:
                     data = await response.json()
+                    print(f"Response data: {data}")
                     return Asset(**data)
                 else:
+                    response_text = await response.text()
                     print(f"Failed to fetch asset: {response.status}")
+                    print(f"Response body: {response_text}")
                     return None
     except Exception as e:
-        print(f"Exception fetching asset: {e}")
+        print(f"Exception fetching asset: {str(e)}")
         return None
 
 
@@ -150,5 +164,3 @@ async def fetch_asset_file(file_url: str) -> bytes:
         error_msg = f"Exception fetching file from {file_url}: {e}"
         print(error_msg)
         raise ApiError(error_msg, 500)
-
-

@@ -1,0 +1,44 @@
+- code in this file will be used to process media files.
+- we will use ffmpeg to process the media files.
+- we will use the ffmpeg-python library to interact with ffmpeg.
+
+- process audio files using @ffmpeg-python
+    - files passed in will be in mp3 and other audio formats
+
+@ffmpeg-python - https://github.com/kkroening/ffmpeg-python
+
+   - we will need to split any large mp3 media files into chunks of max size of 25MB each using temporary files and temporary directory location
+
+This function : split_audio_file from job_processor.py will be used to process media files of audio format
+chunks = await split_audio_file(
+                file_buffer,
+                config.MAX_CHUNK_SIZE_BYTES,
+                os.path.basename(asset.fileName),
+
+
+- if the audio file is in mp3 format its' already in the correct format
+- if the audio file is in other audio formats we will need to convert it to mp3 first using ffmpeg
+
+write a convert_audio_file_to_mp3 function that will take a file input path and output path and convert the file not in mp3 format to mp3 and store it in the output path in temp directory
+this function will be called by the split_audio_file function before the audio file is split into chunks as only mp3 files should be split into chunks
+
+make sure to be converting the file to mp3 asynchronously and return the output path once the file is converted
+
+IMPORTANT: store the media files being processed in the temp directory that is configured in the config.py file.  for each job we will create a subdirectory for that job with directory name being the job id
+
+print the path of the file being processed and the path of the file being written to the temp directory in the console
+
+    @ffmpeg-python - https://github.com/kkroening/ffmpeg-python will be used to probe the media file to get the duration
+    audio files to determine audio file sizes and used to split the audio file into chunks
+
+After converting the audio file to mp3, we will need to split the audio file into chunks of max size of 25MB each named 
+sequentially with original file name + audio_0.mp3, audio_1.mp3, audio_2.mp3, etc.
+    
+    Error handling:
+    - logs are added to track the progress of the audio file processing and if chunks are not created successfully
+    of if chunks are larger than 25MB. Once the audio file is processed, we will need to clear any temporary files created. 
+
+create stub methods and comment out processing of text files and video files
+if we receive those types, just print a message and skip processing
+- process text files
+- process image files 
