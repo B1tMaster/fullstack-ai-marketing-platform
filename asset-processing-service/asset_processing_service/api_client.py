@@ -164,3 +164,40 @@ async def fetch_asset_file(file_url: str) -> bytes:
         error_msg = f"Exception fetching file from {file_url}: {e}"
         print(error_msg)
         raise ApiError(error_msg, 500)
+
+
+async def update_asset_content(asset_id: str, content: str) -> bool:
+    """Update the content of an asset.
+
+    Args:
+        asset_id: The ID of the asset to update
+        content: The new content to set
+
+    Returns:
+        True if the update was successful, False otherwise
+    """
+    if not asset_id:
+        print("Error: asset_id cannot be empty")
+        return False
+
+    base_url = config.API_BASE_URL.rstrip("/")
+    url = f"{base_url}/asset/{asset_id}"
+    print(f"\nUpdating asset content at URL: {url}")
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.patch(
+                url, headers=HEADERS, json={"content": content}
+            ) as response:
+                print(f"Update response status: {response.status}")
+                if response.status == 200:
+                    print(f"Successfully updated content for asset {asset_id}")
+                    return True
+                else:
+                    response_text = await response.text()
+                    print(f"Failed to update asset content: {response.status}")
+                    print(f"Response body: {response_text}")
+                    return False
+    except Exception as e:
+        print(f"Exception updating asset content: {str(e)}")
+        return False

@@ -23,7 +23,29 @@ class Config:
     MAX_CHUNK_SIZE_BYTES = int(
         os.getenv("MAX_CHUNK_SIZE_BYTES", str(25 * 1024 * 1024))
     )  # Default 25MB
-    TEMP_DIR = os.getenv("TEMP_DIR", "~/Downloads/asset-processing")
+
+    # Validate and set TEMP_DIR
+    _temp_dir = os.getenv(
+        "TEMP_DIR", "/Users/davramenko/temp"
+    )  # Default path if not set
+
+    if not os.path.isabs(_temp_dir):
+        raise ValueError(
+            f"TEMP_DIR must be an absolute path. Got: {_temp_dir}\n"
+            "Please provide a full path starting with '/'"
+        )
+
+    TEMP_DIR = _temp_dir.rstrip("/")  # Remove any trailing slashes
+    print(f"Temporary directory configured: {TEMP_DIR}")
+
+    # Create directory if it doesn't exist
+    try:
+        os.makedirs(TEMP_DIR, exist_ok=True)
+        print(f"Verified/created temporary directory: {TEMP_DIR}")
+    except Exception as e:
+        raise ValueError(
+            f"Failed to create/verify temporary directory {TEMP_DIR}: {str(e)}"
+        )
 
 
 config = Config()

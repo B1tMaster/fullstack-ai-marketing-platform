@@ -17,6 +17,10 @@ class MediaProcessingError(Exception):
 async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
     """Convert an audio file to MP3 format.
 
+    This function creates a temporary directory for the job, converts the input audio file
+    to MP3 format using ffmpeg, and returns the path to the converted file. The original
+    file should be cleaned up by the caller.
+
     Args:
         input_path: Path to the input audio file
         job_id: ID of the job being processed (used for temp directory naming)
@@ -25,24 +29,25 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
         Path to the converted MP3 file
 
     Raises:
-        MediaProcessingError: If there's an error during conversion
+        MediaProcessingError: If there's an error during conversion or file operations
     """
+    print(f"\n{'='*20} Converting Audio File {'='*20}")
+    print(f"Job ID: {job_id}")
+    print(f"Input file: {input_path}")
+
     try:
         # Create job-specific temp directory
         temp_dir = os.path.join(config.TEMP_DIR, job_id)
         os.makedirs(temp_dir, exist_ok=True)
-        print(f"Created temp directory for job {job_id}:")
-        print(f"file://{os.path.abspath(temp_dir)}")
+        print(f"Created/verified temp directory: {temp_dir}")
 
         # Get the filename without extension
         base_name = Path(input_path).stem
         output_path = os.path.join(temp_dir, f"{base_name}.mp3")
-
-        print(f"\nConverting audio file:")
-        print(f"From: file://{os.path.abspath(input_path)}")
-        print(f"To: file://{os.path.abspath(output_path)}")
+        print(f"Will save converted file as: {output_path}")
 
         # Set up FFmpeg conversion
+        print("\nStarting FFmpeg conversion...")
         stream = ffmpeg.input(input_path)
         stream = ffmpeg.output(stream, output_path, acodec="libmp3lame", ab="192k")
 
@@ -56,22 +61,47 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
         if process.returncode != 0:
             error_msg = f"FFmpeg conversion failed: {stderr.decode() if stderr else 'Unknown error'}"
-            print(error_msg)
+            print(f"Error: {error_msg}")
             raise MediaProcessingError(error_msg)
 
-        print(f"Successfully converted audio file to MP3.\nOutput file: {output_path}")
+        # Verify the output file exists and has size > 0
+        if not os.path.exists(output_path):
+            raise MediaProcessingError(f"Output file was not created: {output_path}")
+
+        output_size = os.path.getsize(output_path)
+        if output_size == 0:
+            raise MediaProcessingError(f"Output file is empty: {output_path}")
+
+        print(f"Successfully converted file to MP3")
+        print(f"Output file size: {output_size} bytes")
+        print(f"{'='*60}\n")
+
         return output_path
 
     except Exception as e:
         error_msg = f"Error converting audio file to MP3: {str(e)}"
-        print(error_msg)
+        print(f"Error: {error_msg}")
+        print(f"{'='*60}\n")
         raise MediaProcessingError(error_msg)
 
 
 async def split_audio_file(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> Tuple[List[bytes], List[str]]:
+) -> List[dict]:
     """Split an audio file into chunks of maximum size.
+
+    This function processes an audio file by:
+    1. Creating a temporary directory for the job
+    2. Saving the input buffer to a temporary file
+    3. Converting to MP3 format if needed
+    4. Splitting the MP3 file into chunks of maximum size
+    5. Reading chunks into memory
+    6. Cleaning up all temporary files and directories
+
+    The function maintains memory efficiency by:
+    - Processing one chunk at a time
+    - Deleting temporary files immediately after use
+    - Cleaning up the temporary directory when done
 
     Args:
         file_buffer: The audio file content as bytes
@@ -80,73 +110,81 @@ async def split_audio_file(
         job_id: ID of the job being processed (used for temp directory naming)
 
     Returns:
-        Tuple containing:
-        - List of byte buffers containing the audio chunks
-        - List of paths to the generated MP3 files
+        List of dictionaries containing:
+        - data: The chunk data as bytes
+        - size: Size of the chunk in bytes
+        - file_name: Name of the chunk file (zero-padded numbers to maintain order)
 
     Raises:
-        MediaProcessingError: If there's an error processing the audio file
+        MediaProcessingError: If there's an error during processing or file operations
     """
-    print(f"\n{'='*50}")
-    print(f"Starting audio file processing for job {job_id}")
+    print(f"\n{'='*20} Processing Audio File {'='*20}")
+    print(f"Job ID: {job_id}")
     print(f"Original filename: {original_filename}")
-    print(f"Max chunk size: {max_chunk_size} bytes")
-    print(f"Input buffer size: {len(file_buffer)} bytes")
-    print(f"{'='*50}\n")
+    print(f"Max chunk size: {max_chunk_size:,} bytes")
+    print(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
-    generated_files = []
-    try:
-        # Create job-specific temp directory
-        os.makedirs(temp_dir, exist_ok=True)
-        print(f"Using temp directory for job {job_id}:\n{temp_dir}")
+    audio_chunks = []
+    input_path = None
+    converted_path = None
 
-        # Save the input buffer to a temporary file
+    try:
+        # Step 1: Create job-specific temp directory
+        print(f"\nStep 1: Creating temporary directory")
+        os.makedirs(temp_dir, exist_ok=True)
+        print(f"Created/verified temp directory: {temp_dir}")
+
+        # Step 2: Save input buffer to temporary file
+        print(f"\nStep 2: Saving input buffer to temporary file")
         input_path = os.path.join(temp_dir, original_filename)
         with open(input_path, "wb") as f:
             f.write(file_buffer)
-        print(f"Saved input file to:\n{input_path}")
-        generated_files.append(input_path)
+        print(f"Saved input file: {input_path}")
+        print(f"Input file size: {os.path.getsize(input_path):,} bytes")
 
-        # Convert to MP3 if needed
+        # Step 3: Convert to MP3 if needed
+        working_path = input_path
         if not original_filename.lower().endswith(".mp3"):
-            print(f"Input file {original_filename} is not in MP3 format, converting...")
-            input_path = await convert_audio_file_to_mp3(input_path, job_id)
-            print(f"Using converted MP3 file:\n{input_path}")
-            generated_files.append(input_path)
+            print(f"\nStep 3: Converting to MP3 format")
+            converted_path = await convert_audio_file_to_mp3(input_path, job_id)
+            working_path = converted_path
+            print(f"Deleting original file: {input_path}")
+            os.remove(input_path)
+            input_path = None
+        else:
+            print(f"\nStep 3: File is already in MP3 format, skipping conversion")
 
-        # Get audio file information using ffprobe
-        probe = ffmpeg.probe(input_path)
+        # Step 4: Get audio information
+        print(f"\nStep 4: Analyzing audio file")
+        probe = ffmpeg.probe(working_path)
         duration = float(probe["format"]["duration"])
-        print(f"Audio file duration: {duration} seconds")
+        file_size = os.path.getsize(working_path)
+        print(f"Audio duration: {duration:.2f} seconds")
+        print(f"File size: {file_size:,} bytes")
 
-        # Calculate chunk duration based on file size and max chunk size
-        file_size = os.path.getsize(input_path)
+        # Step 5: Calculate chunks
         num_chunks = (file_size + max_chunk_size - 1) // max_chunk_size
         chunk_duration = duration / num_chunks
-        print(
-            f"File size: {file_size} bytes, splitting into {num_chunks} chunks of ~{max_chunk_size} bytes each"
-        )
+        print(f"\nStep 5: Splitting into {num_chunks} chunks")
+        print(f"Approximate chunk duration: {chunk_duration:.2f} seconds")
 
-        chunks = []
-        chunk_paths = []
+        # Step 6: Process chunks
+        print(f"\nStep 6: Processing chunks")
         base_name = Path(original_filename).stem
         for i in range(num_chunks):
-            chunk_path = os.path.join(temp_dir, f"{base_name}_chunk_{i}.mp3")
+            chunk_file_name = f"{base_name}_chunk_{i:03d}.mp3"  # Zero-padded numbers
+            chunk_path = os.path.join(temp_dir, chunk_file_name)
             start_time = i * chunk_duration
-
-            # For the last chunk, use the remaining duration
-            if i == num_chunks - 1:
-                duration_arg = duration - start_time
-            else:
-                duration_arg = chunk_duration
-
-            print(
-                f"Creating chunk {i+1}/{num_chunks} from {start_time}s to {start_time + duration_arg}s"
+            duration_arg = (
+                duration - start_time if i == num_chunks - 1 else chunk_duration
             )
 
-            # Split the audio file
-            stream = ffmpeg.input(input_path, ss=start_time, t=duration_arg)
+            print(f"\nProcessing chunk {i+1}/{num_chunks}")
+            print(f"Time range: {start_time:.2f}s to {start_time + duration_arg:.2f}s")
+
+            # Extract chunk using ffmpeg
+            stream = ffmpeg.input(working_path, ss=start_time, t=duration_arg)
             stream = ffmpeg.output(stream, chunk_path, acodec="copy")
             process = await asyncio.create_subprocess_exec(
                 *stream.compile(),
@@ -157,57 +195,71 @@ async def split_audio_file(
 
             if process.returncode != 0:
                 error_msg = f"Error creating chunk {i}: {stderr.decode() if stderr else 'Unknown error'}"
-                print(error_msg)
+                print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
             # Verify chunk size
             chunk_size = os.path.getsize(chunk_path)
             if chunk_size > max_chunk_size:
-                error_msg = (
-                    f"Chunk {i} exceeds maximum size: {chunk_size} > {max_chunk_size}"
-                )
-                print(error_msg)
+                error_msg = f"Chunk {i} exceeds maximum size: {chunk_size:,} > {max_chunk_size:,}"
+                print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Read the chunk into memory and save its path
+            # Read chunk and clean up
+            print(f"Reading chunk into memory: {chunk_path}")
             with open(chunk_path, "rb") as f:
-                chunks.append(f.read())
-            chunk_paths.append(chunk_path)
-            generated_files.append(chunk_path)
+                chunk_data = f.read()
+            print(f"Deleting temporary chunk file: {chunk_path}")
+            os.remove(chunk_path)
 
-            print(
-                f"Successfully created chunk {i+1} ({chunk_size} bytes):\n"
-                f"file://{os.path.abspath(chunk_path)}"
+            audio_chunks.append(
+                {
+                    "data": chunk_data,
+                    "size": chunk_size,
+                    "file_name": chunk_file_name,
+                }
             )
+            print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
-        print("\nGenerated MP3 files:")
-        for file_path in generated_files:
-            print(f"file://{os.path.abspath(file_path)}")
+        print(f"\nSuccessfully processed all {len(audio_chunks)} chunks")
+        print(
+            f"Total data size: {sum(chunk['size'] for chunk in audio_chunks):,} bytes"
+        )
 
-        return chunks, generated_files
+        return audio_chunks
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
-        print(error_msg)
+        print(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
     except Exception as e:
         error_msg = f"Error processing {original_filename}: {str(e)}"
-        print(error_msg)
+        print(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
     finally:
-        # Clean up only non-MP3 temporary files
+        # Clean up all temporary files and directory
+        print(f"\nCleaning up temporary files and directory")
         try:
+            if input_path and os.path.exists(input_path):
+                print(f"Removing input file: {input_path}")
+                os.remove(input_path)
+            if converted_path and os.path.exists(converted_path):
+                print(f"Removing converted file: {converted_path}")
+                os.remove(converted_path)
             if os.path.exists(temp_dir):
-                print("\nCleaning up temporary files (preserving MP3 files)...")
-                for file in os.listdir(temp_dir):
-                    file_path = os.path.join(temp_dir, file)
-                    if file_path not in generated_files and not file.lower().endswith(
-                        ".mp3"
-                    ):
-                        print(f"Removing temporary file: {file_path}")
-                        os.remove(file_path)
+                if not os.listdir(temp_dir):
+                    print(f"Removing empty temp directory: {temp_dir}")
+                    os.rmdir(temp_dir)
+                else:
+                    print(
+                        f"Warning: Temp directory not empty, files remaining in {temp_dir}:"
+                    )
+                    for file in os.listdir(temp_dir):
+                        print(f"- {file}")
         except Exception as e:
-            print(f"Warning: Error cleaning up temporary files: {e}")
+            print(f"Warning: Error during cleanup: {e}")
+
+        print(f"{'='*60}\n")
 
 
 # Stub methods for other file types

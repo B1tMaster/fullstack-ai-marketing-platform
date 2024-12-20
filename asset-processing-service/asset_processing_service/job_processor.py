@@ -4,6 +4,7 @@ import os
 from asset_processing_service.api_client import (
     fetch_asset,
     fetch_asset_file,
+    update_asset_content,
     update_job_details,
     update_job_heartbeat,
 )
@@ -41,35 +42,50 @@ async def process_job(job: AssetProcessingJob) -> None:
         print(f"MIME type: {asset.mimeType}")
 
         file_buffer = await fetch_asset_file(asset.fileUrl)
+        content = None
 
         if asset.fileType == "text" or asset.fileType == "markdown":
             print(f"Text file detected. Reading content of {asset.fileName}")
             content = file_buffer.decode("utf-8")
         elif asset.fileType == "audio":
             print(f"Processing audio file: {asset.fileName}")
-            chunks, mp3_files = await split_audio_file(
+            print("\nStage 1: Splitting audio file into chunks")
+            audio_chunks = await split_audio_file(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
                 job.id,  # Pass the job ID for temp directory management
             )
-            print(f"\nSuccessfully split audio file into {len(chunks)} chunks")
-            print("\nMP3 files ready for transcription:")
-            for file_path in mp3_files:
-                print(f"- {file_path}")
+            print(f"\nSuccessfully split audio file into {len(audio_chunks)} chunks")
+            print("\nAudio chunks ready for next stage (transcription):")
+            for chunk in audio_chunks:
+                print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
 
-            # TODO: DELETE THIS TESTING CODE
-            os.makedirs(os.path.expanduser("~/Downloads/audio"), exist_ok=True)
-            for i, chunk in enumerate(chunks):
-                chunk_path = os.path.join(
-                    os.path.expanduser("~/Downloads/audio"), f"chunk_{i}.mp3"
-                )
-                with open(chunk_path, "wb") as f:
-                    f.write(chunk)
-                print(f"Wrote test chunk to file://{os.path.abspath(chunk_path)}")
+            # Store the audio chunks info as stage 1 output
+            content = {
+                "stage": "audio_splitting",
+                "chunks": [
+                    {"file_name": chunk["file_name"], "size": chunk["size"]}
+                    for chunk in audio_chunks
+                ],
+                "num_chunks": len(audio_chunks),
+                "total_size": sum(chunk["size"] for chunk in audio_chunks),
+            }
+            print("\nStoring stage 1 output:")
+            print(content)
 
-            # transcribed_chunks = await transcribe_chunks(chunks)
-            # content = "\n\n".join(transcribed_chunks)
+            # Update asset with stage 1 output
+            if content is not None:
+                print(f"\nUpdating asset {asset.id} with stage 1 output")
+                await update_asset_content(asset.id, str(content))
+
+            print(
+                "\nStage 1 (audio splitting) complete. Keeping job in_progress for next stages:"
+            )
+            print("- Stage 2: Audio transcription")
+            print("- Stage 3: Text processing")
+            print("- Stage 4: Final processing")
+            return  # Exit without updating status to completed
         elif asset.fileType == "video":
             print(f"Video processing not implemented yet: {asset.fileName}")
             # chunks = await extract_audio_and_split()
@@ -79,9 +95,13 @@ async def process_job(job: AssetProcessingJob) -> None:
         else:
             raise ValueError(f"Unsupported content type: {asset.fileType}")
 
-        # TODO: update asset content
+        # Update asset content if we have it
+        if content is not None:
+            print(f"\nUpdating content for asset {asset.id}")
+            await update_asset_content(asset.id, content)
 
-        # TODO: Update job status to completed
+        # Update job status to completed
+        print(f"\nMarking job {job.id} as completed")
         await update_job_details(job.id, status="completed")
 
         # Cancel heartbeat updater
