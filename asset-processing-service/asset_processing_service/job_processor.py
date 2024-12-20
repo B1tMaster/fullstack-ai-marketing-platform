@@ -44,8 +44,8 @@ async def process_job(job: AssetProcessingJob) -> None:
             transcribed_chunks = await transcribe_chunks(chunks)
             content = "\n\n".join(transcribed_chunks)
         elif content_type == "video":
-            print("Processing video file...")
-            chunks = await extract_audio_and_split()
+            #print("Processing video file...")
+            # chunks = await extract_audio_and_split()
             # transcribed_chunks = await transcribe_chunks(chunks)
             # content = "\n\n".join(transcribed_chunks)
 

@@ -3,7 +3,14 @@ from typing import Optional
 
 import aiohttp
 from asset_processing_service.config import HEADERS, config
-from asset_processing_service.models import AssetProcessingJob
+from asset_processing_service.models import Asset, AssetProcessingJob
+
+
+class ApiError(Exception):
+    def __init__(self, message: str, status_code: int):
+        self.message = message
+        self.status_code = status_code
+        super().__init__(self.message)
 
 
 async def fetch_jobs() -> list[AssetProcessingJob]:
@@ -66,3 +73,82 @@ async def update_job_details(
     except Exception as e:
         print(f"Exception updating job: {e}, URL: {url}")
         return False
+
+
+async def update_job_heartbeat(job_id: str) -> bool:
+    if not job_id:
+        print("Error: job_id cannot be empty")
+        return False
+
+    base_url = config.API_BASE_URL.rstrip("/")
+    url = f"{base_url}/asset-processing-job/{job_id}"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.patch(
+                url, headers=HEADERS, json={"lastHeartBeat": datetime.now().isoformat()}
+            ) as response:
+                if response.status == 200:
+                    return True
+                else:
+                    print(f"Failed to update heartbeat for job {job_id}")
+                    return False
+    except Exception as e:
+        print(f"Exception updating heartbeat: {e}")
+        return False
+
+
+async def fetch_asset(asset_id: str) -> Optional[Asset]:
+    if not asset_id:
+        print("Error: asset_id cannot be empty")
+        return None
+
+    base_url = config.API_BASE_URL.rstrip("/")
+    url = f"{base_url}/asset/{asset_id}"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=HEADERS) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return Asset(**data)
+                else:
+                    print(f"Failed to fetch asset: {response.status}")
+                    return None
+    except Exception as e:
+        print(f"Exception fetching asset: {e}")
+        return None
+
+
+async def fetch_asset_file(file_url: str) -> bytes:
+    """Fetch the asset file content from Vercel Blob storage.
+
+    Args:
+        file_url: The URL of the file in Vercel Blob storage
+
+    Returns:
+        The file content as bytes
+
+    Raises:
+        ApiError: If the file cannot be fetched, with status code 500
+    """
+    if not file_url:
+        raise ApiError("File URL cannot be empty", 500)
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as response:
+                if response.status == 200:
+                    return await response.read()
+                else:
+                    error_msg = (
+                        f"Failed to fetch file from {file_url}: {response.status}"
+                    )
+                    print(error_msg)
+                    raise ApiError(error_msg, 500)
+    except Exception as e:
+        error_msg = f"Exception fetching file from {file_url}: {e}"
+        print(error_msg)
+        raise ApiError(error_msg, 500)
+
+
