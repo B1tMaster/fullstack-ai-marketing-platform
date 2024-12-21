@@ -15,7 +15,7 @@ def get_required_env_var(var_name: str) -> str:
 
 class Config:
     SERVER_API_KEY = get_required_env_var("SERVER_API_KEY")
-    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000/api")
+    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "whisper-1")
     STUCK_JOB_THRESHOLD_SECONDS = int(os.getenv("STUCK_JOB_THRESHOLD_SECONDS", "30"))
     MAX_JOB_ATTEMPTS = int(os.getenv("MAX_JOB_ATTEMPTS", "3"))

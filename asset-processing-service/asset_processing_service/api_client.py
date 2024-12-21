@@ -14,8 +14,7 @@ class ApiError(Exception):
 
 
 async def fetch_jobs() -> list[AssetProcessingJob]:
-    base_url = config.API_BASE_URL.rstrip("/")
-    url = f"{base_url}/api/asset-processing-job"
+    url = f"{config.API_BASE_URL.rstrip('/')}/asset-processing-job"
     print(f"Fetching jobs from URL: {url}")
     try:
         async with aiohttp.ClientSession() as session:
@@ -41,7 +40,6 @@ async def update_job_details(
     attempts: Optional[int] = None,
     last_heartbeat: Optional[datetime] = None,
 ) -> bool:
-    # Ensure URL doesn't have double slashes and uses the correct endpoint
     base_url = config.API_BASE_URL.rstrip("/")
     url = f"{base_url}/asset-processing-job/{job_id}"
     print(f"Updating job {job_id} at URL: {url}")
@@ -103,14 +101,6 @@ async def update_job_heartbeat(job_id: str) -> bool:
 
 
 async def fetch_asset(asset_id: str) -> Optional[Asset]:
-    """Fetch an asset by ID.
-
-    Args:
-        asset_id: The ID of the asset to fetch
-
-    Returns:
-        The asset if found, None otherwise
-    """
     if not asset_id:
         print("Error: asset_id cannot be empty")
         return None
@@ -171,15 +161,6 @@ async def fetch_asset_file(file_url: str) -> bytes:
 
 
 async def update_asset_content(asset_id: str, content: str) -> bool:
-    """Update the content of an asset.
-
-    Args:
-        asset_id: The ID of the asset to update
-        content: The new content to set
-
-    Returns:
-        True if the update was successful, False otherwise
-    """
     if not asset_id:
         print("Error: asset_id cannot be empty")
         return False

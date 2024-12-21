@@ -27,8 +27,10 @@ async def process_job(job: AssetProcessingJob) -> None:
     temp_dir = os.path.join(config.TEMP_DIR, job.id)
 
     try:
-        # Update job status to "in_progress"
-        await update_job_details(job.id, status="in_progress")
+        # Update job status to "in_progress" and increment attempts
+        await update_job_details(
+            job.id, status="in_progress", attempts=(job.attempts or 0) + 1
+        )
 
         # Fetch asset associated with asset processing job
         print(f"Fetching asset details for ID: {job.assetId}")
@@ -53,6 +55,11 @@ async def process_job(job: AssetProcessingJob) -> None:
         if asset.fileType == "text" or asset.fileType == "markdown":
             print(f"Text file detected. Reading content of {asset.fileName}")
             content = file_buffer.decode("utf-8")
+            print(f"\nUpdating content for asset {asset.id}")
+            await update_asset_content(asset.id, content)
+            print(f"\nMarking job {job.id} as completed")
+            await update_job_details(job.id, status="completed")
+            return  # Exit after completing text file processing
         elif asset.fileType == "audio":
             print(f"Processing audio file: {asset.fileName}")
             print("\nStage 1: Splitting audio file into chunks")
@@ -74,9 +81,7 @@ async def process_job(job: AssetProcessingJob) -> None:
             print("- Stage 4: Final processing")
 
             # TODO: Pass audio_chunks to transcription stage
-            # For now, mark as completed since we've done the first stage
-            print(f"\nMarking job {job.id} as completed after audio splitting")
-            await update_job_details(job.id, status="completed")
+            return  # Exit without updating status to completed
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
             print("\nStage 1: Extracting audio and splitting into chunks")
@@ -100,18 +105,9 @@ async def process_job(job: AssetProcessingJob) -> None:
             print("- Stage 4: Final processing")
 
             # TODO: Pass audio_chunks to transcription stage
-            # For now, mark as completed since we've done the first stage
-            print(f"\nMarking job {job.id} as completed after audio extraction")
-            await update_job_details(job.id, status="completed")
+            return  # Exit without updating status to completed
         else:
             raise ValueError(f"Unsupported content type: {asset.fileType}")
-
-        # Update asset content if we have it
-        if content is not None:
-            print(f"\nUpdating content for asset {asset.id}")
-            await update_asset_content(asset.id, content)
-            print(f"\nMarking job {job.id} as completed after content update")
-            await update_job_details(job.id, status="completed")
 
         # Clean up all temporary files after successful completion
         if temp_files:
