@@ -92,7 +92,7 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
 async def split_audio_file(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> List[dict]:
+) -> Tuple[List[dict], List[str]]:
     """Split an audio file into chunks of maximum size.
 
     This function processes an audio file by:
@@ -101,12 +101,10 @@ async def split_audio_file(
     3. Converting to MP3 format if needed
     4. Splitting the MP3 file into chunks of maximum size
     5. Reading chunks into memory
-    6. Cleaning up all temporary files and directories
 
     The function maintains memory efficiency by:
     - Processing one chunk at a time
-    - Deleting temporary files immediately after use
-    - Cleaning up the temporary directory when done
+    - Keeping files for later cleanup by caller
 
     Args:
         file_buffer: The audio file content as bytes
@@ -115,10 +113,9 @@ async def split_audio_file(
         job_id: ID of the job being processed (used for temp directory naming)
 
     Returns:
-        List of dictionaries containing:
-        - data: The chunk data as bytes
-        - size: Size of the chunk in bytes
-        - file_name: Name of the chunk file (zero-padded numbers to maintain order)
+        Tuple containing:
+        - List of dictionaries containing chunk info (data, size, file_name)
+        - List of paths to temporary files created (for later cleanup)
 
     Raises:
         MediaProcessingError: If there's an error during processing or file operations
@@ -131,6 +128,7 @@ async def split_audio_file(
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
     audio_chunks = []
+    temp_files = []  # Track all temporary files
     input_path = None
     converted_path = None
 
@@ -147,6 +145,7 @@ async def split_audio_file(
             f.write(file_buffer)
         print(f"Saved input file: file://{os.path.abspath(input_path)}")
         print(f"Input file size: {os.path.getsize(input_path):,} bytes")
+        temp_files.append(input_path)
 
         # Step 3: Convert to MP3 if needed
         working_path = input_path
@@ -154,9 +153,7 @@ async def split_audio_file(
             print(f"\nStep 3: Converting to MP3 format")
             converted_path = await convert_audio_file_to_mp3(input_path, job_id)
             working_path = converted_path
-            print(f"Deleting original file: file://{os.path.abspath(input_path)}")
-            os.remove(input_path)
-            input_path = None
+            temp_files.append(converted_path)
         else:
             print(f"\nStep 3: File is already in MP3 format, skipping conversion")
 
@@ -223,15 +220,12 @@ async def split_audio_file(
                 print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Read chunk and clean up
+            # Read chunk into memory but keep the file
             print(f"Reading chunk into memory: file://{os.path.abspath(chunk_path)}")
             with open(chunk_path, "rb") as f:
                 chunk_data = f.read()
-            print(
-                f"Deleting temporary chunk file: file://{os.path.abspath(chunk_path)}"
-            )
-            os.remove(chunk_path)
 
+            temp_files.append(chunk_path)  # Track the chunk file
             audio_chunks.append(
                 {
                     "data": chunk_data,
@@ -245,8 +239,11 @@ async def split_audio_file(
         print(
             f"Total data size: {sum(chunk['size'] for chunk in audio_chunks):,} bytes"
         )
+        print(f"Temporary files created: {len(temp_files)}")
+        for file_path in temp_files:
+            print(f"- file://{os.path.abspath(file_path)}")
 
-        return audio_chunks
+        return audio_chunks, temp_files
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
@@ -256,30 +253,6 @@ async def split_audio_file(
         error_msg = f"Error processing {original_filename}: {str(e)}"
         print(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
-    finally:
-        # Clean up all temporary files and directory
-        print(f"\nCleaning up temporary files and directory")
-        try:
-            if input_path and os.path.exists(input_path):
-                print(f"Removing input file: {input_path}")
-                os.remove(input_path)
-            if converted_path and os.path.exists(converted_path):
-                print(f"Removing converted file: {converted_path}")
-                os.remove(converted_path)
-            if os.path.exists(temp_dir):
-                if not os.listdir(temp_dir):
-                    print(f"Removing empty temp directory: {temp_dir}")
-                    os.rmdir(temp_dir)
-                else:
-                    print(
-                        f"Warning: Temp directory not empty, files remaining in {temp_dir}:"
-                    )
-                    for file in os.listdir(temp_dir):
-                        print(f"- {file}")
-        except Exception as e:
-            print(f"Warning: Error during cleanup: {e}")
-
-        print(f"{'='*60}\n")
 
 
 # Stub methods for other file types
@@ -328,7 +301,7 @@ def _validate_video_file(probe_data: dict, filename: str) -> None:
 
 async def extract_audio_from_video_and_split(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> List[dict]:
+) -> Tuple[List[dict], List[str]]:
     """Extract audio from a video file and split it into chunks.
 
     This function processes a video file by:
@@ -337,12 +310,10 @@ async def extract_audio_from_video_and_split(
     3. Validating the video file format
     4. Extracting the audio track to MP3 format
     5. Splitting the MP3 file into chunks of maximum size
-    6. Cleaning up all temporary files and directories
 
     The function maintains memory efficiency by:
     - Processing one chunk at a time
-    - Deleting temporary files immediately after use
-    - Cleaning up the temporary directory when done
+    - Keeping files for later cleanup by caller
 
     Args:
         file_buffer: The video file content as bytes
@@ -351,10 +322,9 @@ async def extract_audio_from_video_and_split(
         job_id: ID of the job being processed (used for temp directory naming)
 
     Returns:
-        List of dictionaries containing:
-        - data: The chunk data as bytes
-        - size: Size of the chunk in bytes
-        - file_name: Name of the chunk file (zero-padded numbers to maintain order)
+        Tuple containing:
+        - List of dictionaries containing chunk info (data, size, file_name)
+        - List of paths to temporary files created (for later cleanup)
 
     Raises:
         MediaProcessingError: If there's an error during processing or file operations
@@ -365,6 +335,7 @@ async def extract_audio_from_video_and_split(
     print(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
+    temp_files = []  # Track all temporary files
     input_path = None
     audio_path = None
 
@@ -381,6 +352,7 @@ async def extract_audio_from_video_and_split(
             f.write(file_buffer)
         print(f"Saved input file: file://{os.path.abspath(input_path)}")
         print(f"Input file size: {os.path.getsize(input_path):,} bytes")
+        temp_files.append(input_path)
 
         # Step 3: Validate video file
         print(f"\nStep 3: Validating video file")
@@ -426,11 +398,7 @@ async def extract_audio_from_video_and_split(
 
         print(f"Successfully extracted audio to: file://{os.path.abspath(audio_path)}")
         print(f"Audio file size: {os.path.getsize(audio_path):,} bytes")
-
-        # Clean up video file as we don't need it anymore
-        print(f"Removing video file: file://{os.path.abspath(input_path)}")
-        os.remove(input_path)
-        input_path = None
+        temp_files.append(audio_path)
 
         # Step 5: Split audio into chunks
         print(f"\nStep 5: Splitting audio into chunks")
@@ -438,11 +406,17 @@ async def extract_audio_from_video_and_split(
             audio_buffer = f.read()
 
         # Use existing split_audio_file function
-        audio_chunks = await split_audio_file(
+        audio_chunks, chunk_files = await split_audio_file(
             audio_buffer, max_chunk_size, os.path.basename(audio_path), job_id
         )
+        temp_files.extend(chunk_files)  # Add chunk files to our list
 
-        return audio_chunks
+        print(f"\nAll processing complete")
+        print(f"Total temporary files: {len(temp_files)}")
+        for file_path in temp_files:
+            print(f"- file://{os.path.abspath(file_path)}")
+
+        return audio_chunks, temp_files
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
@@ -452,27 +426,3 @@ async def extract_audio_from_video_and_split(
         error_msg = f"Error processing {original_filename}: {str(e)}"
         print(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
-    finally:
-        # Clean up all temporary files and directory
-        print(f"\nCleaning up temporary files and directory")
-        try:
-            if input_path and os.path.exists(input_path):
-                print(f"Removing input file: {input_path}")
-                os.remove(input_path)
-            if audio_path and os.path.exists(audio_path):
-                print(f"Removing extracted audio file: {audio_path}")
-                os.remove(audio_path)
-            if os.path.exists(temp_dir):
-                if not os.listdir(temp_dir):
-                    print(f"Removing empty temp directory: {temp_dir}")
-                    os.rmdir(temp_dir)
-                else:
-                    print(
-                        f"Warning: Temp directory not empty, files remaining in {temp_dir}:"
-                    )
-                    for file in os.listdir(temp_dir):
-                        print(f"- {file}")
-        except Exception as e:
-            print(f"Warning: Error during cleanup: {e}")
-
-        print(f"{'='*60}\n")

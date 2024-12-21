@@ -60,3 +60,27 @@ please make sure to handle the error handling and cleanup of temporary files and
 and also document the function with docstrings and comments 
 
 
+Part 3: handling the image files in part three.
+
+We need to add a new functionality in the media_processor.py file
+we will not be transcribing the audio buffers files we have created in the previous parts. 
+
+for transcription we will  use openai whisper-1 model. 
+I have already added the openai api key to the .env file and installed the openai library. 
+
+we want to write code that will do the transcription of the chunks of audio in parallel and asynchronously. 
+make sure to write code that will be making the api calls to the openai api in parallel and asynchrous and writen in the best practices of parallel and asynchronous programming
+
+we also need to make sure we preserve order when we re-assemble the chunks of text into the original text after the transcription is complete. 
+
+any temporary files and directories created during the transcription should be deleted after the transcription is complete. 
+
+
+we we re-assemble the chunks of text into the original text after the transcription is complete, we will save the text to the database into the content field of the assets table. 
+
+we will then update job status to completed in the assests_processing_jobs table .  
+
+we will also make sure to log status and any errors to the console as before. 
+
+
+

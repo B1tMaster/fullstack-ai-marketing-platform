@@ -14,13 +14,17 @@ class ApiError(Exception):
 
 
 async def fetch_jobs() -> list[AssetProcessingJob]:
-    url = f"{config.API_BASE_URL}/asset-processing-job"
+    base_url = config.API_BASE_URL.rstrip("/")
+    url = f"{base_url}/api/asset-processing-job"
+    print(f"Fetching jobs from URL: {url}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=HEADERS) as response:
                 if response.status == 200:
                     data = await response.json()
-                    return [AssetProcessingJob(**job) for job in data]
+                    jobs = [AssetProcessingJob(**job) for job in data]
+                    print(f"Fetched {len(jobs)} jobs")
+                    return jobs
                 else:
                     print(f"Failed to fetch jobs: {response.status}")
                     return []
