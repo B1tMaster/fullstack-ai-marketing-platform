@@ -9,7 +9,10 @@ from asset_processing_service.api_client import (
     update_job_heartbeat,
 )
 from asset_processing_service.config import config
-from asset_processing_service.media_processor import split_audio_file
+from asset_processing_service.media_processor import (
+    extract_audio_from_video_and_split,
+    split_audio_file,
+)
 from asset_processing_service.models import AssetProcessingJob
 
 
@@ -87,11 +90,46 @@ async def process_job(job: AssetProcessingJob) -> None:
             print("- Stage 4: Final processing")
             return  # Exit without updating status to completed
         elif asset.fileType == "video":
-            print(f"Video processing not implemented yet: {asset.fileName}")
-            # chunks = await extract_audio_and_split()
-            # transcribed_chunks = await transcribe_chunks(chunks)
-            # content = "\n\n".join(transcribed_chunks)
-            pass
+            print(f"Processing video file: {asset.fileName}")
+            print("\nStage 1: Extracting audio and splitting into chunks")
+            audio_chunks = await extract_audio_from_video_and_split(
+                file_buffer,
+                config.MAX_CHUNK_SIZE_BYTES,
+                os.path.basename(asset.fileName),
+                job.id,  # Pass the job ID for temp directory management
+            )
+            print(
+                f"\nSuccessfully extracted and split audio into {len(audio_chunks)} chunks"
+            )
+            print("\nAudio chunks ready for next stage (transcription):")
+            for chunk in audio_chunks:
+                print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
+
+            # Store the audio chunks info as stage 1 output
+            content = {
+                "stage": "video_audio_extraction",
+                "chunks": [
+                    {"file_name": chunk["file_name"], "size": chunk["size"]}
+                    for chunk in audio_chunks
+                ],
+                "num_chunks": len(audio_chunks),
+                "total_size": sum(chunk["size"] for chunk in audio_chunks),
+            }
+            print("\nStoring stage 1 output:")
+            print(content)
+
+            # Update asset with stage 1 output
+            if content is not None:
+                print(f"\nUpdating asset {asset.id} with stage 1 output")
+                await update_asset_content(asset.id, str(content))
+
+            print(
+                "\nStage 1 (audio extraction) complete. Keeping job in_progress for next stages:"
+            )
+            print("- Stage 2: Audio transcription")
+            print("- Stage 3: Text processing")
+            print("- Stage 4: Final processing")
+            return  # Exit without updating status to completed
         else:
             raise ValueError(f"Unsupported content type: {asset.fileType}")
 

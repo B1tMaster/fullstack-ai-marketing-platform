@@ -42,3 +42,21 @@ create stub methods and comment out processing of text files and video files
 if we receive those types, just print a message and skip processing
 - process text files
 - process image files 
+
+
+Part 2: handling the video files in part two.
+
+We need to add a new function in the media_processor.py file
+it will be called: extract_audio_from_video_and_split 
+It will take as input video buffer as bytes, max_chunk_size_bytes,  orignal filename as string and job id as string. just like in the split_audio_file function 
+
+as before , we will use ffmpeg and temporary files and directories to process the video file
+we will stream the video file using ffmpeg and write mp3 file to the temp directory like before 
+then we will call alaredy writen function split_audio_file to split the audio file into chunks of max size of 25MB each named 
+
+we will return the list of chunks as before . 
+
+please make sure to handle the error handling and cleanup of temporary files and directories like before 
+and also document the function with docstrings and comments 
+
+
