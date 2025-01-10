@@ -63,16 +63,16 @@ async def process_job(job: AssetProcessingJob) -> None:
         elif asset.fileType == "audio":
             print(f"Processing audio file: {asset.fileName}")
             print("\nStage 1: Splitting audio file into chunks")
-            audio_chunks, files = await split_audio_file(
+            chunk_metadata = await split_audio_file(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
                 job.id,  # Pass the job ID for temp directory management
             )
-            temp_files.extend(files)  # Track temporary files
-            print(f"\nSuccessfully split audio file into {len(audio_chunks)} chunks")
+            temp_files.extend([chunk['file_path'] for chunk in chunk_metadata])  # Track temporary files
+            print(f"\nSuccessfully split audio file into {len(chunk_metadata)} chunks")
             print("\nAudio chunks ready for next stage (transcription):")
-            for chunk in audio_chunks:
+            for chunk in chunk_metadata:
                 print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
 
             print("\nStage 1 (audio splitting) complete. Moving to next stages:")
@@ -85,18 +85,18 @@ async def process_job(job: AssetProcessingJob) -> None:
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
             print("\nStage 1: Extracting audio and splitting into chunks")
-            audio_chunks, files = await extract_audio_from_video_and_split(
+            chunk_metadata = await extract_audio_from_video_and_split(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
                 job.id,  # Pass the job ID for temp directory management
             )
-            temp_files.extend(files)  # Track temporary files
+            temp_files.extend([chunk['file_path'] for chunk in chunk_metadata])  # Track temporary files
             print(
-                f"\nSuccessfully extracted and split audio into {len(audio_chunks)} chunks"
+                f"\nSuccessfully extracted and split audio into {len(chunk_metadata)} chunks"
             )
             print("\nAudio chunks ready for next stage (transcription):")
-            for chunk in audio_chunks:
+            for chunk in chunk_metadata:
                 print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
 
             print("\nStage 1 (audio extraction) complete. Moving to next stages:")

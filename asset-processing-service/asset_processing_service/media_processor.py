@@ -92,7 +92,7 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
 async def split_audio_file(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> Tuple[List[dict], List[str]]:
+) -> List[dict]:
     """Split an audio file into chunks of maximum size.
 
     This function processes an audio file by:
@@ -127,8 +127,7 @@ async def split_audio_file(
     print(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
-    audio_chunks = []
-    temp_files = []  # Track all temporary files
+    temp_files = []  # Track all temporary files with metadata
     input_path = None
     converted_path = None
 
@@ -220,19 +219,12 @@ async def split_audio_file(
                 print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Read chunk into memory but keep the file
-            print(f"Reading chunk into memory: file://{os.path.abspath(chunk_path)}")
-            with open(chunk_path, "rb") as f:
-                chunk_data = f.read()
-
-            temp_files.append(chunk_path)  # Track the chunk file
-            audio_chunks.append(
-                {
-                    "data": chunk_data,
-                    "size": chunk_size,
-                    "file_name": chunk_file_name,
-                }
-            )
+            # Track the chunk file with metadata
+            temp_files.append({
+                "size": chunk_size,
+                "file_name": chunk_file_name,
+                "file_path": chunk_path
+            })
             print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
         print(f"\nSuccessfully processed all {len(audio_chunks)} chunks")
@@ -243,7 +235,7 @@ async def split_audio_file(
         for file_path in temp_files:
             print(f"- file://{os.path.abspath(file_path)}")
 
-        return audio_chunks, temp_files
+        return temp_files
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
