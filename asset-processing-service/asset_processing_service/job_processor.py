@@ -22,7 +22,7 @@ async def process_job(job: AssetProcessingJob) -> None:
     print(f"Asset ID: {job.assetId}")
     print(f"{'='*50}\n")
 
-    heartbeat_task = asyncio.create_task(heeatbeat_updater(job.id))
+    heartbeat_task = asyncio.create_task(heartbeat_updater(job.id))
     temp_files = []  # Track all temporary files
     temp_dir = os.path.join(config.TEMP_DIR, job.id)
 
@@ -92,7 +92,10 @@ async def process_job(job: AssetProcessingJob) -> None:
                 # Stage 4: Mark job as completed
                 print("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
-            return  # Exit without updating status to completed
+                return
+            except Exception as e:
+                print(f"Error during transcription: {str(e)}")
+                raise
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
             print("\nStage 1: Extracting audio and splitting into chunks")
@@ -126,7 +129,10 @@ async def process_job(job: AssetProcessingJob) -> None:
                 # Stage 4: Mark job as completed
                 print("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
-            return  # Exit without updating status to completed
+                return
+            except Exception as e:
+                print(f"Error during transcription: {str(e)}")
+                raise
         else:
             raise ValueError(f"Unsupported content type: {asset.fileType}")
 
@@ -178,7 +184,7 @@ async def process_job(job: AssetProcessingJob) -> None:
             pass
 
 
-async def heeatbeat_updater(job_id: str):
+async def heartbeat_updater(job_id: str):
     while True:
         try:
             await update_job_heartbeat(job_id)
