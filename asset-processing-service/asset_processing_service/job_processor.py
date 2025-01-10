@@ -9,7 +9,7 @@ from asset_processing_service.api_client import (
     update_job_heartbeat,
 )
 from asset_processing_service.config import config
-from ..media_processor import (
+from asset_processing_service.media_processor import (
     extract_audio_from_video_and_split,
     split_audio_file,
 )
