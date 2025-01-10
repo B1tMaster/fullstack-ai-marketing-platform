@@ -177,29 +177,8 @@ async def process_job(job: AssetProcessingJob) -> None:
             raise ValueError(f"Unsupported content type: {asset.fileType}")
 
         # Clean up all temporary files after successful completion
-        if temp_files:
-            print("\nCleaning up temporary files after successful completion")
-            for file_path in temp_files:
-                if os.path.exists(file_path):
-                    print(f"Removing file: file://{os.path.abspath(file_path)}")
-                    try:
-                        os.remove(file_path)
-                    except Exception as e:
-                        logger.error(f"Error removing file {file_path}: {str(e)}")
-
-            # Remove temp directory if empty
-            if os.path.exists(temp_dir):
-                try:
-                    if not os.listdir(temp_dir):
-                        print(
-                            f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}"
-                        )
-                        os.rmdir(temp_dir)
-                    else:
-                        logger.warning(f"Temp directory not empty: {temp_dir}")
-                except Exception as e:
-                    logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
-
+        await cleanup_temp_files(temp_files, temp_dir)
+        
         # Cancel heartbeat updater
         heartbeat_task.cancel()
         try:
@@ -211,20 +190,11 @@ async def process_job(job: AssetProcessingJob) -> None:
         print(f"Error processing job {job.id}: {str(e)}")
         await update_job_details(job.id, status="failed", error_message=str(e))
 
-        # Clean up temporary files after failure
-        if temp_files:
-            print("\nCleaning up temporary files after job failure")
-            for file_path in temp_files:
-                if os.path.exists(file_path):
-                    print(f"Removing file: file://{os.path.abspath(file_path)}")
-                    os.remove(file_path)
-
-            # Remove temp directory if empty
-            if os.path.exists(temp_dir) and not os.listdir(temp_dir):
-                print(
-                    f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}"
-                )
-                os.rmdir(temp_dir)
+        # Only cleanup if we've reached max attempts
+        if job.attempts and job.attempts >= config.MAX_JOB_ATTEMPTS:
+            await cleanup_temp_files(temp_files, temp_dir)
+        else:
+            logger.info(f"Job failed but under max attempts, keeping temp files for retry")
 
         heartbeat_task.cancel()
         try:
@@ -232,6 +202,34 @@ async def process_job(job: AssetProcessingJob) -> None:
         except asyncio.CancelledError:
             pass
 
+
+async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
+    """Clean up temporary files and directory.
+    
+    Args:
+        temp_files: List of temporary file paths to remove
+        temp_dir: Temporary directory path to remove if empty
+    """
+    if temp_files:
+        logger.info("\nCleaning up temporary files")
+        for file_path in temp_files:
+            if os.path.exists(file_path):
+                logger.info(f"Removing file: file://{os.path.abspath(file_path)}")
+                try:
+                    os.remove(file_path)
+                except Exception as e:
+                    logger.error(f"Error removing file {file_path}: {str(e)}")
+
+        # Remove temp directory if empty
+        if os.path.exists(temp_dir):
+            try:
+                if not os.listdir(temp_dir):
+                    logger.info(f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}")
+                    os.rmdir(temp_dir)
+                else:
+                    logger.warning(f"Temp directory not empty: {temp_dir}")
+            except Exception as e:
+                logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
 
 async def heartbeat_updater(job_id: str):
     while True:
