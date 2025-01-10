@@ -239,6 +239,14 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
         temp_files: List of temporary file paths to remove
         temp_dir: Temporary directory path to remove if empty
     """
+    logger.info(f"\nStarting cleanup of temporary files and directory")
+    logger.info(f"Temp directory: file://{os.path.abspath(temp_dir)}")
+    logger.info(f"Number of files to clean up: {len(temp_files)}")
+    
+    # Track cleanup results
+    files_removed = 0
+    files_failed = 0
+    
     if temp_files:
         logger.info("\nCleaning up temporary files")
         for file_path in temp_files:
@@ -246,19 +254,37 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
                 logger.info(f"Removing file: file://{os.path.abspath(file_path)}")
                 try:
                     os.remove(file_path)
+                    files_removed += 1
+                    logger.info(f"Successfully removed file: {file_path}")
                 except Exception as e:
+                    files_failed += 1
                     logger.error(f"Error removing file {file_path}: {str(e)}")
+            else:
+                logger.warning(f"File not found, skipping removal: {file_path}")
 
-        # Remove temp directory if empty
-        if os.path.exists(temp_dir):
-            try:
-                if not os.listdir(temp_dir):
-                    logger.info(f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}")
-                    os.rmdir(temp_dir)
-                else:
-                    logger.warning(f"Temp directory not empty: {temp_dir}")
-            except Exception as e:
-                logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
+    # Remove temp directory if empty
+    if os.path.exists(temp_dir):
+        try:
+            dir_contents = os.listdir(temp_dir)
+            if not dir_contents:
+                logger.info(f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}")
+                os.rmdir(temp_dir)
+                logger.info(f"Successfully removed temp directory: {temp_dir}")
+            else:
+                logger.warning(f"Temp directory not empty ({len(dir_contents)} items remaining): {temp_dir}")
+                for item in dir_contents:
+                    logger.warning(f"- Remaining item: {item}")
+        except Exception as e:
+            logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
+    
+    # Log final cleanup results
+    logger.info(f"\nCleanup completed:")
+    logger.info(f"- Files successfully removed: {files_removed}")
+    logger.info(f"- Files failed to remove: {files_failed}")
+    if os.path.exists(temp_dir):
+        logger.warning(f"Temp directory still exists: {temp_dir}")
+    else:
+        logger.info(f"Temp directory successfully removed")
 
 async def heartbeat_updater(job_id: str):
     while True:
