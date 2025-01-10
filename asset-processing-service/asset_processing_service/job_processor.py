@@ -12,6 +12,7 @@ from asset_processing_service.config import config
 from asset_processing_service.media_processor import (
     extract_audio_from_video_and_split,
     split_audio_file,
+    transcribe_audio_file,
 )
 from asset_processing_service.models import AssetProcessingJob
 
