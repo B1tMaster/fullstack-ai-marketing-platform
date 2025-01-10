@@ -262,29 +262,38 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
             else:
                 logger.warning(f"File not found, skipping removal: {file_path}")
 
-    # Remove temp directory if empty
+    # Remove job-specific temp directory if empty
     if os.path.exists(temp_dir):
         try:
+            # Verify we're only removing subdirectories of the main TEMP_DIR
+            if not temp_dir.startswith(config.TEMP_DIR + os.sep):
+                logger.error(f"Safety check failed: temp_dir {temp_dir} is not under main TEMP_DIR {config.TEMP_DIR}")
+                return
+                
             dir_contents = os.listdir(temp_dir)
             if not dir_contents:
-                logger.info(f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}")
+                logger.info(f"Removing empty job temp directory: file://{os.path.abspath(temp_dir)}")
                 os.rmdir(temp_dir)
-                logger.info(f"Successfully removed temp directory: {temp_dir}")
+                logger.info(f"Successfully removed job temp directory: {temp_dir}")
             else:
-                logger.warning(f"Temp directory not empty ({len(dir_contents)} items remaining): {temp_dir}")
+                logger.warning(f"Job temp directory not empty ({len(dir_contents)} items remaining): {temp_dir}")
                 for item in dir_contents:
                     logger.warning(f"- Remaining item: {item}")
         except Exception as e:
-            logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
+            logger.error(f"Error removing job temp directory {temp_dir}: {str(e)}")
     
     # Log final cleanup results
     logger.info(f"\nCleanup completed:")
     logger.info(f"- Files successfully removed: {files_removed}")
     logger.info(f"- Files failed to remove: {files_failed}")
     if os.path.exists(temp_dir):
-        logger.warning(f"Temp directory still exists: {temp_dir}")
+        logger.warning(f"Job temp directory still exists: {temp_dir}")
     else:
-        logger.info(f"Temp directory successfully removed")
+        logger.info(f"Job temp directory successfully removed")
+        
+    # Always preserve the main TEMP_DIR
+    if not os.path.exists(config.TEMP_DIR):
+        logger.error(f"Main TEMP_DIR {config.TEMP_DIR} is missing! This should never happen")
 
 async def heartbeat_updater(job_id: str):
     while True:
