@@ -2,12 +2,12 @@ import pytest
 from unittest.mock import patch, AsyncMock
 from pathlib import Path
 
-from asset_processing_service.job_processor import process_job
-from asset_processing_service.models import AssetProcessingJob
-from asset_processing_service.api_client import ApiError
+from ..job_processor import process_job
+from ..models import AssetProcessingJob
+from ..api_client import ApiError
 
 # Test data paths
-TEST_DATA_DIR = Path(__file__).parent / "test_data"
+TEST_DATA_DIR = Path(__file__).parent.parent / "test_data"
 
 @pytest.fixture
 def mock_asset():

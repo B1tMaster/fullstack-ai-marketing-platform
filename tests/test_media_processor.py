@@ -11,7 +11,7 @@ from asset_processing_service.media_processor import (
 )
 
 # Test data paths
-TEST_DATA_DIR = Path(__file__).parent / "test_data"
+TEST_DATA_DIR = Path(__file__).parent.parent / "test_data"
 
 @pytest.mark.asyncio
 class TestAudioProcessing:
