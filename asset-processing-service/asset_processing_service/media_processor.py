@@ -162,12 +162,12 @@ async def split_audio_file(
         print(f"Created/verified temp directory: file://{os.path.abspath(temp_dir)}")
 
         # Step 2: Save input buffer to temporary file
-        print(f"\nStep 2: Saving input buffer to temporary file")
+        logger.info(f"\nStep 2: Saving input buffer to temporary file")
         input_path = os.path.join(temp_dir, original_filename)
         with open(input_path, "wb") as f:
             f.write(file_buffer)
-        print(f"Saved input file: file://{os.path.abspath(input_path)}")
-        print(f"Input file size: {os.path.getsize(input_path):,} bytes")
+        logger.info(f"Saved input file: file://{os.path.abspath(input_path)}")
+        logger.info(f"Input file size: {os.path.getsize(input_path):,} bytes")
         temp_files.append(input_path)
 
         # Step 3: Convert to MP3 if needed
@@ -181,14 +181,14 @@ async def split_audio_file(
             logger.info(f"\nStep 3: File is already in MP3 format, skipping conversion")
 
         # Step 4: Get audio information
-        print(f"\nStep 4: Analyzing audio file")
+        logger.info(f"\nStep 4: Analyzing audio file")
         probe = ffmpeg.probe(working_path)
         _validate_audio_file(probe, original_filename)
         duration = float(probe["format"]["duration"])
         file_size = os.path.getsize(working_path)
-        print(f"Audio file: file://{os.path.abspath(working_path)}")
-        print(f"Audio duration: {duration:.2f} seconds")
-        print(f"File size: {file_size:,} bytes")
+        logger.info(f"Audio file: file://{os.path.abspath(working_path)}")
+        logger.info(f"Audio duration: {duration:.2f} seconds")
+        logger.info(f"File size: {file_size:,} bytes")
 
         # Log audio details
         logger.info(f"Audio details:")
