@@ -4,7 +4,7 @@ import logging
 import re
 import tempfile
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict, Union
 
 import ffmpeg
 from openai import OpenAI
@@ -106,7 +106,7 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
 async def split_audio_file(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> List[dict]:
+) -> List[Dict[str, Union[int, str]]]:
     """Split an audio file into chunks of maximum size.
 
     This function processes an audio file by:
@@ -234,15 +234,16 @@ async def split_audio_file(
                 raise MediaProcessingError(error_msg)
 
             # Track the chunk file with metadata (size, file_name, file_path)
-            temp_files.append({
+            chunk_metadata = {
                 "size": chunk_size,
                 "file_name": chunk_file_name,
                 "file_path": chunk_path
-            })
+            }
+            temp_files.append(chunk_metadata)
+            
             # Only count actual chunks, not input/converted files
             if '_chunk_' in chunk_file_name:
                 print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
-            print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
         # Only count actual chunks, not the input/converted files
         num_chunks_processed = len([f for f in temp_files if '_chunk_' in f['file_name']])
