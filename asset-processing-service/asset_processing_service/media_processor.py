@@ -332,12 +332,20 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
         try:
             with open(chunk_path, "rb") as audio_file:
                 logger.info(f"Transcribing chunk: {chunk_path}")
+                start_time = asyncio.get_event_loop().time()
                 response = await asyncio.to_thread(
                     client.audio.transcriptions.create,
                     model=config.OPENAI_MODEL,
                     file=audio_file
                 )
-                return clean_text(response.text)
+                end_time = asyncio.get_event_loop().time()
+                transcription = clean_text(response.text)
+                duration = end_time - start_time
+                logger.info(
+                    f"Completed transcription of chunk {chunk_path} in {duration:.2f} seconds. "
+                    f"Transcribed {len(transcription)} characters."
+                )
+                return transcription
         except Exception as e:
             if attempts < config.MAX_TRANSCRIPTION_ATTEMPTS:
                 logger.warning(f"Transcription attempt {attempts + 1} failed for {chunk_path}. Retrying...")
@@ -355,13 +363,19 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
             return await transcribe_chunk(chunk_path)
     
     try:
-        # Create and run transcription tasks
+        # Create and run transcription tasks with timing
+        transcription_start = asyncio.get_event_loop().time()
         tasks = [limited_transcribe(chunk) for chunk in chunk_paths]
         transcriptions = await asyncio.gather(*tasks)
+        transcription_end = asyncio.get_event_loop().time()
         
         # Combine transcriptions in order
         final_transcription = " ".join(transcriptions)
-        logger.info("Successfully completed audio transcription")
+        total_time = transcription_end - transcription_start
+        logger.info(
+            f"Successfully completed audio transcription in {total_time:.2f} seconds. "
+            f"Total characters transcribed: {len(final_transcription)}"
+        )
         logger.debug(f"Final transcription: {final_transcription[:200]}...")  # Log first 200 chars
         
         return final_transcription
