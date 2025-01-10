@@ -145,6 +145,8 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                         remove_job_from_pending(
                             job.id, jobs_pending_or_in_progress, "Max attempts exceeded"
                         )
+                        # Skip processing and continue to next job
+                        continue
                     case JobStatus.STUCK.value:
                         print(f"Job {job.id} is stuck")
                         remove_job_from_pending(
