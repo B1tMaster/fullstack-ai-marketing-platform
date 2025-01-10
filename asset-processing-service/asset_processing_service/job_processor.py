@@ -139,13 +139,13 @@ async def process_job(job: AssetProcessingJob) -> None:
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
             print("\nStage 1: Extracting audio and splitting into chunks")
-            chunk_paths = await extract_audio_from_video_and_split(
+            chunk_paths, video_temp_files = await extract_audio_from_video_and_split(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
                 job.id,  # Pass the job ID for temp directory management
             )
-            temp_files.extend(chunk_paths)  # Track temporary files
+            temp_files.extend(video_temp_files)  # Track temporary files
             print(
                 f"\nSuccessfully extracted and split audio into {len(chunk_paths)} chunks"
             )
