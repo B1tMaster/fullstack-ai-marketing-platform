@@ -60,6 +60,13 @@ async def process_job(job: AssetProcessingJob) -> None:
             await update_asset_content(asset.id, content)
             print(f"\nMarking job {job.id} as completed")
             await update_job_details(job.id, status="completed")
+            
+            # Clean up and cancel heartbeat before returning
+            heartbeat_task.cancel()
+            try:
+                await heartbeat_task
+            except asyncio.CancelledError:
+                pass
             return  # Exit after completing text file processing
         elif asset.fileType == "audio":
             print(f"Processing audio file: {asset.fileName}")
@@ -83,7 +90,17 @@ async def process_job(job: AssetProcessingJob) -> None:
             # Stage 2: Audio transcription
             print("\nStarting audio transcription...")
             try:
+                logger.info(f"Starting transcription for {len(chunk_paths)} chunks")
+                for chunk_path in chunk_paths:
+                    if not os.path.exists(chunk_path):
+                        logger.error(f"Chunk file missing: {chunk_path}")
+                        raise FileNotFoundError(f"Chunk file missing: {chunk_path}")
+                    logger.info(f"Chunk file exists: {chunk_path} ({os.path.getsize(chunk_path)} bytes)")
+                
                 transcription = await transcribe_audio_file(chunk_paths)
+                if not transcription:
+                    logger.error("Transcription returned empty result")
+                    raise ValueError("Transcription returned empty result")
                 print(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
                 print(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
                 
@@ -144,21 +161,30 @@ async def process_job(job: AssetProcessingJob) -> None:
             for file_path in temp_files:
                 if os.path.exists(file_path):
                     print(f"Removing file: file://{os.path.abspath(file_path)}")
-                    os.remove(file_path)
+                    try:
+                        os.remove(file_path)
+                    except Exception as e:
+                        logger.error(f"Error removing file {file_path}: {str(e)}")
 
             # Remove temp directory if empty
-            if os.path.exists(temp_dir) and not os.listdir(temp_dir):
-                print(
-                    f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}"
-                )
-                os.rmdir(temp_dir)
+            if os.path.exists(temp_dir):
+                try:
+                    if not os.listdir(temp_dir):
+                        print(
+                            f"Removing empty temp directory: file://{os.path.abspath(temp_dir)}"
+                        )
+                        os.rmdir(temp_dir)
+                    else:
+                        logger.warning(f"Temp directory not empty: {temp_dir}")
+                except Exception as e:
+                    logger.error(f"Error removing temp directory {temp_dir}: {str(e)}")
 
         # Cancel heartbeat updater
         heartbeat_task.cancel()
         try:
             await heartbeat_task
         except asyncio.CancelledError:
-            pass
+            logger.info("Heartbeat task cancelled successfully")
 
     except Exception as e:
         print(f"Error processing job {job.id}: {str(e)}")

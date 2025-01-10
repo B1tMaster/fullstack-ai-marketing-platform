@@ -308,6 +308,10 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
     logger.info("Starting audio transcription process")
     logger.info(f"Processing {len(chunk_paths)} audio chunks")
     
+    if not chunk_paths:
+        logger.error("No chunk paths provided for transcription")
+        raise MediaProcessingError("No chunk paths provided for transcription")
+    
     # Function to clean and normalize text
     def clean_text(text: str) -> str:
         text = text.lower()
