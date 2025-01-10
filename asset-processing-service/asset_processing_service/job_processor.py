@@ -100,8 +100,11 @@ async def process_job(job: AssetProcessingJob) -> None:
                 print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
 
             print("\nStage 1 (audio extraction) complete. Moving to next stages:")
+            
             print("- Stage 2: Audio transcription")
+            
             print("- Stage 3: Text processing")
+            
             print("- Stage 4: Final processing")
 
             # TODO: Pass audio_chunks to transcription stage
