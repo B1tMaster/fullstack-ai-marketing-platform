@@ -35,6 +35,18 @@ async def process_job(job: AssetProcessingJob) -> None:
     heartbeat_task = asyncio.create_task(heartbeat_updater(job.id))
     temp_files = []  # Track all temporary files
     temp_dir = os.path.join(config.TEMP_DIR, job.id)
+    
+    # Clean up any existing files from previous runs
+    if os.path.exists(temp_dir):
+        logger.info(f"Cleaning up existing temp directory: {temp_dir}")
+        for file_name in os.listdir(temp_dir):
+            file_path = os.path.join(temp_dir, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    logger.info(f"Removed existing file: {file_path}")
+            except Exception as e:
+                logger.error(f"Failed to remove existing file {file_path}: {str(e)}")
 
     try:
         # Update job status to "in_progress" and increment attempts
