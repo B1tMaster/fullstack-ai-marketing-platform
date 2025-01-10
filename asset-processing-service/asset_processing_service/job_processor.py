@@ -71,10 +71,11 @@ async def process_job(job: AssetProcessingJob) -> None:
                 job.id,  # Pass the job ID for temp directory management
             )
             temp_files.extend(chunk_paths)  # Track temporary files
-            print(f"\nSuccessfully split audio file into {len(chunk_metadata)} chunks")
+            print(f"\nSuccessfully split audio file into {len(chunk_paths)} chunks")
             print("\nAudio chunks ready for next stage (transcription):")
-            for chunk in chunk_metadata:
-                print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
+            for chunk_path in chunk_paths:
+                chunk_size = os.path.getsize(chunk_path)
+                print(f"- {os.path.basename(chunk_path)} ({chunk_size} bytes)")
 
             print("\nStage 1 (audio splitting) complete. Moving to next stages:")
             print("- Stage 2: Audio transcription")
