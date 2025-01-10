@@ -297,10 +297,7 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
     """Transcribe audio chunks using OpenAI Whisper-1 model.
     
     Args:
-        chunk_metadata: List of dictionaries containing chunk metadata with:
-            - file_path: Path to the audio chunk file
-            - file_name: Name of the chunk file
-            - size: Size of the chunk in bytes
+        chunk_paths: List of paths to audio chunk files
             
     Returns:
         Combined transcription of all chunks as a single string
@@ -309,7 +306,7 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
         MediaProcessingError: If transcription fails after max attempts
     """
     logger.info("Starting audio transcription process")
-    logger.info(f"Processing {len(chunk_metadata)} audio chunks")
+    logger.info(f"Processing {len(chunk_paths)} audio chunks")
     
     # Function to clean and normalize text
     def clean_text(text: str) -> str:
@@ -347,7 +344,7 @@ async def transcribe_audio_file(chunk_paths: List[str]) -> str:
     
     try:
         # Create and run transcription tasks
-        tasks = [limited_transcribe(chunk) for chunk in chunk_metadata]
+        tasks = [limited_transcribe(chunk) for chunk in chunk_paths]
         transcriptions = await asyncio.gather(*tasks)
         
         # Combine transcriptions in order
