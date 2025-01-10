@@ -101,26 +101,26 @@ async def process_job(job: AssetProcessingJob) -> None:
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
             print("\nStage 1: Extracting audio and splitting into chunks")
-            chunk_metadata = await extract_audio_from_video_and_split(
+            chunk_paths = await extract_audio_from_video_and_split(
                 file_buffer,
                 config.MAX_CHUNK_SIZE_BYTES,
                 os.path.basename(asset.fileName),
                 job.id,  # Pass the job ID for temp directory management
             )
-            temp_files.extend([chunk['file_path'] for chunk in chunk_metadata])  # Track temporary files
+            temp_files.extend(chunk_paths)  # Track temporary files
             print(
-                f"\nSuccessfully extracted and split audio into {len(chunk_metadata)} chunks"
+                f"\nSuccessfully extracted and split audio into {len(chunk_paths)} chunks"
             )
             print("\nAudio chunks ready for next stage (transcription):")
-            for chunk in chunk_metadata:
-                print(f"- {chunk['file_name']} ({chunk['size']} bytes)")
+            for chunk_path in chunk_paths:
+                print(f"- {os.path.basename(chunk_path)} ({os.path.getsize(chunk_path)} bytes)")
 
             print("\nStage 1 (audio extraction) complete. Moving to next stages:")
             
             # Stage 2: Audio transcription
             print("\nStarting audio transcription...")
             try:
-                transcription = await transcribe_audio_file(chunk_metadata)
+                transcription = await transcribe_audio_file(chunk_paths)
                 print(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
                 print(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
                 
