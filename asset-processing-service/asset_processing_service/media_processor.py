@@ -128,7 +128,6 @@ async def split_audio_file(
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
     temp_files = []  # Track all temporary files with metadata (size, file_name, file_path)
-    chunk_files = []  # Track paths to chunk files for cleanup
     input_path = None
     converted_path = None
 
@@ -226,7 +225,6 @@ async def split_audio_file(
                 "file_name": chunk_file_name,
                 "file_path": chunk_path
             })
-            chunk_files.append(chunk_path)  # Add to list of files for cleanup
             print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
         print(f"\nSuccessfully processed all {len(temp_files)} chunks")
@@ -237,7 +235,7 @@ async def split_audio_file(
         for file_path in temp_files:
             print(f"- file://{os.path.abspath(file_path)}")
 
-        return temp_files, chunk_files
+        return temp_files
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
