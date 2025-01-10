@@ -54,6 +54,16 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
         temp_dir = os.path.join(config.TEMP_DIR, job_id)
         os.makedirs(temp_dir, exist_ok=True)
         print(f"Created/verified temp directory: file://{os.path.abspath(temp_dir)}")
+        
+        # Clean up any existing files from previous runs
+        for file_name in os.listdir(temp_dir):
+            file_path = os.path.join(temp_dir, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Removed existing file: {file_path}")
+            except Exception as e:
+                print(f"Failed to remove existing file {file_path}: {str(e)}")
 
         # Get the filename without extension
         base_name = Path(input_path).stem
