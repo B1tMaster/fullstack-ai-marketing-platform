@@ -60,6 +60,9 @@ async def process_job(job: AssetProcessingJob) -> None:
             asset = await fetch_asset(job.assetId)
             if asset is None:
                 raise ValueError(f"Asset with ID {job.assetId} not found")
+        except Exception as e:
+            print(f"Error fetching asset details: {str(e)}")
+            raise
 
         print(f"\nAsset details:")
         print(f"- File name: {asset.fileName}")
