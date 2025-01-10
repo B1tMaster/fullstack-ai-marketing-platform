@@ -128,6 +128,7 @@ async def split_audio_file(
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
     temp_files = []  # Track all temporary files with metadata (size, file_name, file_path)
+    chunk_files = []  # Track paths to chunk files for cleanup
     input_path = None
     converted_path = None
 
