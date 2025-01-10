@@ -100,7 +100,6 @@ async def split_audio_file(
     2. Saving the input buffer to a temporary file
     3. Converting to MP3 format if needed
     4. Splitting the MP3 file into chunks of maximum size
-    5. Reading chunks into memory
 
     The function maintains memory efficiency by:
     - Processing one chunk at a time
@@ -113,9 +112,10 @@ async def split_audio_file(
         job_id: ID of the job being processed (used for temp directory naming)
 
     Returns:
-        Tuple containing:
-        - List of dictionaries containing chunk info (data, size, file_name)
-        - List of paths to temporary files created (for later cleanup)
+        List of dictionaries containing chunk metadata with:
+        - size: Size of the chunk in bytes
+        - file_name: Name of the chunk file
+        - file_path: Path to the chunk file
 
     Raises:
         MediaProcessingError: If there's an error during processing or file operations
@@ -127,7 +127,7 @@ async def split_audio_file(
     print(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
-    temp_files = []  # Track all temporary files with metadata
+    temp_files = []  # Track all temporary files with metadata (size, file_name, file_path)
     input_path = None
     converted_path = None
 
@@ -219,7 +219,7 @@ async def split_audio_file(
                 print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Track the chunk file with metadata
+            # Track the chunk file with metadata (size, file_name, file_path)
             temp_files.append({
                 "size": chunk_size,
                 "file_name": chunk_file_name,
