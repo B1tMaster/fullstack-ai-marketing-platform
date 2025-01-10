@@ -66,10 +66,13 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
         print("\nFetching jobs...", flush=True)
 
         try:
-            jobs = await fetch_jobs()
-            print(f"Fetched {len(jobs)} jobs", flush=True)
-            if len(jobs) > 0:
-                print("Job statuses:", [job.status for job in jobs])
+            # Fetch jobs and filter out any with MAX_ATTEMPTS_EXCEEDED status
+            all_jobs = await fetch_jobs()
+            jobs = [job for job in all_jobs if job.status != JobStatus.MAX_ATTEMPTS_EXCEEDED.value]
+            
+            print(f"Fetched {len(all_jobs)} jobs, {len(jobs)} after filtering", flush=True)
+            if len(all_jobs) > 0:
+                print("Job statuses:", [job.status for job in all_jobs])
 
             for job in jobs:
                 print(f"\nProcessing job: {job.id}")
