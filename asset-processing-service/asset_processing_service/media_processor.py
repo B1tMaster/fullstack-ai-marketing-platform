@@ -233,8 +233,13 @@ async def split_audio_file(
                 print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Track the chunk file path
-            temp_files.append(chunk_path)
+            # Track the chunk file with metadata
+            chunk_metadata = {
+                'file_path': chunk_path,
+                'file_name': chunk_file_name,
+                'size': chunk_size
+            }
+            temp_files.append(chunk_metadata)
             
             # Log chunk processing
             print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
@@ -248,10 +253,10 @@ async def split_audio_file(
         )
         print(f"Temporary files created: {len(temp_files)}")
         for file in temp_files:
-            print(f"- file://{os.path.abspath(file['file_path'])}")
+            print(f"- file://{os.path.abspath(file['file_path'])} ({file['size']} bytes)")
 
-        # Return only the chunk paths (filter out input/converted files)
-        return [f for f in temp_files if '_chunk_' in f]
+        # Return only the chunk metadata (filter out input/converted files)
+        return [f for f in temp_files if '_chunk_' in f['file_name']]
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
@@ -482,10 +487,10 @@ async def extract_audio_from_video_and_split(
             audio_buffer = f.read()
 
         # Use existing split_audio_file function
-        audio_chunks, chunk_files = await split_audio_file(
+        audio_chunks = await split_audio_file(
             audio_buffer, max_chunk_size, os.path.basename(audio_path), job_id
         )
-        temp_files.extend(chunk_files)  # Add chunk files to our list
+        temp_files.extend([chunk['file_path'] for chunk in audio_chunks])  # Add chunk files to our list
 
         print(f"\nAll processing complete")
         print(f"Total temporary files: {len(temp_files)}")
