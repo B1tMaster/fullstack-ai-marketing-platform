@@ -5,6 +5,7 @@ from datetime import datetime
 from asset_processing_service.api_client import fetch_jobs, update_job_details
 from asset_processing_service.config import config
 from asset_processing_service.constants.job_status import JobStatus
+from asset_processing_service.models import AssetProcessingJob
 from asset_processing_service.job_processor import process_job
 
 
@@ -81,7 +82,7 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                 time_since_last_heartbeat = abs(current_time - last_heartbeat_time)
 
                 match job.status:
-                    case "in_progress":
+                    case JobStatus.IN_PROGRESS.value:
                         print(f"Job {job.id} is in progress")
                         print(
                             f"Time since last heartbeat: {time_since_last_heartbeat}s"
@@ -115,7 +116,7 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                                 error_message="Max attempts exceeded",
                                 attempts=job.attempts,
                             )
-                    case "created" | "failed":
+                    case JobStatus.CREATED.value | JobStatus.FAILED.value:
                         print(f"Job {job.id} is {job.status}")
                         if job.attempts >= config.MAX_JOB_ATTEMPTS:
                             print(
@@ -139,10 +140,15 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                                 f"Pending/progress jobs now: {jobs_pending_or_in_progress}"
                             )
 
-                    case "max_attempts_exceeded":
+                    case JobStatus.MAX_ATTEMPTS_EXCEEDED.value:
                         print(f"Job {job.id} has exceeded max attempts")
                         remove_job_from_pending(
                             job.id, jobs_pending_or_in_progress, "Max attempts exceeded"
+                        )
+                    case JobStatus.STUCK.value:
+                        print(f"Job {job.id} is stuck")
+                        remove_job_from_pending(
+                            job.id, jobs_pending_or_in_progress, "Job is stuck"
                         )
                     case _:
                         print(f"Job {job.id} has unknown status: {job.status}")
