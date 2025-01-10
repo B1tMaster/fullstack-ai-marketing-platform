@@ -1,1 +1,1 @@
-from ..config import config
+from asset_processing_service.config import config

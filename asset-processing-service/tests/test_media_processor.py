@@ -1,5 +1,11 @@
 import pytest
+import sys
+import os
 from unittest.mock import patch, AsyncMock
+
+# Add the parent directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from asset_processing_service.media_processor import (
     convert_audio_file_to_mp3,
     split_audio_file,
