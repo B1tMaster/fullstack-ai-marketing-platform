@@ -225,15 +225,21 @@ async def split_audio_file(
                 "file_name": chunk_file_name,
                 "file_path": chunk_path
             })
+            # Only count actual chunks, not input/converted files
+            if '_chunk_' in chunk_file_name:
+                print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
             print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
-        print(f"\nSuccessfully processed all {len(temp_files)} chunks")
+        # Only count actual chunks, not the input/converted files
+        num_chunks_processed = len([f for f in temp_files if '_chunk_' in f['file_name']])
+        
+        print(f"\nSuccessfully processed all {num_chunks_processed} chunks")
         print(
-            f"Total data size: {sum(chunk['size'] for chunk in temp_files):,} bytes"
+            f"Total data size: {sum(chunk['size'] for chunk in temp_files if '_chunk_' in chunk['file_name']):,} bytes"
         )
         print(f"Temporary files created: {len(temp_files)}")
-        for file_path in temp_files:
-            print(f"- file://{os.path.abspath(file_path)}")
+        for file in temp_files:
+            print(f"- file://{os.path.abspath(file['file_path'])}")
 
         return temp_files
 
