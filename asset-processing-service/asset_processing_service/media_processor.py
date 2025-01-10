@@ -106,7 +106,7 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
 async def split_audio_file(
     file_buffer: bytes, max_chunk_size: int, original_filename: str, job_id: str
-) -> List[Dict[str, Union[int, str]]]:
+) -> List[str]:
     """Split an audio file into chunks of maximum size.
 
     This function processes an audio file by:
@@ -233,17 +233,11 @@ async def split_audio_file(
                 print(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
-            # Track the chunk file with metadata (size, file_name, file_path)
-            chunk_metadata = {
-                "size": chunk_size,
-                "file_name": chunk_file_name,
-                "file_path": chunk_path
-            }
-            temp_files.append(chunk_metadata)
+            # Track the chunk file path
+            temp_files.append(chunk_path)
             
-            # Only count actual chunks, not input/converted files
-            if '_chunk_' in chunk_file_name:
-                print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
+            # Log chunk processing
+            print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
 
         # Only count actual chunks, not the input/converted files
         num_chunks_processed = len([f for f in temp_files if '_chunk_' in f['file_name']])
@@ -256,7 +250,8 @@ async def split_audio_file(
         for file in temp_files:
             print(f"- file://{os.path.abspath(file['file_path'])}")
 
-        return temp_files
+        # Return only the chunk paths (filter out input/converted files)
+        return [f for f in temp_files if '_chunk_' in f]
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
@@ -298,7 +293,7 @@ def _validate_audio_file(probe_data: dict, filename: str) -> None:
         raise MediaProcessingError(f"No audio stream found in file: {filename}")
 
 
-async def transcribe_audio_file(chunk_metadata: List[dict]) -> str:
+async def transcribe_audio_file(chunk_paths: List[str]) -> str:
     """Transcribe audio chunks using OpenAI Whisper-1 model.
     
     Args:
@@ -346,9 +341,9 @@ async def transcribe_audio_file(chunk_metadata: List[dict]) -> str:
     # Process chunks with limited concurrency
     semaphore = asyncio.Semaphore(config.MAX_TRANSCRIPTION_CONCURRENCY)
     
-    async def limited_transcribe(chunk):
+    async def limited_transcribe(chunk_path):
         async with semaphore:
-            return await transcribe_chunk(chunk['file_path'])
+            return await transcribe_chunk(chunk_path)
     
     try:
         # Create and run transcription tasks

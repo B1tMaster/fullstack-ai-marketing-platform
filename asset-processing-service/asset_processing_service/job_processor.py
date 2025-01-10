@@ -82,7 +82,7 @@ async def process_job(job: AssetProcessingJob) -> None:
             # Stage 2: Audio transcription
             print("\nStarting audio transcription...")
             try:
-                transcription = await transcribe_audio_file(chunk_metadata)
+                transcription = await transcribe_audio_file(chunk_paths)
                 print(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
                 print(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
                 
