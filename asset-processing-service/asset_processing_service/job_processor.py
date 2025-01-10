@@ -83,6 +83,7 @@ async def process_job(job: AssetProcessingJob) -> None:
             await update_job_details(job.id, status="completed")
             
             # Clean up and cancel heartbeat before returning
+            await cleanup_temp_files(temp_files, temp_dir)
             heartbeat_task.cancel()
             try:
                 await heartbeat_task
@@ -132,6 +133,16 @@ async def process_job(job: AssetProcessingJob) -> None:
                 # Stage 4: Mark job as completed
                 print("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
+                
+                # Clean up temporary files
+                await cleanup_temp_files(temp_files, temp_dir)
+                
+                # Cancel heartbeat
+                heartbeat_task.cancel()
+                try:
+                    await heartbeat_task
+                except asyncio.CancelledError:
+                    pass
                 return
             except Exception as e:
                 print(f"Error during transcription: {str(e)}")
@@ -169,6 +180,16 @@ async def process_job(job: AssetProcessingJob) -> None:
                 # Stage 4: Mark job as completed
                 print("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
+                
+                # Clean up temporary files
+                await cleanup_temp_files(temp_files, temp_dir)
+                
+                # Cancel heartbeat
+                heartbeat_task.cancel()
+                try:
+                    await heartbeat_task
+                except asyncio.CancelledError:
+                    pass
                 return
             except Exception as e:
                 print(f"Error during transcription: {str(e)}")
@@ -185,6 +206,9 @@ async def process_job(job: AssetProcessingJob) -> None:
             await heartbeat_task
         except asyncio.CancelledError:
             logger.info("Heartbeat task cancelled successfully")
+            
+        # Ensure we return after cleanup
+        return
 
     except Exception as e:
         print(f"Error processing job {job.id}: {str(e)}")
