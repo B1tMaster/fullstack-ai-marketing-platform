@@ -227,9 +227,9 @@ async def split_audio_file(
             })
             print(f"Chunk {i+1} processed: {chunk_size:,} bytes")
 
-        print(f"\nSuccessfully processed all {len(audio_chunks)} chunks")
+        print(f"\nSuccessfully processed all {len(temp_files)} chunks")
         print(
-            f"Total data size: {sum(chunk['size'] for chunk in audio_chunks):,} bytes"
+            f"Total data size: {sum(chunk['size'] for chunk in temp_files):,} bytes"
         )
         print(f"Temporary files created: {len(temp_files)}")
         for file_path in temp_files:
