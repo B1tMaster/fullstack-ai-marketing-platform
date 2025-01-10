@@ -44,3 +44,48 @@ export async function GET(
     );
   }
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { assetId: string } }
+) {
+  try {
+    const assetId = params.assetId;
+    if (!assetId) {
+      console.log("Missing required parameter: assetId");
+      return NextResponse.json(
+        { error: "Missing required parameter: assetId" },
+        { status: HttpStatus.BAD_REQUEST }
+      );
+    }
+
+    const updateData = await request.json();
+    console.log(`Updating asset ${assetId} with data:`, updateData);
+
+    const updatedAsset = await db
+      .update(assetTable)
+      .set({
+        content: updateData.content,
+        updatedAt: new Date(),
+      })
+      .where(eq(assetTable.id, assetId))
+      .returning();
+
+    if (!updatedAsset || updatedAsset.length === 0) {
+      console.log(`Asset ${assetId} not found`);
+      return NextResponse.json(
+        { error: "Asset not found" },
+        { status: HttpStatus.NOT_FOUND }
+      );
+    }
+
+    console.log(`Successfully updated asset ${assetId}`);
+    return NextResponse.json(updatedAsset[0]);
+  } catch (error) {
+    console.error("Failed to update asset:", error);
+    return NextResponse.json(
+      { error: "Failed to update asset" },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
+    );
+  }
+}

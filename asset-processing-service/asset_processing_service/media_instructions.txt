@@ -1,86 +1,35 @@
-- code in this file will be used to process media files.
-- we will use ffmpeg to process the media files.
-- we will use the ffmpeg-python library to interact with ffmpeg.
-
-- process audio files using @ffmpeg-python
-    - files passed in will be in mp3 and other audio formats
-
-@ffmpeg-python - https://github.com/kkroening/ffmpeg-python
-
-   - we will need to split any large mp3 media files into chunks of max size of 25MB each using temporary files and temporary directory location
-
-This function : split_audio_file from job_processor.py will be used to process media files of audio format
-chunks = await split_audio_file(
-                file_buffer,
-                config.MAX_CHUNK_SIZE_BYTES,
-                os.path.basename(asset.fileName),
 
 
-- if the audio file is in mp3 format its' already in the correct format
-- if the audio file is in other audio formats we will need to convert it to mp3 first using ffmpeg
+We will add a new functionality in the media_processor.py file
 
-write a convert_audio_file_to_mp3 function that will take a file input path and output path and convert the file not in mp3 format to mp3 and store it in the output path in temp directory
-this function will be called by the split_audio_file function before the audio file is split into chunks as only mp3 files should be split into chunks
-
-make sure to be converting the file to mp3 asynchronously and return the output path once the file is converted
-
-IMPORTANT: store the media files being processed in the temp directory that is configured in the config.py file.  for each job we will create a subdirectory for that job with directory name being the job id
-
-print the path of the file being processed and the path of the file being written to the temp directory in the console
-
-    @ffmpeg-python - https://github.com/kkroening/ffmpeg-python will be used to probe the media file to get the duration
-    audio files to determine audio file sizes and used to split the audio file into chunks
-
-After converting the audio file to mp3, we will need to split the audio file into chunks of max size of 25MB each named 
-sequentially with original file name + audio_0.mp3, audio_1.mp3, audio_2.mp3, etc.
-    
-    Error handling:
-    - logs are added to track the progress of the audio file processing and if chunks are not created successfully
-    of if chunks are larger than 25MB. Once the audio file is processed, we will need to clear any temporary files created. 
-
-create stub methods and comment out processing of text files and video files
-if we receive those types, just print a message and skip processing
-- process text files
-- process image files 
-
-
-Part 2: handling the video files in part two.
-
-We need to add a new function in the media_processor.py file
-it will be called: extract_audio_from_video_and_split 
-It will take as input video buffer as bytes, max_chunk_size_bytes,  orignal filename as string and job id as string. just like in the split_audio_file function 
-
-as before , we will use ffmpeg and temporary files and directories to process the video file
-we will stream the video file using ffmpeg and write mp3 file to the temp directory like before 
-then we will call alaredy writen function split_audio_file to split the audio file into chunks of max size of 25MB each named 
-
-we will return the list of chunks as before . 
-
-please make sure to handle the error handling and cleanup of temporary files and directories like before 
-and also document the function with docstrings and comments 
-
-
-Part 3: handling the image files in part three.
-
-We need to add a new functionality in the media_processor.py file
-we will not be transcribing the audio buffers files we have created in the previous parts. 
-
-for transcription we will  use openai whisper-1 model. 
-I have already added the openai api key to the .env file and installed the openai library. 
+1.
+CREATE transcribe_audio_file function in media_processor.py to  transcribe an mp3 file using openai whisper-1 model. 
+the function will take as input chunk_metadata list of dictionaries and asynconously and conncurrently initiate calls to openAI whisper-1 model 
+it will then combine the transcription of the audio files in the proper order and return the transcription of the audio file as a string .
 
 we want to write code that will do the transcription of the chunks of audio in parallel and asynchronously. 
-make sure to write code that will be making the api calls to the openai api in parallel and asynchrous and writen in the best practices of parallel and asynchronous programming
-
 we also need to make sure we preserve order when we re-assemble the chunks of text into the original text after the transcription is complete. 
 
-any temporary files and directories created during the transcription should be deleted after the transcription is complete. 
 
+USE  OPENAI_API_KEY from .env file as api key to connect to all open ai API requests.  
+use installed  openai library listed in pyproject.toml  
+OpenAI libray API documentation: https://platform.openai.com/docs/guides/speech-to-text
 
-we we re-assemble the chunks of text into the original text after the transcription is complete, we will save the text to the database into the content field of the assets table. 
+Sample code to transcribe audio file: 
+    from openai import OpenAI
+    client = OpenAI()
 
-we will then update job status to completed in the assests_processing_jobs table .  
+    audio_file= open("/path/to/file/audio.mp3", "rb")
+    transcription = client.audio.transcriptions.create(
+        model="whisper-1", 
+        file=audio_file
+    )
 
-we will also make sure to log status and any errors to the console as before. 
+    print(transcription.text)
 
+2. add code to use transcribe_audio_file function as a next step in the job_processor.py  stage 2 : Stage 2: Audio transcription for video and audio files.
 
+3. makes sure to create log messages to the console to indicate the start and end of the transcription process and any errors that occur during the transcription process. 
+
+4. print the final transcription to the console as a string.  
 
