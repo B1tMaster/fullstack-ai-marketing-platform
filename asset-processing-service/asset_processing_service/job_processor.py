@@ -54,7 +54,8 @@ async def process_job(job: AssetProcessingJob) -> None:
             job.id, status="in_progress", attempts=(job.attempts or 0) + 1
         )
 
-        # Fetch asset associated with asset processing job
+        try:
+            # Fetch asset associated with asset processing job
         print(f"Fetching asset details for ID: {job.assetId}")
         asset = await fetch_asset(job.assetId)
         if asset is None:
@@ -213,8 +214,9 @@ async def process_job(job: AssetProcessingJob) -> None:
     except Exception as e:
         print(f"Error processing job {job.id}: {str(e)}")
         await update_job_details(job.id, status="failed", error_message=str(e))
-
-        # Only cleanup if we've reached max attempts
+        raise  # Re-raise to trigger outer finally
+    finally:
+        # Cleanup logic moved here to ensure it runs in all cases
         if job.attempts and job.attempts >= config.MAX_JOB_ATTEMPTS:
             await cleanup_temp_files(temp_files, temp_dir)
         else:
