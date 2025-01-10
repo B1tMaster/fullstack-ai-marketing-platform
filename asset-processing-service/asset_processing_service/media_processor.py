@@ -45,15 +45,15 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
     Raises:
         MediaProcessingError: If there's an error during conversion or file operations
     """
-    print(f"\n{'='*20} Converting Audio File {'='*20}")
-    print(f"Job ID: {job_id}")
-    print(f"Input file: {input_path}")
+    logger.info(f"\n{'='*20} Converting Audio File {'='*20}")
+    logger.info(f"Job ID: {job_id}")
+    logger.info(f"Input file: {input_path}")
 
     try:
         # Create job-specific temp directory
         temp_dir = os.path.join(config.TEMP_DIR, job_id)
         os.makedirs(temp_dir, exist_ok=True)
-        print(f"Created/verified temp directory: file://{os.path.abspath(temp_dir)}")
+        logger.info(f"Created/verified temp directory: file://{os.path.abspath(temp_dir)}")
         
         # Clean up any existing files from previous runs
         for file_name in os.listdir(temp_dir):
@@ -61,17 +61,17 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
-                    print(f"Removed existing file: {file_path}")
+                    logger.info(f"Removed existing file: {file_path}")
             except Exception as e:
-                print(f"Failed to remove existing file {file_path}: {str(e)}")
+                logger.error(f"Failed to remove existing file {file_path}: {str(e)}")
 
         # Get the filename without extension
         base_name = Path(input_path).stem
         output_path = os.path.join(temp_dir, f"{base_name}.mp3")
-        print(f"Will save converted file as: file://{os.path.abspath(output_path)}")
+        logger.info(f"Will save converted file as: file://{os.path.abspath(output_path)}")
 
         # Set up FFmpeg conversion
-        print("\nStarting FFmpeg conversion...")
+        logger.info("\nStarting FFmpeg conversion...")
         stream = ffmpeg.input(input_path)
         stream = ffmpeg.output(stream, output_path, acodec="libmp3lame", ab="192k")
 
@@ -85,7 +85,7 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
 
         if process.returncode != 0:
             error_msg = f"FFmpeg conversion failed: {stderr.decode() if stderr else 'Unknown error'}"
-            print(f"Error: {error_msg}")
+            logger.error(f"Error: {error_msg}")
             raise MediaProcessingError(error_msg)
 
         # Verify the output file exists and has size > 0
@@ -100,17 +100,17 @@ async def convert_audio_file_to_mp3(input_path: str, job_id: str) -> str:
                 f"Output file is empty: file://{os.path.abspath(output_path)}"
             )
 
-        print(f"Successfully converted file to MP3")
-        print(f"Output file: file://{os.path.abspath(output_path)}")
-        print(f"Output file size: {output_size:,} bytes")
-        print(f"{'='*60}\n")
+        logger.info(f"Successfully converted file to MP3")
+        logger.info(f"Output file: file://{os.path.abspath(output_path)}")
+        logger.info(f"Output file size: {output_size:,} bytes")
+        logger.info(f"{'='*60}\n")
 
         return output_path
 
     except Exception as e:
         error_msg = f"Error converting audio file to MP3: {str(e)}"
-        print(f"Error: {error_msg}")
-        print(f"{'='*60}\n")
+        logger.error(f"Error: {error_msg}")
+        logger.error(f"{'='*60}\n")
         raise MediaProcessingError(error_msg)
 
 
@@ -144,11 +144,11 @@ async def split_audio_file(
     Raises:
         MediaProcessingError: If there's an error during processing or file operations
     """
-    print(f"\n{'='*20} Processing Audio File {'='*20}")
-    print(f"Job ID: {job_id}")
-    print(f"Original filename: {original_filename}")
-    print(f"Max chunk size: {max_chunk_size:,} bytes")
-    print(f"Input buffer size: {len(file_buffer):,} bytes")
+    logger.info(f"\n{'='*20} Processing Audio File {'='*20}")
+    logger.info(f"Job ID: {job_id}")
+    logger.info(f"Original filename: {original_filename}")
+    logger.info(f"Max chunk size: {max_chunk_size:,} bytes")
+    logger.info(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
     temp_files = []  # Track all temporary files with metadata (size, file_name, file_path)
@@ -173,12 +173,12 @@ async def split_audio_file(
         # Step 3: Convert to MP3 if needed
         working_path = input_path
         if not original_filename.lower().endswith(".mp3"):
-            print(f"\nStep 3: Converting to MP3 format")
+            logger.info(f"\nStep 3: Converting to MP3 format")
             converted_path = await convert_audio_file_to_mp3(input_path, job_id)
             working_path = converted_path
             temp_files.append(converted_path)
         else:
-            print(f"\nStep 3: File is already in MP3 format, skipping conversion")
+            logger.info(f"\nStep 3: File is already in MP3 format, skipping conversion")
 
         # Step 4: Get audio information
         print(f"\nStep 4: Analyzing audio file")
@@ -191,23 +191,23 @@ async def split_audio_file(
         print(f"File size: {file_size:,} bytes")
 
         # Log audio details
-        print(f"Audio details:")
-        print(f"- Format: {probe['format']['format_name']}")
+        logger.info(f"Audio details:")
+        logger.info(f"- Format: {probe['format']['format_name']}")
         for stream in probe["streams"]:
             if stream["codec_type"] == "audio":
-                print(f"- Codec: {stream.get('codec_name', 'unknown')}")
-                print(f"- Channels: {stream.get('channels', 'unknown')}")
-                print(f"- Sample rate: {stream.get('sample_rate', 'unknown')} Hz")
-                print(f"- Bit rate: {stream.get('bit_rate', 'unknown')} bps")
+                logger.info(f"- Codec: {stream.get('codec_name', 'unknown')}")
+                logger.info(f"- Channels: {stream.get('channels', 'unknown')}")
+                logger.info(f"- Sample rate: {stream.get('sample_rate', 'unknown')} Hz")
+                logger.info(f"- Bit rate: {stream.get('bit_rate', 'unknown')} bps")
 
         # Step 5: Calculate chunks
         num_chunks = (file_size + max_chunk_size - 1) // max_chunk_size
         chunk_duration = duration / num_chunks
-        print(f"\nStep 5: Splitting into {num_chunks} chunks")
-        print(f"Approximate chunk duration: {chunk_duration:.2f} seconds")
+        logger.info(f"\nStep 5: Splitting into {num_chunks} chunks")
+        logger.info(f"Approximate chunk duration: {chunk_duration:.2f} seconds")
 
         # Step 6: Process chunks
-        print(f"\nStep 6: Processing chunks")
+        logger.info(f"\nStep 6: Processing chunks")
         base_name = Path(original_filename).stem
         for i in range(num_chunks):
             chunk_file_name = f"{base_name}_chunk_{i:03d}.mp3"  # Zero-padded numbers
@@ -217,9 +217,9 @@ async def split_audio_file(
                 duration - start_time if i == num_chunks - 1 else chunk_duration
             )
 
-            print(f"\nProcessing chunk {i+1}/{num_chunks}")
-            print(f"Time range: {start_time:.2f}s to {start_time + duration_arg:.2f}s")
-            print(f"Output path: file://{os.path.abspath(chunk_path)}")
+            logger.info(f"\nProcessing chunk {i+1}/{num_chunks}")
+            logger.info(f"Time range: {start_time:.2f}s to {start_time + duration_arg:.2f}s")
+            logger.info(f"Output path: file://{os.path.abspath(chunk_path)}")
 
             # Extract chunk using ffmpeg
             stream = ffmpeg.input(working_path, ss=start_time, t=duration_arg)
@@ -233,59 +233,57 @@ async def split_audio_file(
 
             if process.returncode != 0:
                 error_msg = f"Error creating chunk {i}: {stderr.decode() if stderr else 'Unknown error'}"
-                print(f"Error: {error_msg}")
+                logger.error(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
             # Verify chunk size
             chunk_size = os.path.getsize(chunk_path)
             if chunk_size > max_chunk_size:
                 error_msg = f"Chunk {i} exceeds maximum size: {chunk_size:,} > {max_chunk_size:,}"
-                print(f"Error: {error_msg}")
+                logger.error(f"Error: {error_msg}")
                 raise MediaProcessingError(error_msg)
 
             # Track the chunk file path
             temp_files.append(chunk_path)
             
             # Log chunk processing
-            print(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
+            logger.info(f"Chunk {i+1}/{num_chunks} processed: {chunk_size:,} bytes")
 
         # Only count actual chunks, not the input/converted files
         num_chunks_processed = len([f for f in temp_files if '_chunk_' in f])
         
-        print(f"\nSuccessfully processed all {num_chunks_processed} chunks")
-        print(
-            f"Total data size: {sum(os.path.getsize(f) for f in temp_files if '_chunk_' in f):,} bytes"
-        )
-        print(f"Temporary files created: {len(temp_files)}")
+        logger.info(f"\nSuccessfully processed all {num_chunks_processed} chunks")
+        logger.info(f"Total data size: {sum(os.path.getsize(f) for f in temp_files if '_chunk_' in f):,} bytes")
+        logger.info(f"Temporary files created: {len(temp_files)}")
         for file in temp_files:
-            print(f"- file://{os.path.abspath(file)} ({os.path.getsize(file)} bytes)")
+            logger.info(f"- file://{os.path.abspath(file)} ({os.path.getsize(file)} bytes)")
 
         # Return only the chunk paths (filter out input/converted files)
         return [f for f in temp_files if '_chunk_' in f]
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
-        print(f"Error: {error_msg}")
+        logger.error(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
     except Exception as e:
         error_msg = f"Error processing {original_filename}: {str(e)}"
-        print(f"Error: {error_msg}")
+        logger.error(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
 
 
 # Stub methods for other file types
 async def process_text_file(file_buffer: bytes, filename: str) -> str:
-    print(f"Text file processing is not implemented yet: {filename}")
+    logger.warning(f"Text file processing is not implemented yet: {filename}")
     return ""
 
 
 async def process_image_file(file_buffer: bytes, filename: str) -> str:
-    print(f"Image file processing is not implemented yet: {filename}")
+    logger.warning(f"Image file processing is not implemented yet: {filename}")
     return ""
 
 
 async def process_video_file(file_buffer: bytes, filename: str) -> str:
-    print(f"Video file processing is not implemented yet: {filename}")
+    logger.warning(f"Video file processing is not implemented yet: {filename}")
     return ""
 
 
@@ -416,10 +414,10 @@ async def extract_audio_from_video_and_split(
     Raises:
         MediaProcessingError: If there's an error during processing or file operations
     """
-    print(f"\n{'='*20} Processing Video File {'='*20}")
-    print(f"Job ID: {job_id}")
-    print(f"Original filename: {original_filename}")
-    print(f"Input buffer size: {len(file_buffer):,} bytes")
+    logger.info(f"\n{'='*20} Processing Video File {'='*20}")
+    logger.info(f"Job ID: {job_id}")
+    logger.info(f"Original filename: {original_filename}")
+    logger.info(f"Input buffer size: {len(file_buffer):,} bytes")
 
     temp_dir = os.path.join(config.TEMP_DIR, job_id)
     temp_files = []  # Track all temporary files
@@ -442,21 +440,21 @@ async def extract_audio_from_video_and_split(
         temp_files.append(input_path)
 
         # Step 3: Validate video file
-        print(f"\nStep 3: Validating video file")
+        logger.info(f"\nStep 3: Validating video file")
         probe = ffmpeg.probe(input_path)
         _validate_video_file(probe, original_filename)
 
         # Log video details
         duration = float(probe["format"]["duration"])
-        print(f"Video details:")
-        print(f"Video file: file://{os.path.abspath(input_path)}")
-        print(f"- Duration: {duration:.2f} seconds")
-        print(f"- Format: {probe['format']['format_name']}")
+        logger.info(f"Video details:")
+        logger.info(f"Video file: file://{os.path.abspath(input_path)}")
+        logger.info(f"- Duration: {duration:.2f} seconds")
+        logger.info(f"- Format: {probe['format']['format_name']}")
         for stream in probe["streams"]:
             if stream["codec_type"] == "video":
-                print(f"- Video codec: {stream.get('codec_name', 'unknown')}")
+                logger.info(f"- Video codec: {stream.get('codec_name', 'unknown')}")
             elif stream["codec_type"] == "audio":
-                print(f"- Audio codec: {stream.get('codec_name', 'unknown')}")
+                logger.info(f"- Audio codec: {stream.get('codec_name', 'unknown')}")
 
         # Step 4: Extract audio track
         print(f"\nStep 4: Extracting audio track")
@@ -470,7 +468,7 @@ async def extract_audio_from_video_and_split(
             stream, audio_path, vn=None, acodec="libmp3lame", ab="192k"  # No video
         )
 
-        print("Starting FFmpeg audio extraction...")
+        logger.info("Starting FFmpeg audio extraction...")
         process = await asyncio.create_subprocess_exec(
             *stream.compile(),
             stdout=asyncio.subprocess.PIPE,
@@ -480,15 +478,15 @@ async def extract_audio_from_video_and_split(
 
         if process.returncode != 0:
             error_msg = f"FFmpeg audio extraction failed: {stderr.decode() if stderr else 'Unknown error'}"
-            print(f"Error: {error_msg}")
+            logger.error(f"Error: {error_msg}")
             raise MediaProcessingError(error_msg)
 
-        print(f"Successfully extracted audio to: file://{os.path.abspath(audio_path)}")
-        print(f"Audio file size: {os.path.getsize(audio_path):,} bytes")
+        logger.info(f"Successfully extracted audio to: file://{os.path.abspath(audio_path)}")
+        logger.info(f"Audio file size: {os.path.getsize(audio_path):,} bytes")
         temp_files.append(audio_path)
 
         # Step 5: Split audio into chunks
-        print(f"\nStep 5: Splitting audio into chunks")
+        logger.info(f"\nStep 5: Splitting audio into chunks")
         with open(audio_path, "rb") as f:
             audio_buffer = f.read()
 
@@ -498,18 +496,18 @@ async def extract_audio_from_video_and_split(
         )
         temp_files.extend(audio_chunks)  # Add chunk files to our list
 
-        print(f"\nAll processing complete")
-        print(f"Total temporary files: {len(temp_files)}")
+        logger.info(f"\nAll processing complete")
+        logger.info(f"Total temporary files: {len(temp_files)}")
         for file_path in temp_files:
-            print(f"- file://{os.path.abspath(file_path)}")
+            logger.info(f"- file://{os.path.abspath(file_path)}")
 
         return audio_chunks, temp_files
 
     except ffmpeg.Error as e:
         error_msg = f"FFmpeg error processing {original_filename}: {e.stderr.decode() if e.stderr else str(e)}"
-        print(f"Error: {error_msg}")
+        logger.error(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
     except Exception as e:
         error_msg = f"Error processing {original_filename}: {str(e)}"
-        print(f"Error: {error_msg}")
+        logger.error(f"Error: {error_msg}")
         raise MediaProcessingError(error_msg)
