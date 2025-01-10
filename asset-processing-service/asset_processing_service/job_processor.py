@@ -77,10 +77,21 @@ async def process_job(job: AssetProcessingJob) -> None:
 
             print("\nStage 1 (audio splitting) complete. Moving to next stages:")
             print("- Stage 2: Audio transcription")
-            print("- Stage 3: Text processing")
-            print("- Stage 4: Final processing")
-
-            # TODO: Pass audio_chunks to transcription stage
+            
+            # Stage 2: Audio transcription
+            print("\nStarting audio transcription...")
+            try:
+                transcription = await transcribe_audio_file(chunk_metadata)
+                print(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
+                print(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
+                
+                # Stage 3: Update asset content with transcription
+                print("\nUpdating asset content with transcription...")
+                await update_asset_content(asset.id, transcription)
+                
+                # Stage 4: Mark job as completed
+                print("\nMarking job as completed")
+                await update_job_details(job.id, status="completed")
             return  # Exit without updating status to completed
         elif asset.fileType == "video":
             print(f"Processing video file: {asset.fileName}")
@@ -101,13 +112,20 @@ async def process_job(job: AssetProcessingJob) -> None:
 
             print("\nStage 1 (audio extraction) complete. Moving to next stages:")
             
-            print("- Stage 2: Audio transcription")
-            
-            print("- Stage 3: Text processing")
-            
-            print("- Stage 4: Final processing")
-
-            # TODO: Pass audio_chunks to transcription stage
+            # Stage 2: Audio transcription
+            print("\nStarting audio transcription...")
+            try:
+                transcription = await transcribe_audio_file(chunk_metadata)
+                print(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
+                print(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
+                
+                # Stage 3: Update asset content with transcription
+                print("\nUpdating asset content with transcription...")
+                await update_asset_content(asset.id, transcription)
+                
+                # Stage 4: Mark job as completed
+                print("\nMarking job as completed")
+                await update_job_details(job.id, status="completed")
             return  # Exit without updating status to completed
         else:
             raise ValueError(f"Unsupported content type: {asset.fileType}")

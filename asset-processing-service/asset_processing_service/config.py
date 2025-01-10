@@ -24,6 +24,8 @@ class Config:
     MAX_CHUNK_SIZE_BYTES = int(
         os.getenv("MAX_CHUNK_SIZE_BYTES", str(25 * 1024 * 1024))
     )  # Default 25MB
+    MAX_TRANSCRIPTION_ATTEMPTS = int(os.getenv("MAX_TRANSCRIPTION_ATTEMPTS", "3"))
+    MAX_TRANSCRIPTION_CONCURRENCY = int(os.getenv("MAX_TRANSCRIPTION_CONCURRENCY", "3"))
 
     # Validate and set TEMP_DIR
     _temp_dir = os.getenv(

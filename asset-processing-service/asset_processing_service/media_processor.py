@@ -1,10 +1,24 @@
 import asyncio
 import os
+import logging
+import re
 import tempfile
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import ffmpeg
+from openai import OpenAI
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+# Initialize OpenAI client
+client = OpenAI()
 from asset_processing_service.config import config
 
 
@@ -281,6 +295,74 @@ def _validate_audio_file(probe_data: dict, filename: str) -> None:
     """
     if not any(stream["codec_type"] == "audio" for stream in probe_data["streams"]):
         raise MediaProcessingError(f"No audio stream found in file: {filename}")
+
+
+async def transcribe_audio_file(chunk_metadata: List[dict]) -> str:
+    """Transcribe audio chunks using OpenAI Whisper-1 model.
+    
+    Args:
+        chunk_metadata: List of dictionaries containing chunk metadata with:
+            - file_path: Path to the audio chunk file
+            - file_name: Name of the chunk file
+            - size: Size of the chunk in bytes
+            
+    Returns:
+        Combined transcription of all chunks as a single string
+        
+    Raises:
+        MediaProcessingError: If transcription fails after max attempts
+    """
+    logger.info("Starting audio transcription process")
+    logger.info(f"Processing {len(chunk_metadata)} audio chunks")
+    
+    # Function to clean and normalize text
+    def clean_text(text: str) -> str:
+        text = text.lower()
+        text = re.sub(r'[^\w\s]', '', text)  # Remove punctuation
+        text = re.sub(r'\s+', ' ', text)  # Normalize whitespace
+        return text.strip()
+    
+    # Function to transcribe a single chunk with retries
+    async def transcribe_chunk(chunk_path: str, attempts: int = 0) -> Optional[str]:
+        try:
+            with open(chunk_path, "rb") as audio_file:
+                logger.info(f"Transcribing chunk: {chunk_path}")
+                response = await asyncio.to_thread(
+                    client.audio.transcriptions.create,
+                    model=config.OPENAI_MODEL,
+                    file=audio_file
+                )
+                return clean_text(response.text)
+        except Exception as e:
+            if attempts < config.MAX_TRANSCRIPTION_ATTEMPTS:
+                logger.warning(f"Transcription attempt {attempts + 1} failed for {chunk_path}. Retrying...")
+                await asyncio.sleep(1)  # Brief delay before retry
+                return await transcribe_chunk(chunk_path, attempts + 1)
+            else:
+                logger.error(f"Failed to transcribe {chunk_path} after {config.MAX_TRANSCRIPTION_ATTEMPTS} attempts")
+                raise MediaProcessingError(f"Transcription failed for {chunk_path}: {str(e)}")
+    
+    # Process chunks with limited concurrency
+    semaphore = asyncio.Semaphore(config.MAX_TRANSCRIPTION_CONCURRENCY)
+    
+    async def limited_transcribe(chunk):
+        async with semaphore:
+            return await transcribe_chunk(chunk['file_path'])
+    
+    try:
+        # Create and run transcription tasks
+        tasks = [limited_transcribe(chunk) for chunk in chunk_metadata]
+        transcriptions = await asyncio.gather(*tasks)
+        
+        # Combine transcriptions in order
+        final_transcription = " ".join(transcriptions)
+        logger.info("Successfully completed audio transcription")
+        logger.debug(f"Final transcription: {final_transcription[:200]}...")  # Log first 200 chars
+        
+        return final_transcription
+    except Exception as e:
+        logger.error(f"Audio transcription failed: {str(e)}")
+        raise MediaProcessingError(f"Audio transcription failed: {str(e)}")
 
 
 def _validate_video_file(probe_data: dict, filename: str) -> None:
