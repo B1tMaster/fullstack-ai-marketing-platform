@@ -457,10 +457,10 @@ async def extract_audio_from_video_and_split(
                 logger.info(f"- Audio codec: {stream.get('codec_name', 'unknown')}")
 
         # Step 4: Extract audio track
-        print(f"\nStep 4: Extracting audio track")
+        logger.info(f"\nStep 4: Extracting audio track")
         base_name = Path(original_filename).stem
         audio_path = os.path.join(temp_dir, f"{base_name}.mp3")
-        print(f"Will extract audio to: file://{os.path.abspath(audio_path)}")
+        logger.info(f"Will extract audio to: file://{os.path.abspath(audio_path)}")
 
         # Extract audio using ffmpeg
         stream = ffmpeg.input(input_path)
