@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 import aiohttp
+import tiktoken
 from asset_processing_service.config import HEADERS, config
 from asset_processing_service.models import Asset, AssetProcessingJob
 
