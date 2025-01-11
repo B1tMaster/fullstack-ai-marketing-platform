@@ -56,14 +56,22 @@ def configure_logging() -> None:
     json_handler.setLevel(logging.DEBUG)
     class JsonFormatter(logging.Formatter):
         def format(self, record):
-            record.context = getattr(record, 'context', None)
-            return json.dumps({
+            # Safely get context or None if not present
+            context = getattr(record, 'context', None)
+            
+            # Build the log record dictionary
+            log_record = {
                 "timestamp": self.formatTime(record),
                 "logger": record.name,
                 "level": record.levelname,
-                "message": record.getMessage(),
-                "context": record.context
-            })
+                "message": record.getMessage()
+            }
+            
+            # Only add context if it exists
+            if context is not None:
+                log_record["context"] = context
+                
+            return json.dumps(log_record)
     
     json_formatter = JsonFormatter()
     json_handler.setFormatter(json_formatter)
