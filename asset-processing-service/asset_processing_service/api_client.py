@@ -1,13 +1,19 @@
-import logging
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import aiohttp
 import tiktoken
 from asset_processing_service.config import HEADERS, config
 from asset_processing_service.models import Asset, AssetProcessingJob
+from asset_processing_service.logging_config import (
+    get_logger,
+    log_error_with_context,
+    configure_logging
+)
 
-logger = logging.getLogger(__name__)
+# Configure logging on module import
+configure_logging()
+logger = get_logger(__name__)
 
 
 class ApiError(Exception):
@@ -19,20 +25,25 @@ class ApiError(Exception):
 
 async def fetch_jobs() -> list[AssetProcessingJob]:
     url = f"{config.API_BASE_URL.rstrip('/')}/asset-processing-job"
-    print(f"Fetching jobs from URL: {url}")
+    logger.debug(f"Fetching jobs from URL: {url}")
     try:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=HEADERS) as response:
                 if response.status == 200:
                     data = await response.json()
                     jobs = [AssetProcessingJob(**job) for job in data]
-                    print(f"Fetched {len(jobs)} jobs")
+                    logger.info(f"Successfully fetched {len(jobs)} jobs")
                     return jobs
                 else:
-                    print(f"Failed to fetch jobs: {response.status}")
+                    logger.warning(f"Failed to fetch jobs: HTTP {response.status}")
                     return []
     except Exception as e:
-        print(f"Exception fetching jobs: {e}")
+        log_error_with_context(
+            logger,
+            "Exception fetching jobs",
+            e,
+            {"url": url}
+        )
         return []
 
 
@@ -46,7 +57,7 @@ async def update_job_details(
 ) -> bool:
     base_url = config.API_BASE_URL.rstrip("/")
     url = f"{base_url}/asset-processing-job/{job_id}"
-    print(f"Updating job {job_id} at URL: {url}")
+    logger.debug(f"Updating job {job_id} at URL: {url}")
 
     update_data = {}
     if status is not None:
@@ -58,7 +69,7 @@ async def update_job_details(
     if last_heartbeat is not None:
         update_data["lastHeartBeat"] = last_heartbeat.isoformat()
 
-    print(f"Update data: {update_data}")
+    logger.debug(f"Update data: {update_data}")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -68,22 +79,31 @@ async def update_job_details(
                 response_text = await response.text()
 
                 if response.status == 200:
-                    print(f"Successfully updated job {job_id}")
+                    logger.info(f"Successfully updated job {job_id}")
                     return True
                 else:
-                    print(
-                        f"Failed to update job: Status {response.status}, "
-                        f"URL: {url}, Response: {response_text}"
+                    logger.error(
+                        "Failed to update job",
+                        extra={
+                            "status": response.status,
+                            "url": url,
+                            "response": response_text
+                        }
                     )
                     return False
     except Exception as e:
-        print(f"Exception updating job: {e}, URL: {url}")
+        log_error_with_context(
+            logger,
+            "Exception updating job",
+            e,
+            {"url": url, "job_id": job_id}
+        )
         return False
 
 
 async def update_job_heartbeat(job_id: str) -> bool:
     if not job_id:
-        print("Error: job_id cannot be empty")
+        logger.error("Job ID cannot be empty")
         return False
 
     base_url = config.API_BASE_URL.rstrip("/")
@@ -97,22 +117,27 @@ async def update_job_heartbeat(job_id: str) -> bool:
                 if response.status == 200:
                     return True
                 else:
-                    print(f"Failed to update heartbeat for job {job_id}")
+                    logger.warning(f"Failed to update heartbeat for job {job_id}")
                     return False
     except Exception as e:
-        print(f"Exception updating heartbeat: {e}")
+        log_error_with_context(
+            logger,
+            "Exception updating heartbeat",
+            e,
+            {"job_id": job_id}
+        )
         return False
 
 
 async def fetch_asset(asset_id: str) -> Optional[Asset]:
     if not asset_id:
-        print("Error: asset_id cannot be empty")
+        logger.error("Asset ID cannot be empty")
         return None
 
     base_url = config.API_BASE_URL.rstrip("/")
     url = f"{base_url}/asset/{asset_id}"
-    print(f"\nFetching asset from URL: {url}")
-    print(f"Using headers: {HEADERS}")
+    logger.debug(f"Fetching asset from URL: {url}")
+    logger.debug(f"Using headers: {HEADERS}")
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -120,15 +145,26 @@ async def fetch_asset(asset_id: str) -> Optional[Asset]:
                 print(f"Response status: {response.status}")
                 if response.status == 200:
                     data = await response.json()
-                    print(f"Response data: {data}")
+                    logger.debug(f"Response data: {data}")
                     return Asset(**data)
                 else:
                     response_text = await response.text()
-                    print(f"Failed to fetch asset: {response.status}")
-                    print(f"Response body: {response_text}")
+                    logger.error(
+                        "Failed to fetch asset",
+                        extra={
+                            "status": response.status,
+                            "response": response_text,
+                            "asset_id": asset_id
+                        }
+                    )
                     return None
     except Exception as e:
-        print(f"Exception fetching asset: {str(e)}")
+        log_error_with_context(
+            logger,
+            "Exception fetching asset",
+            e,
+            {"asset_id": asset_id, "url": url}
+        )
         return None
 
 
@@ -153,14 +189,12 @@ async def fetch_asset_file(file_url: str) -> bytes:
                 if response.status == 200:
                     return await response.read()
                 else:
-                    error_msg = (
-                        f"Failed to fetch file from {file_url}: {response.status}"
-                    )
-                    print(error_msg)
+                    error_msg = f"Failed to fetch file from {file_url}: {response.status}"
+                    logger.error(error_msg)
                     raise ApiError(error_msg, 500)
     except Exception as e:
         error_msg = f"Exception fetching file from {file_url}: {e}"
-        print(error_msg)
+        logger.error(error_msg)
         raise ApiError(error_msg, 500)
 
 
