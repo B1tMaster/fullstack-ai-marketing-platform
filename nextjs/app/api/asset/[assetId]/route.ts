@@ -6,10 +6,10 @@ import { HttpStatus } from "@/constants/http";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { assetId: string } }
+  { params }: { params: Promise<{ assetId: string }> }
 ) {
   try {
-    const assetId = params.assetId;
+    const { assetId } = await params;
     if (!assetId) {
       console.log("Missing required parameter: assetId");
       return NextResponse.json(
@@ -47,10 +47,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { assetId: string } }
+  { params }: { params: Promise<{ assetId: string }> }
 ) {
   try {
-    const assetId = params.assetId;
+    const { assetId } = await params;
     if (!assetId) {
       console.log("Missing required parameter: assetId");
       return NextResponse.json(
