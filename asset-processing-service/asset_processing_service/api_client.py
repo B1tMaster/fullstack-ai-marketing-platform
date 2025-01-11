@@ -11,9 +11,8 @@ from asset_processing_service.logging_config import (
     configure_logging
 )
 
-# Configure logging on module import
-configure_logging()
-logger = get_logger(__name__)
+# Get logger without configuring it (will use root logger config)
+logger = logging.getLogger(__name__)
 
 
 class ApiError(Exception):
