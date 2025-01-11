@@ -62,12 +62,19 @@ export async function PATCH(
     const updateData = await request.json();
     console.log(`Updating asset ${assetId} with data:`, updateData);
 
+    const updateFields: Record<string, any> = {
+      content: updateData.content,
+      updatedAt: new Date(),
+    };
+
+    // Add tokenCount if it exists in the update data
+    if (updateData.tokenCount !== undefined) {
+      updateFields.tokenCount = updateData.tokenCount;
+    }
+
     const updatedAsset = await db
       .update(assetTable)
-      .set({
-        content: updateData.content,
-        updatedAt: new Date(),
-      })
+      .set(updateFields)
       .where(eq(assetTable.id, assetId))
       .returning();
 
