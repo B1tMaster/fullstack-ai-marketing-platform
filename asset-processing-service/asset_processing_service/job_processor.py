@@ -301,4 +301,4 @@ async def heartbeat_updater(job_id: str):
         except asyncio.CancelledError:
             break
         except Exception as e:
-            print(f"Error updating heartbeat for job {job_id}: {e}")
+            logger.error(f"Error updating heartbeat for job {job_id}: {e}")

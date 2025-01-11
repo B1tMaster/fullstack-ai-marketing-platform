@@ -1,7 +1,10 @@
 import os
+import logging
 
 from asset_processing_service.constants.job_status import JobStatus
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -39,12 +42,12 @@ class Config:
         )
 
     TEMP_DIR = _temp_dir.rstrip("/")  # Remove any trailing slashes
-    print(f"Temporary directory configured: {TEMP_DIR}")
+    logger.info(f"Temporary directory configured: {TEMP_DIR}")
 
     # Create directory if it doesn't exist
     try:
         os.makedirs(TEMP_DIR, exist_ok=True)
-        print(f"Verified/created temporary directory: {TEMP_DIR}")
+        logger.info(f"Verified/created temporary directory: {TEMP_DIR}")
     except Exception as e:
         raise ValueError(
             f"Failed to create/verify temporary directory {TEMP_DIR}: {str(e)}"
