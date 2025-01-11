@@ -1,16 +1,16 @@
 import logging
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import aiohttp
 import tiktoken
 from asset_processing_service.config import HEADERS, config
-from asset_processing_service.models import Asset, AssetProcessingJob
 from asset_processing_service.logging_config import (
+    configure_logging,
     get_logger,
     log_error_with_context,
-    configure_logging
 )
+from asset_processing_service.models import Asset, AssetProcessingJob
 
 # Get logger without configuring it (will use root logger config)
 logger = logging.getLogger(__name__)
@@ -38,16 +38,10 @@ async def fetch_jobs() -> list[AssetProcessingJob]:
                     response_text = await response.text()
                     logger.warning(
                         f"Failed to fetch jobs from {url}: HTTP {response.status}. "
-                        f"Response: {response_text if response_text else 'No response body'}"
                     )
                     return []
     except Exception as e:
-        log_error_with_context(
-            logger,
-            "Exception fetching jobs",
-            e,
-            {"url": url}
-        )
+        log_error_with_context(logger, "Exception fetching jobs", e, {"url": url})
         return []
 
 
@@ -91,16 +85,13 @@ async def update_job_details(
                         extra={
                             "status": response.status,
                             "url": url,
-                            "response": response_text
-                        }
+                            "response": response_text,
+                        },
                     )
                     return False
     except Exception as e:
         log_error_with_context(
-            logger,
-            "Exception updating job",
-            e,
-            {"url": url, "job_id": job_id}
+            logger, "Exception updating job", e, {"url": url, "job_id": job_id}
         )
         return False
 
@@ -125,10 +116,7 @@ async def update_job_heartbeat(job_id: str) -> bool:
                     return False
     except Exception as e:
         log_error_with_context(
-            logger,
-            "Exception updating heartbeat",
-            e,
-            {"job_id": job_id}
+            logger, "Exception updating heartbeat", e, {"job_id": job_id}
         )
         return False
 
@@ -158,16 +146,13 @@ async def fetch_asset(asset_id: str) -> Optional[Asset]:
                         extra={
                             "status": response.status,
                             "response": response_text,
-                            "asset_id": asset_id
-                        }
+                            "asset_id": asset_id,
+                        },
                     )
                     return None
     except Exception as e:
         log_error_with_context(
-            logger,
-            "Exception fetching asset",
-            e,
-            {"asset_id": asset_id, "url": url}
+            logger, "Exception fetching asset", e, {"asset_id": asset_id, "url": url}
         )
         return None
 
@@ -193,7 +178,9 @@ async def fetch_asset_file(file_url: str) -> bytes:
                 if response.status == 200:
                     return await response.read()
                 else:
-                    error_msg = f"Failed to fetch file from {file_url}: {response.status}"
+                    error_msg = (
+                        f"Failed to fetch file from {file_url}: {response.status}"
+                    )
                     logger.error(error_msg)
                     raise ApiError(error_msg, 500)
     except Exception as e:
@@ -204,11 +191,11 @@ async def fetch_asset_file(file_url: str) -> bytes:
 
 async def update_asset_content(asset_id: str, content: str) -> bool:
     """Update asset content and token count in the database.
-    
+
     Args:
         asset_id: ID of the asset to update
         content: Content to update and tokenize
-        
+
     Returns:
         bool: True if update was successful, False otherwise
     """
@@ -222,17 +209,17 @@ async def update_asset_content(asset_id: str, content: str) -> bool:
 
     # Initialize token count
     token_count = 0
-    
+
     try:
         # Get encoding for GPT-4o
         encoding = tiktoken.encoding_for_model("gpt-4o")
         logger.debug(f"Successfully loaded encoding for GPT-4o")
-        
+
         # Encode content and calculate token count
         tokens = encoding.encode(content)
         token_count = len(tokens)
         logger.info(f"Calculated token count: {token_count} for asset {asset_id}")
-        
+
     except Exception as e:
         logger.error(f"Error calculating token count for asset {asset_id}: {str(e)}")
         # Continue with token_count = 0 if tokenization fails
@@ -252,15 +239,14 @@ async def update_asset_content(asset_id: str, content: str) -> bool:
             async with session.patch(
                 url,
                 headers=HEADERS,
-                json={
-                    "content": content,
-                    "tokenCount": token_count
-                }
+                json={"content": content, "tokenCount": token_count},
             ) as response:
                 logger.debug(f"Update response status: {response.status}")
-                
+
                 if response.status == 200:
-                    logger.info(f"Successfully updated content and token count for asset {asset_id}")
+                    logger.info(
+                        f"Successfully updated content and token count for asset {asset_id}"
+                    )
                     return True
                 else:
                     response_text = await response.text()

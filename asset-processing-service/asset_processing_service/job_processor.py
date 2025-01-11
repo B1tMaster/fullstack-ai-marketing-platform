@@ -1,11 +1,12 @@
 import asyncio
-import os
 import logging
+import os
+
 from asset_processing_service.config import config
 
 # Get logger without configuring it (will use root logger config)
 logger = logging.getLogger(__name__)
-logger.info(f"Logging level set to {logging.getLevelName(config.LOG_LEVEL)}")
+logger.info(f"Logging level set to {logging._levelName(config.LOG_LEVEL)}")
 
 from asset_processing_service.api_client import (
     fetch_asset,
@@ -32,7 +33,7 @@ async def process_job(job: AssetProcessingJob) -> None:
     heartbeat_task = asyncio.create_task(heartbeat_updater(job.id))
     temp_files = []  # Track all temporary files
     temp_dir = os.path.join(config.TEMP_DIR, job.id)
-    
+
     # Clean up any existing files from previous runs
     if os.path.exists(temp_dir):
         logger.info(f"Cleaning up existing temp directory: {temp_dir}")
@@ -82,7 +83,7 @@ async def process_job(job: AssetProcessingJob) -> None:
             await update_asset_content(asset.id, content)
             logger.info(f"\nMarking job {job.id} as completed")
             await update_job_details(job.id, status="completed")
-            
+
             # Clean up and cancel heartbeat before returning
             await cleanup_temp_files(temp_files, temp_dir)
             heartbeat_task.cancel()
@@ -101,7 +102,9 @@ async def process_job(job: AssetProcessingJob) -> None:
                 job.id,  # Pass the job ID for temp directory management
             )
             temp_files.extend(chunk_paths)  # Track temporary files
-            logger.info(f"\nSuccessfully split audio file into {len(chunk_paths)} chunks")
+            logger.info(
+                f"\nSuccessfully split audio file into {len(chunk_paths)} chunks"
+            )
             logger.info("\nAudio chunks ready for next stage (transcription):")
             for chunk_path in chunk_paths:
                 chunk_size = os.path.getsize(chunk_path)
@@ -109,7 +112,7 @@ async def process_job(job: AssetProcessingJob) -> None:
 
             logger.info("\nStage 1 (audio splitting) complete. Moving to next stages:")
             logger.info("- Stage 2: Audio transcription")
-            
+
             # Stage 2: Audio transcription
             logger.info("\nStarting audio transcription...")
             try:
@@ -118,26 +121,32 @@ async def process_job(job: AssetProcessingJob) -> None:
                     if not os.path.exists(chunk_path):
                         logger.error(f"Chunk file missing: {chunk_path}")
                         raise FileNotFoundError(f"Chunk file missing: {chunk_path}")
-                    logger.info(f"Chunk file exists: {chunk_path} ({os.path.getsize(chunk_path)} bytes)")
-                
+                    logger.info(
+                        f"Chunk file exists: {chunk_path} ({os.path.getsize(chunk_path)} bytes)"
+                    )
+
                 transcription = await transcribe_audio_file(chunk_paths)
                 if not transcription:
                     logger.error("Transcription returned empty result")
                     raise ValueError("Transcription returned empty result")
-                logger.info(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
-                logger.debug(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
-                
+                logger.info(
+                    f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters"
+                )
+                logger.debug(
+                    f"Sample transcription: {transcription[:200]}..."
+                )  # Show first 200 chars
+
                 # Stage 3: Update asset content with transcription
                 logger.info("\nUpdating asset content with transcription...")
                 await update_asset_content(asset.id, transcription)
-                
+
                 # Stage 4: Mark job as completed
                 logger.info("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
-                
+
                 # Clean up temporary files
                 await cleanup_temp_files(temp_files, temp_dir)
-                
+
                 # Cancel heartbeat
                 heartbeat_task.cancel()
                 try:
@@ -158,31 +167,39 @@ async def process_job(job: AssetProcessingJob) -> None:
                 job.id,  # Pass the job ID for temp directory management
             )
             temp_files.extend(video_temp_files)  # Track temporary files
-            logger.info(f"\nSuccessfully extracted and split audio into {len(chunk_paths)} chunks")
+            logger.info(
+                f"\nSuccessfully extracted and split audio into {len(chunk_paths)} chunks"
+            )
             logger.info("\nAudio chunks ready for next stage (transcription):")
             for chunk_path in chunk_paths:
-                logger.info(f"- {os.path.basename(chunk_path)} ({os.path.getsize(chunk_path)} bytes)")
+                logger.info(
+                    f"- {os.path.basename(chunk_path)} ({os.path.getsize(chunk_path)} bytes)"
+                )
 
             logger.info("\nStage 1 (audio extraction) complete. Moving to next stages:")
-            
+
             # Stage 2: Audio transcription
             logger.info("\nStarting audio transcription...")
             try:
                 transcription = await transcribe_audio_file(chunk_paths)
-                logger.info(f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters")
-                logger.debug(f"Sample transcription: {transcription[:200]}...")  # Show first 200 chars
-                
+                logger.info(
+                    f"\nSuccessfully transcribed audio. Transcription length: {len(transcription)} characters"
+                )
+                logger.debug(
+                    f"Sample transcription: {transcription[:200]}..."
+                )  # Show first 200 chars
+
                 # Stage 3: Update asset content with transcription
                 logger.info("\nUpdating asset content with transcription...")
                 await update_asset_content(asset.id, transcription)
-                
+
                 # Stage 4: Mark job as completed
                 logger.info("\nMarking job as completed")
                 await update_job_details(job.id, status="completed")
-                
+
                 # Clean up temporary files
                 await cleanup_temp_files(temp_files, temp_dir)
-                
+
                 # Cancel heartbeat
                 heartbeat_task.cancel()
                 try:
@@ -198,14 +215,14 @@ async def process_job(job: AssetProcessingJob) -> None:
 
         # Clean up all temporary files after successful completion
         await cleanup_temp_files(temp_files, temp_dir)
-        
+
         # Cancel heartbeat updater
         heartbeat_task.cancel()
         try:
             await heartbeat_task
         except asyncio.CancelledError:
             logger.info("Heartbeat task cancelled successfully")
-            
+
         # Ensure we return after cleanup
         return
 
@@ -220,7 +237,9 @@ async def process_job(job: AssetProcessingJob) -> None:
                 await cleanup_temp_files(temp_files, temp_dir)
                 logger.info(f"Job exceeded max attempts, cleaning up temp files")
             else:
-                logger.info(f"Job failed but under max attempts, keeping temp files for retry")
+                logger.info(
+                    f"Job failed but under max attempts, keeping temp files for retry"
+                )
 
         heartbeat_task.cancel()
         try:
@@ -231,7 +250,7 @@ async def process_job(job: AssetProcessingJob) -> None:
 
 async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
     """Clean up temporary files and directory.
-    
+
     Args:
         temp_files: List of temporary file paths to remove
         temp_dir: Temporary directory path to remove if empty
@@ -239,11 +258,11 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
     logger.info(f"\nStarting cleanup of temporary files and directory")
     logger.info(f"Temp directory: file://{os.path.abspath(temp_dir)}")
     logger.info(f"Number of files to clean up: {len(temp_files)}")
-    
+
     # Track cleanup results
     files_removed = 0
     files_failed = 0
-    
+
     if temp_files:
         logger.info("\nCleaning up temporary files")
         for file_path in temp_files:
@@ -264,21 +283,27 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
         try:
             # Verify we're only removing subdirectories of the main TEMP_DIR
             if not temp_dir.startswith(config.TEMP_DIR + os.sep):
-                logger.error(f"Safety check failed: temp_dir {temp_dir} is not under main TEMP_DIR {config.TEMP_DIR}")
+                logger.error(
+                    f"Safety check failed: temp_dir {temp_dir} is not under main TEMP_DIR {config.TEMP_DIR}"
+                )
                 return
-                
+
             dir_contents = os.listdir(temp_dir)
             if not dir_contents:
-                logger.info(f"Removing empty job temp directory: file://{os.path.abspath(temp_dir)}")
+                logger.info(
+                    f"Removing empty job temp directory: file://{os.path.abspath(temp_dir)}"
+                )
                 os.rmdir(temp_dir)
                 logger.info(f"Successfully removed job temp directory: {temp_dir}")
             else:
-                logger.warning(f"Job temp directory not empty ({len(dir_contents)} items remaining): {temp_dir}")
+                logger.warning(
+                    f"Job temp directory not empty ({len(dir_contents)} items remaining): {temp_dir}"
+                )
                 for item in dir_contents:
                     logger.warning(f"- Remaining item: {item}")
         except Exception as e:
             logger.error(f"Error removing job temp directory {temp_dir}: {str(e)}")
-    
+
     # Log final cleanup results
     logger.info(f"\nCleanup completed:")
     logger.info(f"- Files successfully removed: {files_removed}")
@@ -287,10 +312,13 @@ async def cleanup_temp_files(temp_files: list, temp_dir: str) -> None:
         logger.warning(f"Job temp directory still exists: {temp_dir}")
     else:
         logger.info(f"Job temp directory successfully removed")
-        
+
     # Always preserve the main TEMP_DIR
     if not os.path.exists(config.TEMP_DIR):
-        logger.error(f"Main TEMP_DIR {config.TEMP_DIR} is missing! This should never happen")
+        logger.error(
+            f"Main TEMP_DIR {config.TEMP_DIR} is missing! This should never happen"
+        )
+
 
 async def heartbeat_updater(job_id: str):
     while True:
