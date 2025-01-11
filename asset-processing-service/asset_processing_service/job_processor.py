@@ -217,11 +217,13 @@ async def process_job(job: AssetProcessingJob) -> None:
         await update_job_details(job.id, status="failed", error_message=str(e))
         raise  # Re-raise to trigger outer finally
     finally:
-        # Cleanup logic moved here to ensure it runs in all cases
-        if job.attempts and job.attempts >= config.MAX_JOB_ATTEMPTS:
-            await cleanup_temp_files(temp_files, temp_dir)
-        else:
-            logger.info(f"Job failed but under max attempts, keeping temp files for retry")
+        # Only run cleanup and log messages if the job actually failed
+        if job.status != "completed":
+            if job.attempts and job.attempts >= config.MAX_JOB_ATTEMPTS:
+                await cleanup_temp_files(temp_files, temp_dir)
+                logger.info(f"Job exceeded max attempts, cleaning up temp files")
+            else:
+                logger.info(f"Job failed but under max attempts, keeping temp files for retry")
 
         heartbeat_task.cancel()
         try:
