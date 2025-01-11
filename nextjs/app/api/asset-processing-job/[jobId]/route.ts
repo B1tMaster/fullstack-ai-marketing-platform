@@ -6,10 +6,10 @@ import { HttpStatus } from "@/constants/http";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { jobId: string } }
+  { params }: { params: Promise<{ jobId: string }> }
 ) {
   try {
-    const jobId = params.jobId;
+    const { jobId } = await params;
     console.log(`Updating job ${jobId}`);
 
     const updateData = await request.json();
