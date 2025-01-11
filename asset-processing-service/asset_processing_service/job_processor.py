@@ -4,11 +4,12 @@ import logging
 
 # Configure logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(config.LOG_LEVEL)
 handler = logging.StreamHandler()
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+logger.info(f"Logging level set to {config.LOG_LEVEL}")
 
 from asset_processing_service.api_client import (
     fetch_asset,

@@ -44,6 +44,16 @@ class Config:
     TEMP_DIR = _temp_dir.rstrip("/")  # Remove any trailing slashes
     logger.info(f"Temporary directory configured: {TEMP_DIR}")
 
+    # Configure logging level
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if LOG_LEVEL not in valid_levels:
+        logger.warning(
+            f"Invalid LOG_LEVEL '{LOG_LEVEL}' configured. "
+            f"Must be one of {valid_levels}. Defaulting to INFO."
+        )
+        LOG_LEVEL = "INFO"
+
     # Create directory if it doesn't exist
     try:
         os.makedirs(TEMP_DIR, exist_ok=True)
