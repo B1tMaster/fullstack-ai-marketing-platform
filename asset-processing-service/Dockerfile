@@ -19,13 +19,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy dependency files first for caching
-COPY pyproject.toml poetry.lock* /app/
+COPY pyproject.toml poetry.lock* README.md /app/
 
-# Install dependencies
-RUN poetry install  --no-interaction --no-ansi
+# Install dependencies (without package)                                                                                                    
+RUN poetry install --no-root --no-interaction --no-ansi   
+
 
 # Copy the rest of the application code
 COPY . /app/
+
+# Install only the package (with entry points) without dependencies                                                                         
+RUN poetry install --only-root --no-interaction --no-ansi  
 
 # Run the application
 CMD ["poetry", "run", "asset-processing-service"]
