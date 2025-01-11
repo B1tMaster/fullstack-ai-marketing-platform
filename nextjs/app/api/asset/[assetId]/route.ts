@@ -86,7 +86,13 @@ export async function PATCH(
     }
 
     // Build update fields with only provided values
-    const updateFields: Record<string, any> = {
+    interface UpdateFields {
+      updatedAt: Date;
+      content?: string;
+      tokenCount?: number;
+    }
+
+    const updateFields: UpdateFields = {
       updatedAt: new Date(),
     };
 
