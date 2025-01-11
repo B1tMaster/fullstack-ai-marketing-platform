@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Optional
 
@@ -5,6 +6,8 @@ import aiohttp
 import tiktoken
 from asset_processing_service.config import HEADERS, config
 from asset_processing_service.models import Asset, AssetProcessingJob
+
+logger = logging.getLogger(__name__)
 
 
 class ApiError(Exception):
@@ -162,28 +165,72 @@ async def fetch_asset_file(file_url: str) -> bytes:
 
 
 async def update_asset_content(asset_id: str, content: str) -> bool:
+    """Update asset content and token count in the database.
+    
+    Args:
+        asset_id: ID of the asset to update
+        content: Content to update and tokenize
+        
+    Returns:
+        bool: True if update was successful, False otherwise
+    """
     if not asset_id:
-        print("Error: asset_id cannot be empty")
+        logger.error("Asset ID cannot be empty")
         return False
+
+    if not content:
+        logger.warning(f"Empty content provided for asset {asset_id}")
+        content = ""
+
+    # Initialize token count
+    token_count = 0
+    
+    try:
+        # Get encoding for GPT-4o
+        encoding = tiktoken.encoding_for_model("gpt-4o")
+        logger.debug(f"Successfully loaded encoding for GPT-4o")
+        
+        # Encode content and calculate token count
+        tokens = encoding.encode(content)
+        token_count = len(tokens)
+        logger.info(f"Calculated token count: {token_count} for asset {asset_id}")
+        
+    except Exception as e:
+        logger.error(f"Error calculating token count for asset {asset_id}: {str(e)}")
+        # Continue with token_count = 0 if tokenization fails
+        token_count = 0
+
+    # Validate token count
+    if not isinstance(token_count, int) or token_count < 0:
+        logger.error(f"Invalid token count {token_count} for asset {asset_id}")
+        token_count = 0
 
     base_url = config.API_BASE_URL.rstrip("/")
     url = f"{base_url}/asset/{asset_id}"
-    print(f"\nUpdating asset content at URL: {url}")
+    logger.debug(f"Updating asset content at URL: {url}")
 
     try:
         async with aiohttp.ClientSession() as session:
             async with session.patch(
-                url, headers=HEADERS, json={"content": content}
+                url,
+                headers=HEADERS,
+                json={
+                    "content": content,
+                    "tokenCount": token_count
+                }
             ) as response:
-                print(f"Update response status: {response.status}")
+                logger.debug(f"Update response status: {response.status}")
+                
                 if response.status == 200:
-                    print(f"Successfully updated content for asset {asset_id}")
+                    logger.info(f"Successfully updated content and token count for asset {asset_id}")
                     return True
                 else:
                     response_text = await response.text()
-                    print(f"Failed to update asset content: {response.status}")
-                    print(f"Response body: {response_text}")
+                    logger.error(
+                        f"Failed to update asset content: Status {response.status}, "
+                        f"Response: {response_text}"
+                    )
                     return False
     except Exception as e:
-        print(f"Exception updating asset content: {str(e)}")
+        logger.error(f"Exception updating asset content: {str(e)}")
         return False
