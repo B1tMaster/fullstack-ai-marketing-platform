@@ -1,3 +1,47 @@
-.aider*
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment files
 .env
+.env.local
+.env.development
+.env.production
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+venv/
+.venv/
+env/
+*.egg-info/
+
+# Node.js/Next.js
+node_modules/
+.next/
+out/
+.cache/
+
+# Logs
 logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Aider
+.aider*
+
+# Coverage
+.coverage
+htmlcov/
+
+# Local development
+*.local
+*.dev
+*.test
