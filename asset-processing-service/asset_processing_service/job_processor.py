@@ -1,6 +1,7 @@
 import asyncio
 import os
 import logging
+from asset_processing_service.config import config
 
 # Configure logging
 logger = logging.getLogger(__name__)
