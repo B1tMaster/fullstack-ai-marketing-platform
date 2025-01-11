@@ -3,6 +3,7 @@ import { assetTable } from "@/server/db/schema";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { HttpStatus } from "@/constants/http";
+import { z } from "zod";
 
 export async function GET(
   request: NextRequest,
@@ -59,17 +60,40 @@ export async function PATCH(
       );
     }
 
+    // Define strict schema for update data
+    const updateSchema = z.object({
+      content: z.string(),
+      tokenCount: z.number().int().nonnegative()
+    });
+
     const updateData = await request.json();
     console.log(`Updating asset ${assetId} with data:`, updateData);
 
+    // Validate input data
+    const validationResult = updateSchema.safeParse(updateData);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error);
+      return NextResponse.json(
+        { 
+          error: "Invalid update data",
+          details: validationResult.error.errors 
+        },
+        { status: HttpStatus.BAD_REQUEST }
+      );
+    }
+
+    // Handle missing fields with defaults and warnings
     const updateFields: Record<string, any> = {
-      content: updateData.content,
+      content: updateData.content || "",
+      tokenCount: updateData.tokenCount || 0,
       updatedAt: new Date(),
     };
 
-    // Add tokenCount if it exists in the update data
-    if (updateData.tokenCount !== undefined) {
-      updateFields.tokenCount = updateData.tokenCount;
+    if (!updateData.content) {
+      console.warn(`Missing content field in update for asset ${assetId}, using default`);
+    }
+    if (!updateData.tokenCount) {
+      console.warn(`Missing tokenCount field in update for asset ${assetId}, using default`);
     }
 
     const updatedAsset = await db
