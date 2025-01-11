@@ -60,10 +60,13 @@ export async function PATCH(
       );
     }
 
-    // Define strict schema for update data
+    // Define schema with optional fields but strict validation rules
     const updateSchema = z.object({
-      content: z.string(),
-      tokenCount: z.number().int().nonnegative()
+      content: z.string().optional(),
+      tokenCount: z.number().int().nonnegative().optional()
+    }).refine(data => data.content !== undefined || data.tokenCount !== undefined, {
+      message: "At least one field must be provided for update",
+      path: ["content", "tokenCount"]
     });
 
     const updateData = await request.json();
@@ -82,18 +85,21 @@ export async function PATCH(
       );
     }
 
-    // Handle missing fields with defaults and warnings
+    // Build update fields with only provided values
     const updateFields: Record<string, any> = {
-      content: updateData.content || "",
-      tokenCount: updateData.tokenCount || 0,
       updatedAt: new Date(),
     };
 
-    if (!updateData.content) {
-      console.warn(`Missing content field in update for asset ${assetId}, using default`);
+    if (updateData.content !== undefined) {
+      updateFields.content = updateData.content;
+    } else {
+      console.warn(`Content not provided in update for asset ${assetId}, keeping existing value`);
     }
-    if (!updateData.tokenCount) {
-      console.warn(`Missing tokenCount field in update for asset ${assetId}, using default`);
+
+    if (updateData.tokenCount !== undefined) {
+      updateFields.tokenCount = updateData.tokenCount;
+    } else {
+      console.warn(`Token count not provided in update for asset ${assetId}, keeping existing value`);
     }
 
     const updatedAsset = await db
