@@ -1,35 +1,23 @@
 
+UPDATE  function update_asset_content inside api_client.py to pass token_count to a PATCH request made inside update_asset_content function. 
 
-We will add a new functionality in the media_processor.py file
-
-1.
-CREATE transcribe_audio_file function in media_processor.py to  transcribe an mp3 file using openai whisper-1 model. 
-the function will take as input chunk_metadata list of dictionaries and asynconously and conncurrently initiate calls to openAI whisper-1 model 
-it will then combine the transcription of the audio files in the proper order and return the transcription of the audio file as a string .
-
-we want to write code that will do the transcription of the chunks of audio in parallel and asynchronously. 
-we also need to make sure we preserve order when we re-assemble the chunks of text into the original text after the transcription is complete. 
+We will USE ticktoken to encode the content : str passed in as parameter to tokens using the tiktoken library as illustated below: 
 
 
-USE  OPENAI_API_KEY from .env file as api key to connect to all open ai API requests.  
-use installed  openai library listed in pyproject.toml  
-OpenAI libray API documentation: https://platform.openai.com/docs/guides/speech-to-text
+# To get the tokeniser corresponding to a specific model in the OpenAI API:
+encoding = tiktoken.encoding_for_model("gpt-4o")
 
-Sample code to transcribe audio file: 
-    from openai import OpenAI
-    client = OpenAI()
+# To encode a string:
+tokens = encoding.encode(content)
 
-    audio_file= open("/path/to/file/audio.mp3", "rb")
-    transcription = client.audio.transcriptions.create(
-        model="whisper-1", 
-        file=audio_file
-    )
+token_count = len(tokens)
 
-    print(transcription.text)
+UPDATE the json to include =`{"content": content , "token_count": token_count} 
 
-2. add code to use transcribe_audio_file function as a next step in the job_processor.py  stage 2 : Stage 2: Audio transcription for video and audio files.
+and pass it to the PATCH request inside update_asset_content function. 
 
-3. makes sure to create log messages to the console to indicate the start and end of the transcription process and any errors that occur during the transcription process. 
+UPDATE any other code required to make sure token_count gets updated in the asset table defined in "schema.ts" file 
 
-4. print the final transcription to the console as a string.  
+
+
 
