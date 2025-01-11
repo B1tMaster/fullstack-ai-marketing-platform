@@ -35,7 +35,11 @@ async def fetch_jobs() -> list[AssetProcessingJob]:
                     logger.info(f"Successfully fetched {len(jobs)} jobs")
                     return jobs
                 else:
-                    logger.warning(f"Failed to fetch jobs: HTTP {response.status}")
+                    response_text = await response.text()
+                    logger.warning(
+                        f"Failed to fetch jobs from {url}: HTTP {response.status}. "
+                        f"Response: {response_text if response_text else 'No response body'}"
+                    )
                     return []
     except Exception as e:
         log_error_with_context(
