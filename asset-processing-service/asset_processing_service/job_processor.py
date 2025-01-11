@@ -6,7 +6,7 @@ from asset_processing_service.config import config
 
 # Get logger without configuring it (will use root logger config)
 logger = logging.getLogger(__name__)
-logger.info(f"Logging level set to {logging._levelToName(config.LOG_LEVEL)}")
+logger.info(f"Logging level set to {logging.getLevelName(config.LOG_LEVEL)}")
 
 from asset_processing_service.api_client import (
     fetch_asset,
