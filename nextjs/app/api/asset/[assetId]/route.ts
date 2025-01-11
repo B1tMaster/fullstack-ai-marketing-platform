@@ -60,14 +60,19 @@ export async function PATCH(
       );
     }
 
-    // Define schema with optional fields but strict validation rules
-    const updateSchema = z.object({
-      content: z.string().optional(),
-      tokenCount: z.number().int().nonnegative().optional()
-    }).refine(data => data.content !== undefined || data.tokenCount !== undefined, {
-      message: "At least one field must be provided for update",
-      path: ["content", "tokenCount"]
-    });
+    // Define schema with optional fields but strict validation rules.
+    const updateSchema = z
+      .object({
+        content: z.string().optional(),
+        tokenCount: z.number().int().nonnegative().optional(),
+      })
+      .refine(
+        (data) => data.content !== undefined || data.tokenCount !== undefined,
+        {
+          message: "At least one field must be provided for update",
+          path: ["content", "tokenCount"],
+        }
+      );
 
     const updateData = await request.json();
     console.log(`Updating asset ${assetId} with data:`, updateData);
@@ -77,9 +82,9 @@ export async function PATCH(
     if (!validationResult.success) {
       console.error("Validation failed:", validationResult.error);
       return NextResponse.json(
-        { 
+        {
           error: "Invalid update data",
-          details: validationResult.error.errors 
+          details: validationResult.error.errors,
         },
         { status: HttpStatus.BAD_REQUEST }
       );
@@ -99,13 +104,17 @@ export async function PATCH(
     if (updateData.content !== undefined) {
       updateFields.content = updateData.content;
     } else {
-      console.warn(`Content not provided in update for asset ${assetId}, keeping existing value`);
+      console.warn(
+        `Content not provided in update for asset ${assetId}, keeping existing value`
+      );
     }
 
     if (updateData.tokenCount !== undefined) {
       updateFields.tokenCount = updateData.tokenCount;
     } else {
-      console.warn(`Token count not provided in update for asset ${assetId}, keeping existing value`);
+      console.warn(
+        `Token count not provided in update for asset ${assetId}, keeping existing value`
+      );
     }
 
     const updatedAsset = await db
@@ -132,3 +141,5 @@ export async function PATCH(
     );
   }
 }
+
+//test precommit hook husky
