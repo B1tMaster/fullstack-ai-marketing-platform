@@ -14,10 +14,10 @@ LOGS_DIR.mkdir(exist_ok=True)
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 JSON_LOG_FORMAT = {
     "timestamp": "%(asctime)s",
-    "logger": "%(name)s",
+    "logger": "%(name)s", 
     "level": "%(levelname)s",
     "message": "%(message)s",
-    "context": "%(context)s" if hasattr(record, 'context') else None
+    "context": "%(context)s"
 }
 
 def configure_logging() -> None:
