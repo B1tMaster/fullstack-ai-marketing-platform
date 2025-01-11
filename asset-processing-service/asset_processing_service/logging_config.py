@@ -17,7 +17,7 @@ JSON_LOG_FORMAT = {
     "logger": "%(name)s",
     "level": "%(levelname)s",
     "message": "%(message)s",
-    "context": "%(context)s"
+    "context": "%(context)s" if hasattr(record, 'context') else None
 }
 
 def configure_logging() -> None:
@@ -54,7 +54,18 @@ def configure_logging() -> None:
         backupCount=5
     )
     json_handler.setLevel(logging.DEBUG)
-    json_formatter = logging.Formatter(json.dumps(JSON_LOG_FORMAT))
+    class JsonFormatter(logging.Formatter):
+        def format(self, record):
+            record.context = getattr(record, 'context', None)
+            return json.dumps({
+                "timestamp": self.formatTime(record),
+                "logger": record.name,
+                "level": record.levelname,
+                "message": record.getMessage(),
+                "context": record.context
+            })
+    
+    json_formatter = JsonFormatter()
     json_handler.setFormatter(json_formatter)
     root_logger.addHandler(json_handler)
 
