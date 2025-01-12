@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 from asset_processing_service.constants.job_status import JobStatus
 from dotenv import load_dotenv
@@ -18,7 +18,7 @@ def get_required_env_var(var_name: str) -> str:
 
 class Config:
     SERVER_API_KEY = get_required_env_var("SERVER_API_KEY")
-    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000")
+    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000/api")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "whisper-1")
     STUCK_JOB_THRESHOLD_SECONDS = int(os.getenv("STUCK_JOB_THRESHOLD_SECONDS", "30"))
     MAX_JOB_ATTEMPTS = int(os.getenv("MAX_JOB_ATTEMPTS", "3"))
@@ -51,7 +51,7 @@ class Config:
         "INFO": logging.INFO,
         "WARNING": logging.WARNING,
         "ERROR": logging.ERROR,
-        "CRITICAL": logging.CRITICAL
+        "CRITICAL": logging.CRITICAL,
     }
     if LOG_LEVEL_STR not in valid_levels:
         logger.warning(
