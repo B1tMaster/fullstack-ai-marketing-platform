@@ -1,15 +1,12 @@
 import asyncio
 from collections import defaultdict
 from datetime import datetime
-import logging
+from asset_processing_service.logging_config import configure_logging
+from asset_processing_service.config import config
 
-# Configure logging
+# Configure logging using centralized configuration
+configure_logging(config.LOG_LEVEL)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 from asset_processing_service.api_client import fetch_jobs, update_job_details
 from asset_processing_service.config import config

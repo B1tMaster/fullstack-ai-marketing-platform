@@ -45,7 +45,7 @@ class Config:
     logger.info(f"Temporary directory configured: {TEMP_DIR}")
 
     # Configure logging level
-    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+    LOG_LEVEL_STR = os.getenv("LOG_LEVEL", "INFO").upper()
     valid_levels = {
         "DEBUG": logging.DEBUG,
         "INFO": logging.INFO,
@@ -53,14 +53,14 @@ class Config:
         "ERROR": logging.ERROR,
         "CRITICAL": logging.CRITICAL
     }
-    if LOG_LEVEL not in valid_levels:
+    if LOG_LEVEL_STR not in valid_levels:
         logger.warning(
-            f"Invalid LOG_LEVEL '{LOG_LEVEL}' configured. "
+            f"Invalid LOG_LEVEL '{LOG_LEVEL_STR}' configured. "
             f"Must be one of {list(valid_levels.keys())}. Defaulting to INFO."
         )
-        LOG_LEVEL = "INFO"
+        LOG_LEVEL = logging.INFO
     else:
-        LOG_LEVEL = valid_levels[LOG_LEVEL]
+        LOG_LEVEL = valid_levels[LOG_LEVEL_STR]
 
     # Create directory if it doesn't exist
     try:
