@@ -1,6 +1,7 @@
 import asyncio
 from collections import defaultdict
 from datetime import datetime
+import logging
 from asset_processing_service.logging_config import configure_logging
 from asset_processing_service.config import config
 
