@@ -47,7 +47,7 @@ function PromptContainerCard({
                     : "text-gray-500"
                 )}
               >
-                {formatFileTokens(prompt.tokenCount)} tokens
+                Tokens: {formatFileTokens(prompt.tokenCount)}
                 {prompt.tokenCount > MAX_TOKENS_PROMPT && " (Exceeded)"}
               </p>
             </>
