@@ -7,7 +7,7 @@ import PromptsList from "./PromptsList";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Prompt } from "@/server/db/schema";
-import { initializeTokenEncoder } from "@/utils/tokenHelper";
+import { initializeTokenEncoder, freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
 
 interface ConfigurePromptsStepProps {
