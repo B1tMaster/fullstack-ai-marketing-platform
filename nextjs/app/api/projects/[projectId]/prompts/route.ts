@@ -25,15 +25,11 @@ export async function GET(
     }
 
     const projectId = (await params).projectId;
-    
+
     const prompts = await db
       .select()
       .from(promptsTable)
-      .where(
-        and(
-          eq(promptsTable.projectId, projectId)
-        )
-      )
+      .where(and(eq(promptsTable.projectId, projectId)))
       .orderBy(promptsTable.order);
 
     return NextResponse.json(prompts);
@@ -58,7 +54,7 @@ export async function DELETE(
 
     const { projectId } = params;
     const { promptId } = await request.json();
-    
+
     if (!promptId) {
       return NextResponse.json(
         { error: "promptId is required" },
