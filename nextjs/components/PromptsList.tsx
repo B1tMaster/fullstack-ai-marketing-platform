@@ -30,7 +30,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
 
     setIsDeleting(true);
     try {
-      await axios.delete(`/api/projects/${projectId}/prompts/${promptToDelete}`);
+      await axios.delete(`/api/projects/${projectId}/prompts/${promptToDelete}/route`);
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");
     } catch (error) {
