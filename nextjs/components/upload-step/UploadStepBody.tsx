@@ -27,10 +27,16 @@ function UploadStepBody({
   const [formattedPercentage, setFormattedPercentage] = useState(0);
 
   useEffect(() => {
-    const calculatedTotalTokens = uploadAssets.reduce(
-      (sum, file) => sum + (file.tokenCount || 0),
-      0
-    );
+    const calculateTokens = async () => {
+      await initializeTokenEncoder();
+      const calculatedTotalTokens = uploadAssets.reduce(
+        (sum, file) => sum + (file.tokenCount || 0),
+        0
+      );
+      // ... rest of the effect
+    };
+    
+    calculateTokens();
 
     const calculatedUsagePercentage = Math.min(
       (calculatedTotalTokens / MAX_TOKENS_ASSETS) * 100,

@@ -101,9 +101,11 @@ export async function PATCH(
       );
     }
 
-    // Calculate token count using same logic as UploadStepBody
-    const wordCount = newPrompt.split(/\s+/).length;
-    const tokenCount = Math.ceil(wordCount * 0.75); // Approximate tokens
+    // Initialize token encoder
+    await initializeTokenEncoder();
+    
+    // Calculate accurate token count using js-tiktoken
+    const tokenCount = countTokens(newPrompt);
     
     if (tokenCount > MAX_TOKENS_PROMPT) {
       return NextResponse.json(

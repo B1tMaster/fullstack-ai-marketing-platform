@@ -7,6 +7,7 @@ import PromptsList from "./PromptsList";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Prompt } from "@/server/db/schema";
+import { initializeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
 
 interface ConfigurePromptsStepProps {
@@ -48,6 +49,10 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   };
 
   useEffect(() => {
+    const initialize = async () => {
+      await initializeTokenEncoder();
+    };
+
     const fetchPrompts = async () => {
       try {
         const response = await axios.get<Prompt[]>(
@@ -64,6 +69,12 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
 
     fetchPrompts();
   }, [projectId]);
+
+  useEffect(() => {
+    return () => {
+      freeTokenEncoder();
+    };
+  }, []);
 
   const handlePromptDeleted = (deletedPromptId: string) => {
     setPrompts((prev) => prev.filter((p) => p.id !== deletedPromptId));
