@@ -105,9 +105,9 @@ export async function PATCH(
     const wordCount = newPrompt.split(/\s+/).length;
     const tokenCount = Math.ceil(wordCount * 0.75); // Approximate tokens
     
-    if (tokenCount > MAX_TOKENS_PROMPTS) {
+    if (tokenCount > MAX_TOKENS_PROMPT) {
       return NextResponse.json(
-        { error: `Prompt exceeds maximum token limit of ${MAX_TOKENS_PROMPTS}` },
+        { error: `Prompt exceeds maximum token limit of ${MAX_TOKENS_PROMPT}` },
         { status: 400 }
       );
     }
