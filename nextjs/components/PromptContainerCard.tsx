@@ -11,6 +11,7 @@ interface PromptContainerCardProps {
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
+  onUpdate: (newPrompt: string) => void;
 }
 
 function PromptContainerCard({
@@ -31,9 +32,15 @@ function PromptContainerCard({
     >
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium truncate">{prompt.name}</h3>
-        <p className="text-xs text-gray-500 mt-1 truncate">
-          {prompt.prompt || "Empty prompt"}
-        </p>
+        <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
+          <p className="truncate">{prompt.prompt || "Empty prompt"}</p>
+          {prompt.tokenCount && prompt.tokenCount > 0 && (
+            <>
+              <span>•</span>
+              <p>Tokens: {prompt.tokenCount}</p>
+            </>
+          )}
+        </div>
       </div>
       <Button
         variant="ghost"

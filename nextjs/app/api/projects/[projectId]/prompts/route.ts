@@ -81,6 +81,55 @@ export async function DELETE(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { projectId: string; promptId: string } }
+) {
+  try {
+    const { userId } = getAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { projectId } = params;
+    const { promptId, prompt: newPrompt } = await request.json();
+
+    if (!promptId || !newPrompt) {
+      return NextResponse.json(
+        { error: "promptId and prompt are required" },
+        { status: 400 }
+      );
+    }
+
+    // Calculate token count (approximate using word count)
+    const wordCount = newPrompt.split(/\s+/).length;
+    const tokenCount = Math.ceil(wordCount * 0.75); // Approximate tokens
+
+    const [updatedPrompt] = await db
+      .update(promptsTable)
+      .set({ 
+        prompt: newPrompt,
+        tokenCount,
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(promptsTable.id, promptId),
+          eq(promptsTable.projectId, projectId)
+        )
+      )
+      .returning();
+
+    return NextResponse.json(updatedPrompt);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to update prompt" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Params }

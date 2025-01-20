@@ -25,6 +25,26 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
     router.push(`?tab=prompts&promptId=${promptId}`, { scroll: false });
   };
 
+  const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
+    try {
+      const response = await axios.patch<Prompt>(
+        `/api/projects/${projectId}/prompts`,
+        {
+          promptId,
+          prompt: newPrompt
+        }
+      );
+      const updatedPrompt = response.data;
+      setPrompts(prev => 
+        prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+      );
+      toast.success("Prompt updated successfully");
+    } catch (error) {
+      console.error("Failed to update prompt", error);
+      toast.error("Failed to update prompt");
+    }
+  };
+
   const handleDeletePrompt = async () => {
     if (!promptToDelete) return;
 
@@ -57,6 +77,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
             setPromptToDelete(prompt.id);
             setShowDeleteConfirmation(true);
           }}
+          onUpdate={(newPrompt) => handlePromptUpdate(prompt.id, newPrompt)}
         />
       ))}
 
