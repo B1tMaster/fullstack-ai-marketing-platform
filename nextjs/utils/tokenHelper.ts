@@ -1,4 +1,5 @@
-import { Tiktoken, encodingForModel } from "js-tiktoken/lite";
+import { Tiktoken } from "js-tiktoken/lite";
+import { encodingForModel } from "js-tiktoken";
 
 let encoder: Tiktoken | null = null;
 
