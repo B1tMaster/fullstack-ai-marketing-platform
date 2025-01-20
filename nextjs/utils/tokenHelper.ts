@@ -18,9 +18,6 @@ export const getPromptTokenCount = (prompt: string): number => {
 };
 
 export function freeTokenEncoder() {
-  if (encoder) {
-    encoder.free();
-    encoder = null;
-  }
+  encoder = null;
 }
 
