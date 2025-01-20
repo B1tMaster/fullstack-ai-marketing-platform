@@ -46,6 +46,38 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Params & { promptId: string } }
+) {
+  try {
+    const { userId } = getAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const projectId = (await params).projectId;
+    const promptId = (await params).promptId;
+
+    await db
+      .delete(promptsTable)
+      .where(
+        and(
+          eq(promptsTable.id, promptId),
+          eq(promptsTable.projectId, projectId)
+        )
+      );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to delete prompt" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Params }
