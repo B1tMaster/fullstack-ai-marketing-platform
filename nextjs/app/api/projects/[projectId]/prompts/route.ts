@@ -101,9 +101,16 @@ export async function PATCH(
       );
     }
 
-    // Calculate token count (approximate using word count)
+    // Calculate token count using same logic as UploadStepBody
     const wordCount = newPrompt.split(/\s+/).length;
     const tokenCount = Math.ceil(wordCount * 0.75); // Approximate tokens
+    
+    if (tokenCount > MAX_TOKENS_PROMPTS) {
+      return NextResponse.json(
+        { error: `Prompt exceeds maximum token limit of ${MAX_TOKENS_PROMPTS}` },
+        { status: 400 }
+      );
+    }
 
     const [updatedPrompt] = await db
       .update(promptsTable)

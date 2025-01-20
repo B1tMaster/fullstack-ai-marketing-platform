@@ -5,6 +5,8 @@ import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import { formatFileTokens } from "@/utils/formatFileTokens";
+import { MAX_TOKENS_PROMPTS } from "@/lib/constants";
 
 interface PromptContainerCardProps {
   prompt: Prompt;
@@ -37,7 +39,17 @@ function PromptContainerCard({
           {prompt.tokenCount && prompt.tokenCount > 0 && (
             <>
               <span>•</span>
-              <p>Tokens: {prompt.tokenCount}</p>
+              <p
+                className={cn(
+                  "text-xs sm:text-sm",
+                  prompt.tokenCount > MAX_TOKENS_PROMPTS
+                    ? "text-red-500 font-medium"
+                    : "text-gray-500"
+                )}
+              >
+                Tokens: {formatFileTokens(prompt.tokenCount)}
+                {prompt.tokenCount > MAX_TOKENS_PROMPTS && " (Exceeded)"}
+              </p>
             </>
           )}
         </div>
