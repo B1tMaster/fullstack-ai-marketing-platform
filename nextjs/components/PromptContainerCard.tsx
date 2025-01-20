@@ -35,10 +35,10 @@ function PromptContainerCard({
       <div className="flex-1 min-w-0">
         <h3 className="text-sm font-medium truncate">{prompt.name}</h3>
         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
-          <p className="truncate">{prompt.prompt || "Empty prompt"}</p>
+          {prompt.prompt && <p className="truncate">{prompt.prompt}</p>}
           {prompt.tokenCount && prompt.tokenCount > 0 && (
             <>
-              <span>•</span>
+              {prompt.prompt && <span>•</span>}
               <p
                 className={cn(
                   "text-xs sm:text-sm",
@@ -47,7 +47,7 @@ function PromptContainerCard({
                     : "text-gray-500"
                 )}
               >
-                Tokens: {formatFileTokens(prompt.tokenCount)}
+                {formatFileTokens(prompt.tokenCount)} tokens
                 {prompt.tokenCount > MAX_TOKENS_PROMPT && " (Exceeded)"}
               </p>
             </>
