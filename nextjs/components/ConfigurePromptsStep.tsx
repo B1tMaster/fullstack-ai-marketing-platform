@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 import ConfigurePromptsStepHeader from "./ConfigurePromptsStepHeader";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ interface ConfigurePromptsStepProps {
 
 function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [isLoadingPrompts, setIsLoadingPrompts] = useState(true);
   const [isImportingTemplate, setIsImportingTemplate] = useState(false);
   const [isCreatingPrompt, setIsCreatingPrompt] = useState(false);
 
@@ -45,6 +46,28 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
     }
   };
 
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await axios.get<Prompt[]>(
+          `/api/projects/${projectId}/prompts`
+        );
+        setPrompts(response.data);
+      } catch (error) {
+        console.error("Failed to fetch prompts", error);
+        toast.error("Failed to load prompts");
+      } finally {
+        setIsLoadingPrompts(false);
+      }
+    };
+
+    fetchPrompts();
+  }, [projectId]);
+
+  const handlePromptDeleted = (deletedPromptId: string) => {
+    setPrompts((prev) => prev.filter((p) => p.id !== deletedPromptId));
+  };
+
   return (
     <div>
       <ConfigurePromptsStepHeader
@@ -52,12 +75,19 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         handlePromptCreate={handlePromptCreate}
         isImportingTemplate={isImportingTemplate}
       />
-      {/* <PromptList /> */}
-      {/* <ConfirmationModal /> */}
-      {/* This is the modal that will be shown when the user tries to delete a prompt */}
-      {/* <PromptContainerDialog /> */}
-      {/** This is where the user can edit and save changes to a prompt */}
-      {/* <TemplateSectionPopup /> */}
+      
+      {isLoadingPrompts ? (
+        <div className="space-y-4 mt-6">
+          <div className="h-20 bg-gray-100 rounded-lg animate-pulse" />
+          <div className="h-20 bg-gray-100 rounded-lg animate-pulse" />
+        </div>
+      ) : (
+        <PromptsList
+          prompts={prompts}
+          projectId={projectId}
+          onPromptDeleted={handlePromptDeleted}
+        />
+      )}
     </div>
   );
 }

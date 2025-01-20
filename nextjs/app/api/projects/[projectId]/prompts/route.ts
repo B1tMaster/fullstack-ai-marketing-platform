@@ -3,6 +3,7 @@ import { promptsTable } from "@/server/db/schema";
 import { auth, getAuth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { and, eq } from "drizzle-orm";
 
 const newPromptSchema = z.object({
   name: z.string().default("New Prompt"),
@@ -12,6 +13,38 @@ const newPromptSchema = z.object({
 });
 
 type Params = Promise<{ projectId: string }>;
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Params }
+) {
+  try {
+    const { userId } = getAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const projectId = (await params).projectId;
+    
+    const prompts = await db
+      .select()
+      .from(promptsTable)
+      .where(
+        and(
+          eq(promptsTable.projectId, projectId)
+        )
+      )
+      .orderBy(promptsTable.order);
+
+    return NextResponse.json(prompts);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Failed to fetch prompts" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(
   request: NextRequest,
