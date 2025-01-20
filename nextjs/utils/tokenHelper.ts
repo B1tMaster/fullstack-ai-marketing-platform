@@ -1,12 +1,11 @@
-import { Tiktoken } from "js-tiktoken/lite";
-import { encoding_for_model } from "js-tiktoken";
+import { Tiktoken, encodingForModel } from "js-tiktoken/lite";
 
 let encoder: Tiktoken | null = null;
 
 export async function initializeTokenEncoder() {
   if (!encoder) {
     // Use gpt-3.5-turbo model which uses cl100k_base encoding
-    encoder = encoding_for_model("gpt-3.5-turbo");
+    encoder = encodingForModel("gpt-3.5-turbo");
   }
 }
 
