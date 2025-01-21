@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
-import { Trash2 } from "lucide-react";
+import { Trash2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   formatTokens,
@@ -55,9 +55,15 @@ function PromptContainerCard({
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-base sm:text-lg text-main truncate">
-          {prompt.name}
-        </h3>
+        <div className="flex items-center gap-2">
+          <MessageSquare
+            className="h-4 w-4 sm:h-6 sm:w-6 text-main flex-shrink-0"
+            strokeWidth={3}
+          />
+          <h3 className="font-semibold text-base sm:text-lg text-main truncate">
+            {prompt.name}
+          </h3>
+        </div>
         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
           {prompt.prompt && <p className="truncate">{prompt.prompt}</p>}
           {!prompt.prompt && (
