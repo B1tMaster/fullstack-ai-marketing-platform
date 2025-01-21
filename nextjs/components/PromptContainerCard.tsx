@@ -5,6 +5,12 @@ import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 
