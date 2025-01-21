@@ -5,8 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
 import { AudioLines, FileMinus, Video, File, Dot, Trash } from "lucide-react";
 import { Button } from "../ui/button";
-import { formatFileTokens } from "@/utils/formatFileTokens";
-import { initializeTokenEncoder } from "@/utils/tokenHelper";
+import { initializeTokenEncoder, formatTokens } from "@/utils/tokenHelper";
 import { cn } from "@/lib/utils";
 import { MAX_TOKENS_ASSETS } from "@/lib/constants";
 
@@ -113,7 +112,7 @@ function UploadStepBody({
                   </p>
                   <Dot className="hidden sm:flex flex-shrink-0" />
                   <p className="text-xs sm:text-sm truncate">
-                    Tokens: {formatFileTokens(asset.tokenCount || 0)}
+                    Tokens: {formatTokens(asset.tokenCount || 0)}
                   </p>
                 </div>
               </div>
