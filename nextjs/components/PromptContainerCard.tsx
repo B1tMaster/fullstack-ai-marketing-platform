@@ -68,15 +68,36 @@ function PromptContainerCard({
           {(prompt.prompt || tokenCount !== 0) && (
             <>
               {prompt.prompt && <span>•</span>}
-              <p
-                className={cn(
-                  "text-xs sm:text-sm",
-                  isExceeded ? "text-red-500 font-medium" : "text-gray-500"
+              <div className="flex items-center gap-1">
+                <p
+                  className={cn(
+                    "text-xs sm:text-sm",
+                    isExceeded ? "text-red-500 font-medium" : "text-gray-500"
+                  )}
+                >
+                  Tokens: {formatTokens(tokenCount)}
+                </p>
+                {isExceeded && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className="bg-red-100 text-red-500 text-xs rounded-md px-1 py-0.5 sm:px-2 sm:py-1">
+                          <span className="hidden sm:inline">
+                            Token Count Exceeded
+                          </span>
+                          <span className="sm:hidden">Exceeded</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs text-gray-600">
+                          Current Tokens: {formatTokens(tokenCount)}, Maximum:{" "}
+                          {formatTokens(MAX_TOKENS_PROMPT)}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
-              >
-                Tokens: {formatTokens(tokenCount)}
-                {isExceeded && " (Exceeded)"}
-              </p>
+              </div>
             </>
           )}
         </div>
