@@ -6,13 +6,18 @@ import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import {
+  formatTokens,
+  getPromptTokenCount,
+  initializeTokenEncoder,
+} from "@/utils/tokenHelper";
+import { MAX_TOKENS_PROMPT } from "@/lib/constants";
+
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
-import { MAX_TOKENS_PROMPT } from "@/lib/constants";
+} from "@radix-ui/react-tooltip";
 
 interface PromptContainerCardProps {
   prompt: Prompt;
@@ -38,7 +43,7 @@ function PromptContainerCard({
       setTokenCount(newTokenCount);
       setIsExceeded(newTokenCount > MAX_TOKENS_PROMPT);
     };
-    
+
     calculateTokens();
   }, [prompt]);
   return (
@@ -50,7 +55,9 @@ function PromptContainerCard({
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-base sm:text-lg text-main truncate">{prompt.name}</h3>
+        <h3 className="font-semibold text-base sm:text-lg text-main truncate">
+          {prompt.name}
+        </h3>
         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
           {prompt.prompt && <p className="truncate">{prompt.prompt}</p>}
           {!prompt.prompt && (
