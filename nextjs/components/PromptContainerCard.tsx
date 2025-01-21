@@ -5,7 +5,7 @@ import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
-import { formatTokens, getPromptTokenCount } from "@/utils/tokenHelper";
+import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 
 interface PromptContainerCardProps {
@@ -26,9 +26,14 @@ function PromptContainerCard({
   const [tokenCount, setTokenCount] = useState(0);
 
   useEffect(() => {
-    const newTokenCount = getPromptTokenCount(prompt.prompt || "");
-    setTokenCount(newTokenCount);
-    setIsExceeded(newTokenCount > MAX_TOKENS_PROMPT);
+    const calculateTokens = async () => {
+      await initializeTokenEncoder();
+      const newTokenCount = getPromptTokenCount(prompt.prompt || "");
+      setTokenCount(newTokenCount);
+      setIsExceeded(newTokenCount > MAX_TOKENS_PROMPT);
+    };
+    
+    calculateTokens();
   }, [prompt]);
   return (
     <div
