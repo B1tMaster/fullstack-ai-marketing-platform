@@ -47,19 +47,17 @@ function PromptContainerCard({
               <span className="hidden sm:inline">Prompt empty</span>
             </div>
           )}
-          {(prompt.prompt || prompt.tokenCount !== undefined) && (
+          {(prompt.prompt || tokenCount !== 0) && (
             <>
               {prompt.prompt && <span>•</span>}
               <p
                 className={cn(
                   "text-xs sm:text-sm",
-                  (prompt.tokenCount || 0) > MAX_TOKENS_PROMPT
-                    ? "text-red-500 font-medium"
-                    : "text-gray-500"
+                  isExceeded ? "text-red-500 font-medium" : "text-gray-500"
                 )}
               >
-                Tokens: {formatTokens(prompt.tokenCount || 0)}
-                {(prompt.tokenCount || 0) > MAX_TOKENS_PROMPT && " (Exceeded)"}
+                Tokens: {formatTokens(tokenCount)}
+                {isExceeded && " (Exceeded)"}
               </p>
             </>
           )}
