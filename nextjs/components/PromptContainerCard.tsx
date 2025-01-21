@@ -33,7 +33,7 @@ function PromptContainerCard({
       onClick={onClick}
     >
       <div className="flex-1 min-w-0">
-        <h3 className="text-sm font-medium truncate">{prompt.name}</h3>
+        <h3 className="text-sm font-bold text-main truncate">{prompt.name}</h3>
         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
           {prompt.prompt && <p className="truncate">{prompt.prompt}</p>}
           {(prompt.prompt || prompt.tokenCount !== undefined) && (
