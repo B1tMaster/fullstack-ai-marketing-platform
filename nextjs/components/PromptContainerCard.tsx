@@ -25,10 +25,8 @@ function PromptContainerCard({
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors",
-        isActive
-          ? "bg-main/10 border border-main/20"
-          : "bg-gray-50 hover:bg-gray-100"
+        "flex items-center justify-between p-4 border border-gray-200 bg-gray-50 rounded-2xl shadow-sm hover:border-main hover:shadow-md hover:scale-[1.01] transition-all duration-300 cursor-pointer",
+        isActive && "bg-main/10 border-main/20"
       )}
       onClick={onClick}
     >
