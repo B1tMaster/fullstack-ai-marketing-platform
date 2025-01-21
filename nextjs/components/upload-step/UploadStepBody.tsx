@@ -6,6 +6,7 @@ import { Skeleton } from "../ui/skeleton";
 import { AudioLines, FileMinus, Video, File, Dot, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { formatFileTokens } from "@/utils/formatFileTokens";
+import { initializeTokenEncoder } from "@/utils/tokenHelper";
 import { cn } from "@/lib/utils";
 import { MAX_TOKENS_ASSETS } from "@/lib/constants";
 
@@ -28,27 +29,34 @@ function UploadStepBody({
 
   useEffect(() => {
     const calculateTokens = async () => {
-      await initializeTokenEncoder();
-      const calculatedTotalTokens = uploadAssets.reduce(
-        (sum, file) => sum + (file.tokenCount || 0),
-        0
-      );
-      // ... rest of the effect
+      try {
+        await initializeTokenEncoder();
+        const calculatedTotalTokens = uploadAssets.reduce(
+          (sum, file) => sum + (file.tokenCount || 0),
+          0
+        );
+
+        const calculatedUsagePercentage = Math.min(
+          (calculatedTotalTokens / MAX_TOKENS_ASSETS) * 100,
+          100
+        );
+        setUsagePercentage(calculatedUsagePercentage);
+
+        const calculatedFormattedPercentage = Math.round(calculatedUsagePercentage);
+        setFormattedPercentage(calculatedFormattedPercentage);
+
+        const exceeded = calculatedTotalTokens > MAX_TOKENS_ASSETS;
+        setIsExceeded(exceeded);
+      } catch (error) {
+        console.error('Error calculating tokens:', error);
+        // Set default/fallback values if calculation fails
+        setUsagePercentage(0);
+        setFormattedPercentage(0);
+        setIsExceeded(false);
+      }
     };
     
     calculateTokens();
-
-    const calculatedUsagePercentage = Math.min(
-      (calculatedTotalTokens / MAX_TOKENS_ASSETS) * 100,
-      100
-    );
-    setUsagePercentage(calculatedUsagePercentage);
-
-    const calculatedFormattedPercentage = Math.round(calculatedUsagePercentage);
-    setFormattedPercentage(calculatedFormattedPercentage);
-
-    const exceeded = calculatedTotalTokens > MAX_TOKENS_ASSETS;
-    setIsExceeded(exceeded);
   }, [uploadAssets]);
 
   if (isLoading) {
