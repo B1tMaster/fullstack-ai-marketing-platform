@@ -34,6 +34,11 @@ function PromptContainerCard({
         <h3 className="font-semibold text-base sm:text-lg text-main truncate">{prompt.name}</h3>
         <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
           {prompt.prompt && <p className="truncate">{prompt.prompt}</p>}
+          {!prompt.prompt && (
+            <div className="bg-yellow-100 text-yellow-700 text-xs rounded-md px-1 py-0.5 sm:px-2 sm:py-1">
+              <span className="hidden sm:inline">Prompt empty</span>
+            </div>
+          )}
           {(prompt.prompt || prompt.tokenCount !== undefined) && (
             <>
               {prompt.prompt && <span>•</span>}
