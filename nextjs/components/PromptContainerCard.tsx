@@ -109,9 +109,9 @@ function PromptContainerCard({
         </div>
       </div>
       <Button
-        variant="ghost"
         size="sm"
-        className="text-gray-500 hover:text-red-600 hover:bg-red-50 ml-2"
+        variant="ghost"
+        className="text-main hover:text-red-600 hover:bg-red-50 rounded-full w-6 h-6 sm:w-8 sm:h-8 p-0 ml-2"
         onClick={(e) => {
           e.stopPropagation();
           onDelete();
