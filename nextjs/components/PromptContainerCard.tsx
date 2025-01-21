@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
-import { formatTokens } from "@/utils/tokenHelper";
+import { formatTokens, getPromptTokenCount } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 
 interface PromptContainerCardProps {
@@ -22,6 +22,14 @@ function PromptContainerCard({
   onClick,
   onDelete,
 }: PromptContainerCardProps) {
+  const [isExceeded, setIsExceeded] = useState(false);
+  const [tokenCount, setTokenCount] = useState(0);
+
+  useEffect(() => {
+    const newTokenCount = getPromptTokenCount(prompt.prompt || "");
+    setTokenCount(newTokenCount);
+    setIsExceeded(newTokenCount > MAX_TOKENS_PROMPT);
+  }, [prompt]);
   return (
     <div
       className={cn(
