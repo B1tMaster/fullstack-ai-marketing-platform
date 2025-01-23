@@ -88,6 +88,14 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         isImportingTemplate={isImportingTemplate}
       />
       
+      <PromptEditorDialog
+        prompt={{ id: "", name: "", prompt: "", projectId, tokenCount: 0, order: 0 }}
+        projectId={projectId}
+        isOpen={false}
+        onOpenChange={() => {}}
+        onSave={() => {}}
+      />
+
       {isLoadingPrompts ? (
         <div className="space-y-4 mt-6">
           <div className="h-20 bg-gray-100 rounded-lg animate-pulse" />

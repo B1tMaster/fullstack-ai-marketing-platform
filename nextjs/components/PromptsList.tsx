@@ -21,8 +21,14 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
   const [promptToDelete, setPromptToDelete] = React.useState<string | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+
   const handlePromptClick = (promptId: string) => {
     router.push(`?tab=prompts&promptId=${promptId}`, { scroll: false });
+  };
+
+  const handlePromptDoubleClick = (prompt: Prompt) => {
+    setEditingPrompt(prompt);
   };
 
   const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
@@ -73,6 +79,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
           prompt={prompt}
           isActive={searchParams.get("promptId") === prompt.id}
           onClick={() => handlePromptClick(prompt.id)}
+          onDoubleClick={() => handlePromptDoubleClick(prompt)}
           onDelete={() => {
             setPromptToDelete(prompt.id);
             setShowDeleteConfirmation(true);
@@ -80,6 +87,21 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
           onUpdate={(newPrompt) => handlePromptUpdate(prompt.id, newPrompt)}
         />
       ))}
+
+      <PromptEditorDialog
+        prompt={editingPrompt!}
+        projectId={projectId}
+        isOpen={!!editingPrompt}
+        onOpenChange={(open) => {
+          if (!open) setEditingPrompt(null);
+        }}
+        onSave={(updatedPrompt) => {
+          setPrompts(prev => 
+            prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+          );
+          setEditingPrompt(null);
+        }}
+      />
 
       <ConfirmationModal
         isOpen={showDeleteConfirmation}
