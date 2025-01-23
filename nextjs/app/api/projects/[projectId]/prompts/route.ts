@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { promptsTable } from "@/server/db/schema";
 import { auth, getAuth } from "@clerk/nextjs/server";
-import { initializeTokenEncoder, countTokens } from "@/utils/tokenHelper";
+import { initializeTokenEncoder, getPromptTokenCount } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -107,7 +107,7 @@ export async function PATCH(
     await initializeTokenEncoder();
     
     // Calculate accurate token count using js-tiktoken
-    const tokenCount = countTokens(newPrompt);
+    const tokenCount = getPromptTokenCount(newPrompt);
     
     if (tokenCount > MAX_TOKENS_PROMPT) {
       return NextResponse.json(
