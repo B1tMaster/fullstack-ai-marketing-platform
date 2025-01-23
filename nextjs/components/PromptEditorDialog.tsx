@@ -183,12 +183,14 @@ function PromptEditorDialog({
                   variant="outline"
                   onClick={handleCancel}
                   disabled={isSaving}
+                  className="text-base"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={() => setShowSaveConfirmation(true)}
                   disabled={isSaving || isTokenLimitExceeded || !hasChanges}
+                  className="text-base"
                 >
                   {isSaving ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
