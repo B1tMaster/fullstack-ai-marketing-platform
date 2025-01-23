@@ -26,12 +26,12 @@ function PromptEditorDialog({
   onOpenChange,
   onSave,
 }: PromptEditorDialogProps) {
-  const [editedPrompt, setEditedPrompt] = useState(prompt.prompt || "");
-  const [tokenCount, setTokenCount] = useState(prompt.tokenCount || 0);
+  const [editedPrompt, setEditedPrompt] = useState(prompt?.prompt || "");
+  const [tokenCount, setTokenCount] = useState(prompt?.tokenCount || 0);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
-  const hasChanges = editedPrompt !== prompt.prompt;
+  const hasChanges = editedPrompt !== (prompt?.prompt || "");
   const isTokenLimitExceeded = tokenCount > MAX_TOKENS_PROMPT;
 
   // Calculate tokens in real-time
@@ -158,7 +158,7 @@ function PromptEditorDialog({
         isLoading={false}
         onClose={() => setShowCancelConfirmation(false)}
         onConfirm={() => {
-          setEditedPrompt(prompt.prompt || "");
+          setEditedPrompt(prompt?.prompt || "");
           onOpenChange(false);
         }}
       />
