@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Prompt } from "@/server/db/schema";
 import PromptContainerCard from "./PromptContainerCard";
 import ConfirmationModal from "./ConfirmationModal";
