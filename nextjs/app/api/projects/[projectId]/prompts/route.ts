@@ -1,6 +1,8 @@
 import { db } from "@/server/db";
 import { promptsTable } from "@/server/db/schema";
 import { auth, getAuth } from "@clerk/nextjs/server";
+import { initializeTokenEncoder, countTokens } from "@/utils/tokenHelper";
+import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
