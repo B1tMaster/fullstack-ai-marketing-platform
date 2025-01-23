@@ -79,6 +79,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
     <div className="space-y-4 mt-6">
       {prompts.map((prompt) => (
         <div 
+          key={prompt.id}
           onDoubleClick={() => {
             handlePromptDoubleClick(prompt);
             setIsEditorOpen(true);
