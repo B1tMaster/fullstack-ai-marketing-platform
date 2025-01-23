@@ -7,6 +7,7 @@ import {
   varchar,
   bigint,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const projectsTable = pgTable("projects", {
@@ -22,6 +23,28 @@ export const projectsTable = pgTable("projects", {
 
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   assets: many(assetTable),
+  prompts: many(promptsTable),
+  templates: many(templatesTable),
+}));
+
+export const templatesTable = pgTable("templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").notNull().default(false),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const templatesRelations = relations(templatesTable, ({ one, many }) => ({
+  project: one(projectsTable, {
+    fields: [templatesTable.userId],
+    references: [projectsTable.userId],
+  }),
   prompts: many(promptsTable),
 }));
 
@@ -123,3 +146,5 @@ export type InsertAssetProcessingJob =
   typeof assetProcessingJobTable.$inferInsert;
 export type Prompt = typeof promptsTable.$inferSelect;
 export type InsertPrompt = typeof promptsTable.$inferInsert;
+export type Template = typeof templatesTable.$inferSelect;
+export type InsertTemplate = typeof templatesTable.$inferInsert;
