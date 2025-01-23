@@ -178,7 +178,7 @@ function PromptEditorDialog({
                   <span className="ml-2 text-red-500">(Token limit exceeded)</span>
                 )}
               </div>
-              <div className="space-x-2">
+              <div className="space-x-2 flex items-center">
                 <Button
                   variant="outline"
                   onClick={handleCancel}
