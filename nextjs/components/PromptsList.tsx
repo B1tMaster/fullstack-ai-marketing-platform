@@ -13,11 +13,10 @@ interface PromptsListProps {
   prompts: Prompt[];
   projectId: string;
   onPromptDeleted: (deletedPromptId: string) => void;
-  onPromptDoubleClick: (prompt: Prompt) => void;
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
-function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: PromptsListProps) {
+function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick, setPrompts }: PromptsListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
@@ -79,18 +78,16 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
   return (
     <div className="space-y-4 mt-6">
       {prompts.map((prompt) => (
-        <div 
-          key={prompt.id}
-          onDoubleClick={() => {
-            handlePromptDoubleClick(prompt);
-            setIsEditorOpen(true);
-          }}
-        >
+        <div key={prompt.id}>
           <PromptContainerCard
             key={prompt.id}
             prompt={prompt}
             isActive={searchParams.get("promptId") === prompt.id}
-            onClick={() => handlePromptClick(prompt.id)}
+            onClick={() => {
+              handlePromptClick(prompt.id);
+              handlePromptDoubleClick(prompt);
+              setIsEditorOpen(true);
+            }}
             onDelete={() => {
               setPromptToDelete(prompt.id);
               setShowDeleteConfirmation(true);
