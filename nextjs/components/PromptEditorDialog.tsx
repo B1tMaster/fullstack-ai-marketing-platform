@@ -114,7 +114,7 @@ function PromptEditorDialog({
                 <Input
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
-                  className="text-xl font-bold"
+                  className="text-xl font-bold text-gray-900"
                 />
                 <Button
                   onClick={() => setIsEditingName(false)}
@@ -132,7 +132,7 @@ function PromptEditorDialog({
             ) : (
               <div className="group relative mb-4">
                 <h1 
-                  className="text-xl font-bold text-gray-900 cursor-pointer hover:text-main hover:underline hover:decoration-main hover:decoration-2 hover:underline-offset-4 animate-underline"
+                  className="text-xl font-bold text-main cursor-pointer hover:underline hover:decoration-main hover:decoration-2 hover:underline-offset-4 animate-underline"
                   onClick={() => setIsEditingName(true)}
                 >
                   {editedName}
