@@ -13,6 +13,7 @@ interface PromptsListProps {
   prompts: Prompt[];
   projectId: string;
   onPromptDeleted: (deletedPromptId: string) => void;
+  onPromptDoubleClick: (prompt: Prompt) => void;
 }
 
 function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) {
@@ -82,7 +83,10 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
           prompt={prompt}
           isActive={searchParams.get("promptId") === prompt.id}
           onClick={() => handlePromptClick(prompt.id)}
-          onDoubleClick={() => handlePromptDoubleClick(prompt)}
+          onDoubleClick={() => {
+            handlePromptDoubleClick(prompt);
+            setIsEditorOpen(true);
+          }}
           onDelete={() => {
             setPromptToDelete(prompt.id);
             setShowDeleteConfirmation(true);
@@ -91,23 +95,25 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
         />
       ))}
 
-      <PromptEditorDialog
-        prompt={editingPrompt!}
-        projectId={projectId}
-        isOpen={isEditorOpen}
-        onOpenChange={(open) => {
-          setIsEditorOpen(open);
-          if (!open) {
+      {editingPrompt && (
+        <PromptEditorDialog
+          prompt={editingPrompt}
+          projectId={projectId}
+          isOpen={isEditorOpen}
+          onOpenChange={(open) => {
+            setIsEditorOpen(open);
+            if (!open) {
+              setEditingPrompt(null);
+            }
+          }}
+          onSave={(updatedPrompt) => {
+            setPrompts(prev => 
+              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+            );
             setEditingPrompt(null);
-          }
-        }}
-        onSave={(updatedPrompt) => {
-          setPrompts(prev => 
-            prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
-          );
-          setEditingPrompt(null);
-        }}
-      />
+          }}
+        />
+      )}
 
       <ConfirmationModal
         isOpen={showDeleteConfirmation}
