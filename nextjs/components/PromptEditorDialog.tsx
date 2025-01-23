@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Textarea } from "./ui/textarea";
+import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, CheckIcon } from "lucide-react";
 import { Prompt } from "@/server/db/schema";
 import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
@@ -26,12 +27,14 @@ function PromptEditorDialog({
   onOpenChange,
   onSave,
 }: PromptEditorDialogProps) {
+  const [editedName, setEditedName] = useState(prompt?.name || "");
   const [editedPrompt, setEditedPrompt] = useState(prompt?.prompt || "");
   const [tokenCount, setTokenCount] = useState(prompt?.tokenCount || 0);
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
-  const hasChanges = editedPrompt !== (prompt?.prompt || "");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const hasChanges = editedPrompt !== (prompt?.prompt || "") || editedName !== (prompt?.name || "");
   const isTokenLimitExceeded = tokenCount > MAX_TOKENS_PROMPT;
 
   // Calculate tokens in real-time
@@ -55,6 +58,7 @@ function PromptEditorDialog({
         },
         body: JSON.stringify({
           promptId: prompt.id,
+          name: editedName,
           prompt: editedPrompt,
         }),
       });
@@ -105,6 +109,35 @@ function PromptEditorDialog({
               </Dialog.Close>
             </div>
 
+            {isEditingName ? (
+              <div className="flex items-center gap-2 mb-4">
+                <Input
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-xl font-bold"
+                />
+                <Button
+                  onClick={() => setIsEditingName(false)}
+                  className="h-8 w-8 rounded-full p-0 bg-red-100 text-red-500 hover:bg-red-200"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+                <Button
+                  onClick={() => setIsEditingName(false)}
+                  className="h-8 w-8 rounded-full p-0 bg-green-100 text-green-600 hover:bg-green-200"
+                >
+                  <CheckIcon className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <h1 
+                className="text-xl font-bold text-gray-900 mb-4 cursor-pointer"
+                onClick={() => setIsEditingName(true)}
+              >
+                {editedName}
+              </h1>
+            )}
+            
             <Textarea
               value={editedPrompt}
               onChange={(e) => setEditedPrompt(e.target.value)}

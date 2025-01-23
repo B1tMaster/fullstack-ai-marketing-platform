@@ -94,11 +94,11 @@ export async function PATCH(
     }
 
     const { projectId } = params;
-    const { promptId, prompt: newPrompt } = await request.json();
+    const { promptId, name, prompt: newPrompt } = await request.json();
 
-    if (!promptId || !newPrompt) {
+    if (!promptId || !newPrompt || !name) {
       return NextResponse.json(
-        { error: "promptId and prompt are required" },
+        { error: "promptId, name and prompt are required" },
         { status: 400 }
       );
     }
@@ -110,6 +110,7 @@ export async function PATCH(
     const [updatedPrompt] = await db
       .update(promptsTable)
       .set({ 
+        name,
         prompt: newPrompt,
         tokenCount,
         updatedAt: new Date()
