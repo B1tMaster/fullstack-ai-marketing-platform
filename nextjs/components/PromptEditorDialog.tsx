@@ -31,7 +31,6 @@ function PromptEditorDialog({
   const [editedPrompt, setEditedPrompt] = useState(prompt?.prompt || "");
   const [tokenCount, setTokenCount] = useState(prompt?.tokenCount || 0);
   const [isSaving, setIsSaving] = useState(false);
-  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false);
   const [showCancelConfirmation, setShowCancelConfirmation] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const hasChanges = editedPrompt !== (prompt?.prompt || "") || editedName !== (prompt?.name || "");
@@ -188,7 +187,7 @@ function PromptEditorDialog({
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => setShowSaveConfirmation(true)}
+                  onClick={handleSave}
                   disabled={isSaving || isTokenLimitExceeded || !hasChanges}
                   className="text-base"
                 >
@@ -204,16 +203,6 @@ function PromptEditorDialog({
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-
-      {/* Save Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={showSaveConfirmation}
-        title="Save Changes"
-        message="Are you sure you want to save these changes?"
-        isLoading={isSaving}
-        onClose={() => setShowSaveConfirmation(false)}
-        onConfirm={handleSave}
-      />
 
       {/* Cancel Confirmation Modal */}
       <ConfirmationModal
