@@ -40,13 +40,16 @@ export const templatesTable = pgTable("templates", {
     .$onUpdate(() => new Date()),
 });
 
-export const templatesRelations = relations(templatesTable, ({ one, many }) => ({
-  project: one(projectsTable, {
-    fields: [templatesTable.userId],
-    references: [projectsTable.userId],
-  }),
-  templatePrompts: many(templatePromptsTable),
-}));
+export const templatesRelations = relations(
+  templatesTable,
+  ({ one, many }) => ({
+    project: one(projectsTable, {
+      fields: [templatesTable.userId],
+      references: [projectsTable.userId],
+    }),
+    templatePrompts: many(templatePromptsTable),
+  })
+);
 
 export const assetTable = pgTable("assets", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -136,15 +139,6 @@ export const promptRelations = relations(promptsTable, ({ one }) => ({
   }),
 }));
 
-// Types
-export type InsertProject = typeof projectsTable.$inferInsert;
-export type Project = typeof projectsTable.$inferSelect;
-export type Asset = typeof assetTable.$inferSelect;
-export type InsertAsset = typeof assetTable.$inferInsert;
-export type AssetProcessingJob = typeof assetProcessingJobTable.$inferSelect;
-export type InsertAssetProcessingJob =
-  typeof assetProcessingJobTable.$inferInsert;
-export type Prompt = typeof promptsTable.$inferSelect;
 export const templatePromptsTable = pgTable("template_prompts", {
   id: uuid("id").defaultRandom().primaryKey(),
   templateId: uuid("template_id")
@@ -163,13 +157,25 @@ export const templatePromptsTable = pgTable("template_prompts", {
     .$onUpdate(() => new Date()),
 });
 
-export const templatePromptRelations = relations(templatePromptsTable, ({ one }) => ({
-  template: one(templatesTable, {
-    fields: [templatePromptsTable.templateId],
-    references: [templatesTable.id],
-  }),
-}));
+export const templatePromptRelations = relations(
+  templatePromptsTable,
+  ({ one }) => ({
+    template: one(templatesTable, {
+      fields: [templatePromptsTable.templateId],
+      references: [templatesTable.id],
+    }),
+  })
+);
 
+// Types
+export type InsertProject = typeof projectsTable.$inferInsert;
+export type Project = typeof projectsTable.$inferSelect;
+export type Asset = typeof assetTable.$inferSelect;
+export type InsertAsset = typeof assetTable.$inferInsert;
+export type AssetProcessingJob = typeof assetProcessingJobTable.$inferSelect;
+export type InsertAssetProcessingJob =
+  typeof assetProcessingJobTable.$inferInsert;
+export type Prompt = typeof promptsTable.$inferSelect;
 export type InsertPrompt = typeof promptsTable.$inferInsert;
 export type Template = typeof templatesTable.$inferSelect;
 export type InsertTemplate = typeof templatesTable.$inferInsert;
