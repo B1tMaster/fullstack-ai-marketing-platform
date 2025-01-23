@@ -40,6 +40,10 @@ export const templatesTable = pgTable("templates", {
     .$onUpdate(() => new Date()),
 });
 
+export const templatesRelations = relations(templatesTable, ({ many }) => ({
+  templatePrompts: many(templatePromptsTable),
+}));
+
 
 export const assetTable = pgTable("assets", {
   id: uuid("id").defaultRandom().primaryKey(),
