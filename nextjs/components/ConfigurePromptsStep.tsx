@@ -9,6 +9,7 @@ import axios from "axios";
 import { Prompt } from "@/server/db/schema";
 import { initializeTokenEncoder, freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
+import PromptEditorDialog from "./PromptEditorDialog";
 
 interface ConfigurePromptsStepProps {
   projectId: string;
@@ -87,9 +88,16 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         handlePromptCreate={handlePromptCreate}
         isImportingTemplate={isImportingTemplate}
       />
-      
+
       <PromptEditorDialog
-        prompt={{ id: "", name: "", prompt: "", projectId, tokenCount: 0, order: 0 }}
+        prompt={{
+          id: "",
+          name: "",
+          prompt: "",
+          projectId,
+          tokenCount: 0,
+          order: 0,
+        }}
         projectId={projectId}
         isOpen={false}
         onOpenChange={() => {}}
