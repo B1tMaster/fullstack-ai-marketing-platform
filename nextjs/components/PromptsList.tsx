@@ -17,7 +17,7 @@ interface PromptsListProps {
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
-function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) {
+function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: PromptsListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
