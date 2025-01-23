@@ -78,21 +78,24 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
   return (
     <div className="space-y-4 mt-6">
       {prompts.map((prompt) => (
-        <PromptContainerCard
-          key={prompt.id}
-          prompt={prompt}
-          isActive={searchParams.get("promptId") === prompt.id}
-          onClick={() => handlePromptClick(prompt.id)}
+        <div 
           onDoubleClick={() => {
             handlePromptDoubleClick(prompt);
             setIsEditorOpen(true);
           }}
-          onDelete={() => {
-            setPromptToDelete(prompt.id);
-            setShowDeleteConfirmation(true);
-          }}
-          onUpdate={(newPrompt) => handlePromptUpdate(prompt.id, newPrompt)}
-        />
+        >
+          <PromptContainerCard
+            key={prompt.id}
+            prompt={prompt}
+            isActive={searchParams.get("promptId") === prompt.id}
+            onClick={() => handlePromptClick(prompt.id)}
+            onDelete={() => {
+              setPromptToDelete(prompt.id);
+              setShowDeleteConfirmation(true);
+            }}
+            onUpdate={(newPrompt) => handlePromptUpdate(prompt.id, newPrompt)}
+          />
+        </div>
       ))}
 
       {editingPrompt && (
