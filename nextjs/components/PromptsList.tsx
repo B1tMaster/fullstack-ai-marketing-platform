@@ -23,6 +23,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const handlePromptClick = (promptId: string) => {
     router.push(`?tab=prompts&promptId=${promptId}`, { scroll: false });
@@ -30,6 +31,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
 
   const handlePromptDoubleClick = (prompt: Prompt) => {
     setEditingPrompt(prompt);
+    setIsEditorOpen(true);
   };
 
   const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
@@ -92,9 +94,12 @@ function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) 
       <PromptEditorDialog
         prompt={editingPrompt!}
         projectId={projectId}
-        isOpen={!!editingPrompt}
+        isOpen={isEditorOpen}
         onOpenChange={(open) => {
-          if (!open) setEditingPrompt(null);
+          setIsEditorOpen(open);
+          if (!open) {
+            setEditingPrompt(null);
+          }
         }}
         onSave={(updatedPrompt) => {
           setPrompts(prev => 
