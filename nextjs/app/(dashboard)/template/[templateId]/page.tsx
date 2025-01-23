@@ -1,28 +1,21 @@
+import TemplateDetailView from "@/components/TemplateDetailView";
+import { getTemplate } from "@/server/queries";
+import { notFound } from "next/navigation";
 import React from "react";
 
-type Template = {
-  name: string;
-};
+type Params = Promise<{ templateId: string }>;
 
-export default async function TemplatesPage() {
-  const templatePromise = new Promise<Template[]>((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { name: "Template 4" },
-        { name: "Template 5" },
-        { name: "Template 6" },
-      ]);
-    }, 5000);
-  });
+export default async function TemplatePage(props: { params: Params }) {
+  const templateId = (await props.params).templateId;
+  const template = await getTemplate(templateId);
 
-  const templates = await templatePromise;
+  if (!template) {
+    return notFound();
+  }
 
   return (
-    <div>
-      <h1>Templates Page</h1>
-      {templates.map((template, idx) => (
-        <div key={idx}>{template.name}</div>
-      ))}
+    <div className="p-2 sm:p-4 md:p-6 lg:p-8 mt-2">
+      <TemplateDetailView template={template} />
     </div>
   );
 }

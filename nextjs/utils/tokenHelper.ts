@@ -15,15 +15,22 @@ export function formatTokens(tokenCount: number): string {
 
 export async function initializeTokenEncoder() {
   if (!encoder) {
-    // Use gpt-3.5-turbo model which uses cl100k_base encoding
     encoder = encodingForModel("gpt-4o");
   }
 }
 
-export const getPromptTokenCount = (prompt: string): number => {
+export const getPromptTokenCount = async (prompt: string): Promise<number> => {
+  if (!encoder) {
+    try {
+      await initializeTokenEncoder();
+    } catch (error) {
+      console.error("Error initializing token encoder", error);
+      throw new Error("Error initializing token encoder");
+    }
+  }
   if (!encoder) {
     throw new Error(
-      "Token encoder not initialized. Call initializeTokenEncoder() first."
+      "Token encoder still not initialized.. after initializeTokenEncoder()"
     );
   }
   return encoder.encode(prompt).length;

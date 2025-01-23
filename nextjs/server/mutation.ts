@@ -2,7 +2,8 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "./db";
-import { projectsTable } from "./db/schema";
+import { projectsTable, templatesTable } from "./db/schema";
+import { redirect } from "next/navigation";
 
 export async function createProject() {
   //  Figure out who the user is
@@ -14,7 +15,7 @@ export async function createProject() {
   }
 
   // Create project in database
-  await db
+  const [newProject] = await db
     .insert(projectsTable)
     .values({
       title: "New Project",
@@ -22,6 +23,19 @@ export async function createProject() {
     })
     .returning();
 
-  // TODO: LATER - redirect to detail view
-  // redirect -> `/project/${newProject.id}`;
+  redirect(`/project/${newProject.id}`);
+}
+
+export async function createTemplate() {
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  const [newTemplate] = await db
+    .insert(templatesTable)
+    .values({ title: "New Template", userId })
+    .returning();
+
+  redirect(`/template/${newTemplate.id}`);
 }
