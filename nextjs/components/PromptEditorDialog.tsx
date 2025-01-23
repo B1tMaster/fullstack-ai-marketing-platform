@@ -5,7 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Loader2, X, CheckIcon, SquarePen } from "lucide-react";
+import { Loader2, X, CheckIcon, SquarePen, Save } from "lucide-react";
 import { Prompt } from "@/server/db/schema";
 import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
@@ -190,8 +190,12 @@ function PromptEditorDialog({
                   onClick={() => setShowSaveConfirmation(true)}
                   disabled={isSaving || isTokenLimitExceeded || !hasChanges}
                 >
-                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save Changes
+                  {isSaving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-4 w-4" />
+                  )}
+                  Save
                 </Button>
               </div>
             </div>
