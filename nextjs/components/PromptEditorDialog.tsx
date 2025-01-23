@@ -131,7 +131,7 @@ function PromptEditorDialog({
               </div>
             ) : (
               <h1 
-                className="text-xl font-bold text-gray-900 mb-4 cursor-pointer"
+                className="text-xl font-bold text-gray-900 mb-4 cursor-pointer hover:underline hover:decoration-main hover:decoration-2 hover:underline-offset-4 animate-underline"
                 onClick={() => setIsEditingName(true)}
               >
                 {editedName}
