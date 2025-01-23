@@ -114,6 +114,7 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
           prompts={prompts}
           projectId={projectId}
           onPromptDeleted={handlePromptDeleted}
+          setPrompts={setPrompts}
         />
       )}
     </div>

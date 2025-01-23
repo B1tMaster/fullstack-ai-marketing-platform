@@ -14,6 +14,7 @@ interface PromptsListProps {
   projectId: string;
   onPromptDeleted: (deletedPromptId: string) => void;
   onPromptDoubleClick: (prompt: Prompt) => void;
+  setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
 function PromptsList({ prompts, projectId, onPromptDeleted }: PromptsListProps) {
