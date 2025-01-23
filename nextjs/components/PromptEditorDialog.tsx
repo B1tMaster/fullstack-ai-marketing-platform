@@ -5,7 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Loader2, X, CheckIcon } from "lucide-react";
+import { Loader2, X, CheckIcon, SquarePen } from "lucide-react";
 import { Prompt } from "@/server/db/schema";
 import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
@@ -130,12 +130,38 @@ function PromptEditorDialog({
                 </Button>
               </div>
             ) : (
-              <h1 
-                className="text-xl font-bold text-gray-900 mb-4 cursor-pointer hover:underline hover:decoration-main hover:decoration-2 hover:underline-offset-4 animate-underline"
-                onClick={() => setIsEditingName(true)}
-              >
-                {editedName}
-              </h1>
+              <div className="group relative mb-4">
+                <h1 
+                  className="text-xl font-bold text-gray-900 cursor-pointer hover:underline hover:decoration-main hover:decoration-2 hover:underline-offset-4 animate-underline"
+                  onClick={() => setIsEditingName(true)}
+                >
+                  {editedName}
+                </h1>
+                <div className="absolute -right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-full p-0 bg-gray-100/50 text-gray-500 hover:bg-gray-200/50 backdrop-blur-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsEditingName(true);
+                    }}
+                  >
+                    <SquarePen className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-full p-0 bg-gray-100/50 text-gray-500 hover:bg-gray-200/50 backdrop-blur-sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowCancelConfirmation(true);
+                    }}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
             )}
             
             <Textarea
