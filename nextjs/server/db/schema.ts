@@ -40,16 +40,6 @@ export const templatesTable = pgTable("templates", {
     .$onUpdate(() => new Date()),
 });
 
-export const templatesRelations = relations(
-  templatesTable,
-  ({ one, many }) => ({
-    project: one(projectsTable, {
-      fields: [templatesTable.userId],
-      references: [projectsTable.userId],
-    }),
-    templatePrompts: many(templatePromptsTable),
-  })
-);
 
 export const assetTable = pgTable("assets", {
   id: uuid("id").defaultRandom().primaryKey(),
