@@ -24,7 +24,6 @@ export const projectsTable = pgTable("projects", {
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   assets: many(assetTable),
   prompts: many(promptsTable),
-  templates: many(templatesTable),
 }));
 
 export const templatesTable = pgTable("templates", {
