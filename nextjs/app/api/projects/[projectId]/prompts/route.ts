@@ -103,18 +103,9 @@ export async function PATCH(
       );
     }
 
-    // Initialize token encoder
+    // Calculate token count using js-tiktoken
     await initializeTokenEncoder();
-    
-    // Calculate accurate token count using js-tiktoken
     const tokenCount = getPromptTokenCount(newPrompt);
-    
-    if (tokenCount > MAX_TOKENS_PROMPT) {
-      return NextResponse.json(
-        { error: `Prompt exceeds maximum token limit of ${MAX_TOKENS_PROMPT}` },
-        { status: 400 }
-      );
-    }
 
     const [updatedPrompt] = await db
       .update(promptsTable)
