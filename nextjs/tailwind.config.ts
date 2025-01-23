@@ -68,10 +68,15 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        underline: {
+          '0%': { 'text-decoration-color': 'transparent', 'text-decoration-thickness': '0px' },
+          '100%': { 'text-decoration-color': 'currentColor', 'text-decoration-thickness': '2px' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        underline: "underline 0.3s ease-out",
       },
       fontFamily: {
         sans: ["var(--font-poppins)", "Arial", "sans-serif"],
