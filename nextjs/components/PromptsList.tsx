@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import PromptEditorDialog from "./PromptEditorDialog";
 import { Prompt } from "@/server/db/schema";
 import PromptContainerCard from "./PromptContainerCard";
 import ConfirmationModal from "./ConfirmationModal";
