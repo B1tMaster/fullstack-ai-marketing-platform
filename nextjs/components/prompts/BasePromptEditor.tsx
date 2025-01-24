@@ -116,7 +116,7 @@ function BasePromptEditor({
                 variant="ghost"
                 size="icon"
                 className="text-gray-500 hover:text-gray-900"
-                onClick={handleCancel}
+                onClick={() => handleCancel('close')}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -195,7 +195,7 @@ function BasePromptEditor({
             <div className="space-x-2 flex items-center">
               <Button
                 variant="outline"
-                onClick={handleCancel}
+                onClick={() => handleCancel('button')}
                 disabled={isSaving}
                 className="text-base"
               >
