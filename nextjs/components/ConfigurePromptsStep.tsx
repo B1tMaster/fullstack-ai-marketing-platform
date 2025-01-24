@@ -9,7 +9,7 @@ import axios from "axios";
 import { Prompt } from "@/server/db/schema";
 import { freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
-import PromptEditorDialog from "./PromptEditorDialog";
+import ProjectPromptEditor from "./prompts/ProjectPromptEditor";
 
 interface ConfigurePromptsStepProps {
   projectId: string;
@@ -85,7 +85,8 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         isImportingTemplate={isImportingTemplate}
       />
 
-      <PromptEditorDialog
+      <ProjectPromptEditor
+        projectId={projectId}
         prompt={{
           id: "",
           name: "",
@@ -94,10 +95,10 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
           tokenCount: 0,
           order: 0,
         }}
-        projectId={projectId}
         isOpen={false}
         onOpenChange={() => {}}
         onSave={() => {}}
+        onCancel={() => {}}
       />
 
       {isLoadingPrompts ? (

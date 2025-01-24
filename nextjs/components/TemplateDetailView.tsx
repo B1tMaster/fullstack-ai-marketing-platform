@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import TemplateDetailBody from "./TemplateDetailBody";
 import { CommonPrompt } from "@/interfaces/CommonPrompt";
-import PromptEditorDialog from "./PromptEditorDialog";
+import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
 
 interface TemplateDetailViewProps {
   template: Template;
@@ -170,12 +170,15 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         onClose={() => setDeletePromptId(null)}
         onConfirm={() => deletePromptId && handleDeletePrompt(deletePromptId)}
       />
-      <PromptEditorDialog
+      <TemplatePromptEditor
+        templateId={template.id}
+        prompt={selectedPrompt!}
         isOpen={!!selectedPrompt}
-        prompt={selectedPrompt}
-        handleOnClose={handleCloseDialog}
-        isSaving={isSavingPrompt}
-        handleSave={handleOnSave}
+        onOpenChange={(open) => {
+          if (!open) handleCloseDialog();
+        }}
+        onSave={handleOnSave}
+        onCancel={handleCloseDialog}
       />
     </div>
   );
