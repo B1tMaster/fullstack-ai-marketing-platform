@@ -73,10 +73,19 @@ function BasePromptEditor({
   const handleCancel = () => {
     if (hasChanges) {
       setShowCancelConfirmation(true);
-    } else {
-      onCancel();
-      onOpenChange(false);
+      return; // Prevent dialog from closing immediately
     }
+    onCancel();
+    onOpenChange(false);
+  };
+
+  // Handle confirmation modal confirm
+  const handleConfirmCancel = () => {
+    setEditedName(prompt?.name || "");
+    setEditedPrompt(prompt?.prompt || "");
+    onCancel();
+    onOpenChange(false);
+    setShowCancelConfirmation(false);
   };
 
   // Add effect to handle confirmation modal close
