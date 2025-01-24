@@ -97,10 +97,11 @@ function BasePromptEditor({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       // When dialog is closing, check for changes
-      if (!handleCancel()) {
-        // If there are changes, prevent closing
-        return;
+      if (hasChanges) {
+        setShowCancelConfirmation(true);
+        return; // Prevent closing
       }
+      handleCancel();
     }
     onOpenChange(open);
   };
