@@ -80,15 +80,6 @@ function BasePromptEditor({
   };
 
   const handleConfirmCancel = () => {
-    setEditedName(prompt?.name || "");
-    setEditedPrompt(prompt?.prompt || "");
-    onCancel();
-    onOpenChange(false);
-    setShowCancelConfirmation(false);
-  };
-
-  // Handle confirmation modal confirm
-  const handleConfirmCancel = () => {
     // Reset form and close dialog
     setEditedName(prompt?.name || "");
     setEditedPrompt(prompt?.prompt || "");
