@@ -9,7 +9,7 @@ import axios from "axios";
 import { Prompt } from "@/server/db/schema";
 import { freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
-import ProjectPromptEditor from "@/components/prompts/ProjectPromptEditor";
+import ProjectPromptEditor from "./prompts/ProjectPromptEditor";
 
 interface ConfigurePromptsStepProps {
   projectId: string;
