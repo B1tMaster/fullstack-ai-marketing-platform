@@ -27,7 +27,11 @@ function ProjectPromptEditor({
     try {
       const response = await axios.patch<CommonPrompt>(
         `/api/projects/${projectId}/prompts`,
-        updatedPrompt
+        {
+          promptId: updatedPrompt.id,
+          name: updatedPrompt.name,
+          prompt: updatedPrompt.prompt
+        }
       );
       onSave(response.data);
       toast.success("Prompt saved successfully");

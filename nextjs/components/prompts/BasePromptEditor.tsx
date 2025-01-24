@@ -75,8 +75,17 @@ function BasePromptEditor({
       setShowCancelConfirmation(true);
     } else {
       onCancel();
+      onOpenChange(false);
     }
   };
+
+  // Add effect to handle confirmation modal close
+  useEffect(() => {
+    if (!showCancelConfirmation && !isOpen) {
+      setEditedName(prompt?.name || "");
+      setEditedPrompt(prompt?.prompt || "");
+    }
+  }, [showCancelConfirmation, isOpen, prompt]);
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
