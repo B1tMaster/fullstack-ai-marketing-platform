@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import PromptEditorDialog from "./PromptEditorDialog";
+import ProjectPromptEditor from "./prompts/ProjectPromptEditor";
 import { Prompt } from "@/server/db/schema";
 import PromptContainerCard from "./PromptContainerCard";
 import ConfirmationModal from "./ConfirmationModal";
@@ -98,9 +98,9 @@ function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick,
       ))}
 
       {editingPrompt && (
-        <PromptEditorDialog
-          prompt={editingPrompt}
+        <ProjectPromptEditor
           projectId={projectId}
+          prompt={editingPrompt}
           isOpen={isEditorOpen}
           onOpenChange={(open) => {
             setIsEditorOpen(open);
@@ -112,6 +112,10 @@ function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick,
             setPrompts(prev => 
               prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
             );
+            setEditingPrompt(null);
+          }}
+          onCancel={() => {
+            setIsEditorOpen(false);
             setEditingPrompt(null);
           }}
         />
