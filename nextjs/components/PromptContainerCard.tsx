@@ -38,8 +38,7 @@ function PromptContainerCard({
 
   useEffect(() => {
     const calculateTokens = async () => {
-      await initializeTokenEncoder();
-      const newTokenCount = getPromptTokenCount(prompt.prompt || "");
+      const newTokenCount = await getPromptTokenCount(prompt.prompt || "");
       setTokenCount(newTokenCount);
       setIsExceeded(newTokenCount > MAX_TOKENS_PROMPT);
     };
