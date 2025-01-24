@@ -79,6 +79,7 @@ function BasePromptEditor({
     setEditedName(prompt?.name || "");
     setEditedPrompt(prompt?.prompt || "");
     onCancel();
+    onOpenChange(false);
     return true; // Allow dialog to close
   };
 
