@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Skeleton } from "../ui/skeleton";
 import { AudioLines, FileMinus, Video, File, Dot, Trash } from "lucide-react";
 import { Button } from "../ui/button";
-import { initializeTokenEncoder, formatTokens } from "@/utils/tokenHelper";
+import { formatTokens } from "@/utils/tokenHelper";
 import { cn } from "@/lib/utils";
 import { MAX_TOKENS_ASSETS } from "@/lib/constants";
 
@@ -29,7 +29,6 @@ function UploadStepBody({
   useEffect(() => {
     const calculateTokens = async () => {
       try {
-        await initializeTokenEncoder();
         const calculatedTotalTokens = uploadAssets.reduce(
           (sum, file) => sum + (file.tokenCount || 0),
           0

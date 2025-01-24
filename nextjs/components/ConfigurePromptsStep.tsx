@@ -7,7 +7,7 @@ import PromptsList from "./PromptsList";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Prompt } from "@/server/db/schema";
-import { initializeTokenEncoder, freeTokenEncoder } from "@/utils/tokenHelper";
+import { freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
 import PromptEditorDialog from "./PromptEditorDialog";
 
@@ -50,10 +50,6 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   };
 
   useEffect(() => {
-    const initialize = async () => {
-      await initializeTokenEncoder();
-    };
-
     const fetchPrompts = async () => {
       try {
         const response = await axios.get<Prompt[]>(
