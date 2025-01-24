@@ -1,7 +1,7 @@
 import { db } from "@/server/db";
 import { promptsTable } from "@/server/db/schema";
-import { auth, getAuth } from "@clerk/nextjs/server";
-import { initializeTokenEncoder, getPromptTokenCount } from "@/utils/tokenHelper";
+import { getAuth } from "@clerk/nextjs/server";
+import { getPromptTokenCount } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -93,7 +93,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
     const { promptId, name, prompt: newPrompt } = await request.json();
 
     if (!promptId || !newPrompt || !name) {
@@ -104,16 +104,16 @@ export async function PATCH(
     }
 
     // Calculate token count using js-tiktoken
-    await initializeTokenEncoder();
-    const tokenCount = getPromptTokenCount(newPrompt);
+
+    const tokenCount = await getPromptTokenCount(newPrompt);
 
     const [updatedPrompt] = await db
       .update(promptsTable)
-      .set({ 
+      .set({
         name,
         prompt: newPrompt,
         tokenCount,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(
         and(
