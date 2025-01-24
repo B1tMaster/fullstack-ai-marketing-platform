@@ -70,22 +70,28 @@ function BasePromptEditor({
     onSave(updatedPrompt);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (source: 'button' | 'close') => {
     if (hasChanges) {
       setShowCancelConfirmation(true);
-      return false; // Prevent dialog from closing
+      setCancelSource(source); // Track where cancel was initiated
+      return false;
     }
     handleConfirmCancel();
     return true;
   };
 
+  const [cancelSource, setCancelSource] = useState<'button' | 'close'>('button');
+
   const handleConfirmCancel = () => {
-    // Reset form and close dialog
     setEditedName(prompt?.name || "");
     setEditedPrompt(prompt?.prompt || "");
     onCancel();
     setShowCancelConfirmation(false);
-    onOpenChange(false); // Close the main dialog
+    
+    // Close based on where cancel was initiated
+    if (cancelSource === 'button') {
+      onOpenChange(false);
+    }
   };
 
   // Handle dialog open/close changes
@@ -93,10 +99,11 @@ function BasePromptEditor({
     if (!open) {
       // When dialog is closing, check for changes
       if (hasChanges) {
+        setCancelSource('close');
         setShowCancelConfirmation(true);
-        return false; // Prevent closing
+        return false;
       }
-      handleCancel();
+      handleCancel('close');
     }
     onOpenChange(open);
     return true;
