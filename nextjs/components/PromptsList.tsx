@@ -24,15 +24,18 @@ function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick,
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const isEditorOpen = !!editingPrompt;
 
-  const handlePromptClick = (promptId: string) => {
-    router.push(`?tab=prompts&promptId=${promptId}`, { scroll: false });
-  };
-
-  const handlePromptDoubleClick = (prompt: Prompt) => {
-    setEditingPrompt(prompt);
-    setIsEditorOpen(true);
+  const handlePromptClick = (prompt: Prompt) => {
+    if (editingPrompt?.id === prompt.id) {
+      // If clicking the same prompt, close the editor
+      setEditingPrompt(null);
+      router.push(`?tab=prompts`, { scroll: false });
+    } else {
+      // Open editor for new prompt
+      setEditingPrompt(prompt);
+      router.push(`?tab=prompts&promptId=${prompt.id}`, { scroll: false });
+    }
   };
 
   const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
