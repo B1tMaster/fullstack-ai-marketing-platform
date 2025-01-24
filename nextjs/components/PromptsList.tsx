@@ -16,7 +16,7 @@ interface PromptsListProps {
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
-function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick, setPrompts }: PromptsListProps) {
+function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: PromptsListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
@@ -86,11 +86,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted, onPromptDoubleClick,
             key={prompt.id}
             prompt={prompt}
             isActive={searchParams.get("promptId") === prompt.id}
-            onClick={() => {
-              handlePromptClick(prompt.id);
-              handlePromptDoubleClick(prompt);
-              setIsEditorOpen(true);
-            }}
+            onClick={() => handlePromptClick(prompt)}
             onDelete={() => {
               setPromptToDelete(prompt.id);
               setShowDeleteConfirmation(true);
