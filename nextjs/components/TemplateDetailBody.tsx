@@ -10,6 +10,7 @@ interface TemplateDetailBodyProps {
   prompts: CommonPrompt[];
   isLoading: boolean;
   setDeletePromptId: React.Dispatch<React.SetStateAction<string | null>>;
+  onPromptClick: (prompt: CommonPrompt) => void;
 }
 
 function TemplateDetailBody({
@@ -45,6 +46,7 @@ function TemplateDetailBody({
         prompts={prompts}
         isLoading={isLoading}
         setDeletePromptId={setDeletePromptId}
+        onPromptClick={onPromptClick}
       />
     </div>
   );

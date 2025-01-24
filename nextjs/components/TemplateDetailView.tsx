@@ -54,15 +54,10 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
     fetchPrompts();
   }, [template.id]);
 
-  useEffect(() => {
-    const promptId = searchParams.get("promptId");
-    if (promptId) {
-      const prompt = prompts.find((p) => p.id === promptId);
-      if (prompt) setSelectedPrompt(prompt);
-    } else {
-      setSelectedPrompt(null);
-    }
-  }, [searchParams, prompts]);
+  const handlePromptClick = (prompt: CommonPrompt) => {
+    setSelectedPrompt(prompt);
+    router.push(`?promptId=${prompt.id}`, { scroll: false });
+  };
 
   const handleDeleteTemplate = async () => {
     setIsDeletingTemplate(true);
@@ -165,6 +160,7 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         isLoading={isLoading}
         prompts={prompts}
         setDeletePromptId={setDeletePromptId}
+        onPromptClick={handlePromptClick}
       />
       <ConfirmationModal
         title="Delete Prompt"
