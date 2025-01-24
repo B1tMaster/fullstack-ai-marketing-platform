@@ -73,31 +73,39 @@ function BasePromptEditor({
   const handleCancel = () => {
     if (hasChanges) {
       setShowCancelConfirmation(true);
-      return; // Prevent dialog from closing immediately
+      return false; // Prevent dialog from closing
     }
+    // Reset form and close dialog
+    setEditedName(prompt?.name || "");
+    setEditedPrompt(prompt?.prompt || "");
     onCancel();
-    onOpenChange(false);
+    return true; // Allow dialog to close
   };
 
   // Handle confirmation modal confirm
   const handleConfirmCancel = () => {
+    // Reset form and close dialog
     setEditedName(prompt?.name || "");
     setEditedPrompt(prompt?.prompt || "");
     onCancel();
-    onOpenChange(false);
     setShowCancelConfirmation(false);
+    onOpenChange(false); // Close the main dialog
   };
 
-  // Add effect to handle confirmation modal close
-  useEffect(() => {
-    if (!showCancelConfirmation && !isOpen) {
-      setEditedName(prompt?.name || "");
-      setEditedPrompt(prompt?.prompt || "");
+  // Handle dialog open/close changes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // When dialog is closing, check for changes
+      if (!handleCancel()) {
+        // If there are changes, prevent closing
+        return;
+      }
     }
-  }, [showCancelConfirmation, isOpen, prompt]);
+    onOpenChange(open);
+  };
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl z-50">
