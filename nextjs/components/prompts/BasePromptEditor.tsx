@@ -75,12 +75,16 @@ function BasePromptEditor({
       setShowCancelConfirmation(true);
       return false; // Prevent dialog from closing
     }
-    // Reset form and close dialog
+    handleConfirmCancel();
+    return true;
+  };
+
+  const handleConfirmCancel = () => {
     setEditedName(prompt?.name || "");
     setEditedPrompt(prompt?.prompt || "");
     onCancel();
     onOpenChange(false);
-    return true; // Allow dialog to close
+    setShowCancelConfirmation(false);
   };
 
   // Handle confirmation modal confirm
@@ -99,11 +103,12 @@ function BasePromptEditor({
       // When dialog is closing, check for changes
       if (hasChanges) {
         setShowCancelConfirmation(true);
-        return; // Prevent closing
+        return false; // Prevent closing
       }
       handleCancel();
     }
     onOpenChange(open);
+    return true;
   };
 
   return (
