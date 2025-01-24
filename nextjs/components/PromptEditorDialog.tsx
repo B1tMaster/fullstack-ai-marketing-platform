@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Loader2, X, CheckIcon, SquarePen, Save } from "lucide-react";
 import { Prompt } from "@/server/db/schema";
-import { formatTokens, getPromptTokenCount, initializeTokenEncoder } from "@/utils/tokenHelper";
+import { formatTokens, getPromptTokenCount } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import ConfirmationModal from "./ConfirmationModal";
 import toast from "react-hot-toast";
@@ -39,8 +39,7 @@ function PromptEditorDialog({
   // Calculate tokens in real-time
   useEffect(() => {
     const calculateTokens = async () => {
-      await initializeTokenEncoder();
-      const newTokenCount = getPromptTokenCount(editedPrompt);
+      const newTokenCount = await getPromptTokenCount(editedPrompt);
       setTokenCount(newTokenCount);
     };
 
