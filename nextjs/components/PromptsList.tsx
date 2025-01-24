@@ -38,6 +38,11 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
     }
   };
 
+  const handleEditorClose = () => {
+    setEditingPrompt(null);
+    router.push(`?tab=prompts`, { scroll: false });
+  };
+
   const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
     try {
       const response = await axios.patch<Prompt>(
@@ -102,21 +107,17 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
           prompt={editingPrompt}
           isOpen={isEditorOpen}
           onOpenChange={(open) => {
-            setIsEditorOpen(open);
             if (!open) {
-              setEditingPrompt(null);
+              handleEditorClose();
             }
           }}
           onSave={(updatedPrompt) => {
             setPrompts(prev => 
               prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
             );
-            setEditingPrompt(null);
+            handleEditorClose();
           }}
-          onCancel={() => {
-            setIsEditorOpen(false);
-            setEditingPrompt(null);
-          }}
+          onCancel={handleEditorClose}
         />
       )}
 
