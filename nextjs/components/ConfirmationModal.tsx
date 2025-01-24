@@ -32,7 +32,7 @@ function ConfirmationModal({
 }: ConfirmationModalProps) {
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogContent className="max-w-[90%] sm:max-w-lg bg-white">
+      <AlertDialogContent className="max-w-[90%] sm:max-w-lg bg-white z-[102]">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg sm:text-xl md:text-2xl">
             {title}
