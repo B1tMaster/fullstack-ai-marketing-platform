@@ -67,7 +67,7 @@ export async function POST(
     const { name, order, prompt } = parseResult.data;
 
     // Calculate token count
-    const tokenCount = getPromptTokenCount(prompt || "");
+    const tokenCount = await getPromptTokenCount(prompt || "");
 
     const newPrompt = await db
       .insert(templatePromptsTable)
@@ -154,7 +154,7 @@ export async function PATCH(
     const { id, name, prompt: promptText, order } = prompt;
 
     // Calculate token count
-    const tokenCount = getPromptTokenCount(promptText || "");
+    const tokenCount = await getPromptTokenCount(promptText || "");
 
     const updatedPrompt = await db
       .update(templatePromptsTable)
