@@ -1,25 +1,23 @@
 import React from "react";
-import PromptList from "./PromptsList";
+import TemplatePromptsList from "./TemplatePromptsList";
 import { Button } from "./ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { CommonPrompt } from "@/interfaces/CommonPrompt";
+import { Prompt } from "@/server/db/schema";
 
 interface TemplateDetailBodyProps {
   handleCreatePrompt: () => void;
   isCreatingPrompt: boolean;
-  prompts: CommonPrompt[];
-  isLoading: boolean;
-  setDeletePromptId: React.Dispatch<React.SetStateAction<string | null>>;
-  onPromptClick: (prompt: CommonPrompt) => void;
+  prompts: Prompt[];
+  templateId: string;
+  setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
 function TemplateDetailBody({
   handleCreatePrompt,
   isCreatingPrompt,
   prompts,
-  isLoading,
-  setDeletePromptId,
-  onPromptClick,
+  templateId,
+  setPrompts,
 }: TemplateDetailBodyProps) {
   return (
     <div className="bg-gray-50 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
@@ -43,11 +41,13 @@ function TemplateDetailBody({
           )}
         </Button>
       </div>
-      <PromptList
+      <TemplatePromptsList
         prompts={prompts}
-        isLoading={isLoading}
-        setDeletePromptId={setDeletePromptId}
-        onPromptClick={onPromptClick}
+        templateId={templateId}
+        onPromptDeleted={(deletedPromptId) => {
+          setPrompts(prev => prev.filter(p => p.id !== deletedPromptId));
+        }}
+        setPrompts={setPrompts}
       />
     </div>
   );
