@@ -111,9 +111,11 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
             }
           }}
           onSave={(updatedPrompt) => {
-            setPrompts(prev => 
-              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
-            );
+            if (setPrompts) {
+              setPrompts(prev => 
+                prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+              );
+            }
             handleEditorClose();
           }}
           onCancel={handleEditorClose}

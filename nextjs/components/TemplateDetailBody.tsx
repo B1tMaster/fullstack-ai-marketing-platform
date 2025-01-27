@@ -41,7 +41,6 @@ function TemplateDetailBody({
           )}
         </Button>
       </div>
-      console.log('TemplateDetailBody - rendering with templateId:', templateId);
       <TemplatePromptsList
         prompts={prompts}
         templateId={templateId}
