@@ -26,16 +26,11 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const isEditorOpen = !!editingPrompt;
 
-  console.log('TemplatePromptsList - constructor props:', { prompts, templateId, editingPrompt });
-  
   const handlePromptClick = (prompt: Prompt) => {
-    console.log('TemplatePromptsList - handlePromptClick with:', { prompt, templateId });
     if (editingPrompt?.id === prompt.id) {
-      // If clicking the same prompt, close the editor
       setEditingPrompt(null);
       router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
     } else {
-      // Open editor for new prompt
       setEditingPrompt(prompt);
       router.push(`/template/${templateId}?tab=prompts&promptId=${prompt.id}`, { scroll: false });
     }
@@ -43,19 +38,9 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
 
   const handleEditorClose = () => {
     setEditingPrompt(null);
-    router.push(`?tab=prompts`, { scroll: false });
+    router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
   };
 
-  const handlePromptUpdate = (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
-    console.log('TemplatePromptsList - handlePromptUpdate called with:', { promptId, newPrompt, currentPrompt });
-    const updatedPrompt = {
-      ...currentPrompt,
-      prompt: newPrompt
-    };
-    setPrompts(prev => 
-      prev.map(p => p.id === promptId ? updatedPrompt : p)
-    );
-  };
 
   const handleDeletePrompt = async () => {
     if (!promptToDelete || !templateId) {
@@ -94,11 +79,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
               setPromptToDelete(prompt.id);
               setShowDeleteConfirmation(true);
             }}
-            onUpdate={(newPrompt) => {
-              console.log('TemplatePromptsList - onUpdate called with prompt:', prompt);
-              const currentPrompt = prompt; // Use the prompt from the map iteration
-              handlePromptUpdate(currentPrompt.id, newPrompt, currentPrompt);
-            }}
+            onUpdate={() => handlePromptClick(prompt)}
           />
         </div>
       ))}
