@@ -25,7 +25,22 @@ function TemplatePromptEditor({
 }: TemplatePromptEditorProps) {
   console.log('TemplatePromptEditor - constructor with templateId:', templateId);
   const handleSave = async (updatedPrompt: CommonPrompt) => {
-    onSave(updatedPrompt);
+    try {
+      const response = await axios.patch<CommonPrompt>(
+        `/api/templates/${templateId}/prompts`,
+        {
+          id: updatedPrompt.id,
+          name: updatedPrompt.name,
+          prompt: updatedPrompt.prompt,
+          order: updatedPrompt.order
+        }
+      );
+      onSave(response.data);
+      toast.success("Prompt saved successfully");
+    } catch (error) {
+      console.error("Failed to save prompt:", error);
+      toast.error("Failed to save prompt");
+    }
   };
 
   return (
