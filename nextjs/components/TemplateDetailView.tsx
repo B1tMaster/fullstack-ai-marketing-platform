@@ -17,17 +17,11 @@ interface TemplateDetailViewProps {
 }
 
 function TemplateDetailView({ template }: TemplateDetailViewProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSavingPrompt, setIsSavingPrompt] = useState(false);
   const [prompts, setPrompts] = useState<CommonPrompt[]>([]);
   const [isDeletingTemplate, setIsDeletingTemplate] = useState(false);
-  const [isDeletingPrompt, setIsDeletingPrompt] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<CommonPrompt | null>(
-    null
-  );
+  const [selectedPrompt, setSelectedPrompt] = useState<CommonPrompt | null>(null);
   const [isCreatingPrompt, setIscCreatingPrompt] = useState(false);
-  const [deletePromptId, setDeletePromptId] = useState<string | null>(null);
-  const [showTemplateDeleteConfirmation, setShowTemplateDeleteConfirmation] =
+  const [showTemplateDeleteConfirmation, setShowTemplateDeleteConfirmation] = 
     useState(false);
 
   const router = useRouter();
@@ -46,8 +40,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       } catch (error) {
         console.error("Failed to fetch prompts:", error);
         toast.error("Failed to load prompts. Please try again.");
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -113,27 +105,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
     }
   };
 
-  const handleOnSave = async (updatedPrompt: CommonPrompt) => {
-    setIsSavingPrompt(true);
-    try {
-      const response = await axios.patch<CommonPrompt>(
-        `/api/templates/${template.id}/prompts`,
-        updatedPrompt
-      );
-      const savedPrompt = response.data;
-
-      setPrompts(
-        prompts.map((p) => (p.id === updatedPrompt.id ? savedPrompt : p))
-      );
-      toast.success("Template Prompt saved successfully");
-      handleCloseDialog();
-    } catch (error) {
-      console.error("Failed to save prompt:", error);
-      toast.error("Failed to save prompt. Please try again.");
-    } finally {
-      setIsSavingPrompt(false);
-    }
-  };
 
   const handleCloseDialog = () => {
     setSelectedPrompt(null);
@@ -176,7 +147,12 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         onOpenChange={(open) => {
           if (!open) handleCloseDialog();
         }}
-        onSave={handleOnSave}
+        onSave={(updatedPrompt) => {
+          setPrompts(prev => 
+            prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+          );
+          handleCloseDialog();
+        }}
         onCancel={handleCloseDialog}
       />
     </div>
