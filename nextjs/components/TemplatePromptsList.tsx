@@ -46,19 +46,14 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
     router.push(`?tab=prompts`, { scroll: false });
   };
 
-  const handlePromptUpdate = async (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
-    try {
-      const updatedPrompt = {
-        ...currentPrompt,
-        prompt: newPrompt
-      };
-      setPrompts(prev => 
-        prev.map(p => p.id === promptId ? updatedPrompt : p)
-      );
-    } catch (error) {
-      console.error("Failed to update prompt", error);
-      toast.error("Failed to update prompt");
-    }
+  const handlePromptUpdate = (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
+    const updatedPrompt = {
+      ...currentPrompt,
+      prompt: newPrompt
+    };
+    setPrompts(prev => 
+      prev.map(p => p.id === promptId ? updatedPrompt : p)
+    );
   };
 
   const handleDeletePrompt = async () => {
