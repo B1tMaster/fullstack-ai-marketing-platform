@@ -43,15 +43,15 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
     router.push(`?tab=prompts`, { scroll: false });
   };
 
-  const handlePromptUpdate = async (promptId: string, newPrompt: string) => {
+  const handlePromptUpdate = async (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
     try {
       const response = await axios.patch<Prompt>(
         `/api/templates/${templateId}/prompts`,
         {
           id: promptId,
-          name: editingPrompt?.name || "",
+          name: currentPrompt.name,
           prompt: newPrompt,
-          order: editingPrompt?.order || 0
+          order: currentPrompt.order
         }
       );
       const updatedPrompt = response.data;
@@ -98,7 +98,10 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
               setPromptToDelete(prompt.id);
               setShowDeleteConfirmation(true);
             }}
-            onUpdate={(newPrompt) => handlePromptUpdate(prompt.id, newPrompt)}
+            onUpdate={(newPrompt) => {
+              const currentPrompt = prompt; // Use the prompt from the map iteration
+              handlePromptUpdate(currentPrompt.id, newPrompt, currentPrompt);
+            }}
           />
         </div>
       ))}
