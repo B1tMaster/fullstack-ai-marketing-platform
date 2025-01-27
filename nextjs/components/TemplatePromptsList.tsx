@@ -26,7 +26,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const isEditorOpen = !!editingPrompt;
 
-  console.log('TemplatePromptsList - received templateId:', templateId);
+  console.log('TemplatePromptsList - constructor props:', { prompts, templateId, editingPrompt });
   
   const handlePromptClick = (prompt: Prompt) => {
     console.log('TemplatePromptsList - handlePromptClick with templateId:', templateId);
