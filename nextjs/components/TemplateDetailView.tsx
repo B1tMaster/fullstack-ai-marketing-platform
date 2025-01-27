@@ -29,7 +29,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
 
   useEffect(() => {
     const fetchPrompts = async () => {
-      setIsLoading(true);
       try {
         const response = await axios.get(
           `/api/templates/${template.id}/prompts`
