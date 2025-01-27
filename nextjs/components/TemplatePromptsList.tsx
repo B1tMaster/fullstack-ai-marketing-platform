@@ -121,11 +121,26 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
               handleEditorClose();
             }
           }}
-          onSave={(updatedPrompt) => {
-            setPrompts(prev => 
-              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
-            );
-            handleEditorClose();
+          onSave={async (updatedPrompt) => {
+            try {
+              const response = await axios.patch<Prompt>(
+                `/api/templates/${templateId}/prompts`,
+                {
+                  id: updatedPrompt.id,
+                  name: updatedPrompt.name,
+                  prompt: updatedPrompt.prompt,
+                  order: updatedPrompt.order
+                }
+              );
+              setPrompts(prev => 
+                prev.map(p => p.id === response.data.id ? response.data : p)
+              );
+              toast.success("Prompt saved successfully");
+              handleEditorClose();
+            } catch (error) {
+              console.error("Failed to save prompt:", error);
+              toast.error("Failed to save prompt");
+            }
           }}
           onCancel={handleEditorClose}
         />
