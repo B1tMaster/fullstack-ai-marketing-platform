@@ -157,10 +157,9 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       <TemplateDetailBody
         handleCreatePrompt={handleCreatePrompt}
         isCreatingPrompt={isCreatingPrompt}
-        isLoading={isLoading}
         prompts={prompts}
-        setDeletePromptId={setDeletePromptId}
-        onPromptClick={handlePromptClick}
+        templateId={template.id}
+        setPrompts={setPrompts}
       />
       <ConfirmationModal
         title="Delete Template Prompt"
