@@ -25,6 +25,7 @@ function TemplatePromptEditor({
 }: TemplatePromptEditorProps) {
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
+      console.log('TemplatePromptEditor - Saving prompt for template:', templateId, 'prompt:', updatedPrompt); // Debug log
       const response = await axios.patch<CommonPrompt>(
         `/api/templates/${templateId}/prompts`,
         updatedPrompt
