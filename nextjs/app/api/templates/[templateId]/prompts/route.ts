@@ -138,17 +138,17 @@ export async function DELETE(
 }
 
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { templateId: string } }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
-  const { userId } = getAuth(req);
+  const templateId = (await params).templateId;
+
+  const { userId } = getAuth(request);
   if (!userId)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const templateId = await params.templateId;
-
   try {
-    const json = await req.json();
+    const json = await request.json();
     const prompt = updatePromptSchema.parse(json);
 
     const { id, name, prompt: promptText, order } = prompt;
