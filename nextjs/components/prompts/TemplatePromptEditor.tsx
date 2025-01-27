@@ -32,7 +32,9 @@ function TemplatePromptEditor({
         endpoint,
         updatedPrompt
       );
-      onSave(response.data);
+      if (response.data) {
+        onSave(response.data);
+      }
       toast.success("Prompt saved successfully");
     } catch (error) {
       console.error("Failed to save prompt:", error);
