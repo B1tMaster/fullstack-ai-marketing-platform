@@ -80,7 +80,7 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       const response = await axios.post(
         `/api/templates/${template.id}/prompts`,
         {
-          name: "New Prompt",
+          name: "New Template Prompt",
           prompt: "",
           order: prompts.length,
           tokenCount: 0,
@@ -91,8 +91,8 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       setPrompts((prev) => [...prev, newPrompt]);
       router.push(`?promptId=${newPrompt.id}`);
     } catch (error) {
-      console.error("Error creating prompt", error);
-      toast.error("Error creating prompt. Please try again later.");
+      console.error("Error creating template prompt", error);
+      toast.error("Error creating template prompt. Please try again later.");
     } finally {
       setIscCreatingPrompt(false);
     }
@@ -125,7 +125,7 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       setPrompts(
         prompts.map((p) => (p.id === updatedPrompt.id ? savedPrompt : p))
       );
-      toast.success("Prompt saved successfully");
+      toast.success("Template Prompt saved successfully");
       handleCloseDialog();
     } catch (error) {
       console.error("Failed to save prompt:", error);
@@ -163,8 +163,8 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         onPromptClick={handlePromptClick}
       />
       <ConfirmationModal
-        title="Delete Prompt"
-        message="Are you sure you want to delete this prompt? This action cannot be undone."
+        title="Delete Template Prompt"
+        message="Are you sure you want to delete this template prompt? This action cannot be undone."
         isOpen={!!deletePromptId}
         isLoading={isDeletingPrompt}
         onClose={() => setDeletePromptId(null)}
