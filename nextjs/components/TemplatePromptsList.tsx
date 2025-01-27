@@ -47,6 +47,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
   };
 
   const handlePromptUpdate = (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
+    console.log('TemplatePromptsList - handlePromptUpdate called with:', { promptId, newPrompt, currentPrompt });
     const updatedPrompt = {
       ...currentPrompt,
       prompt: newPrompt
@@ -90,6 +91,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
               setShowDeleteConfirmation(true);
             }}
             onUpdate={(newPrompt) => {
+              console.log('TemplatePromptsList - onUpdate called with prompt:', prompt);
               const currentPrompt = prompt; // Use the prompt from the map iteration
               handlePromptUpdate(currentPrompt.id, newPrompt, currentPrompt);
             }}

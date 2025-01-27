@@ -35,6 +35,7 @@ function TemplatePromptEditor({
           order: updatedPrompt.order
         }
       );
+      console.log('TemplatePromptEditor - API response:', response.data);
       onSave(response.data);
       toast.success("Prompt saved successfully");
     } catch (error) {
