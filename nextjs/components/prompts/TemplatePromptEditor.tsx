@@ -26,6 +26,11 @@ function TemplatePromptEditor({
   console.log('TemplatePromptEditor - constructor with templateId:', templateId);
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
+      console.log('TemplatePromptEditor - handleSave called with:', {
+        updatedPrompt,
+        prompt,
+        templateId: prompt.templateId
+      });
       const response = await axios.patch<CommonPrompt>(
         `/api/templates/${prompt.templateId}/prompts`,
         {
