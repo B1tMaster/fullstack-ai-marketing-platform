@@ -6,13 +6,14 @@ let encoderInitialized = false;
 
 async function initializeTokenEncoder(): Promise<boolean> {
   try {
-    if (encoderInitialized) return true;
+    if (encoderInitialized && encoder) return true;
     
     encoder = await encodingForModel("gpt-4o");
-    encoderInitialized = true;
-    return true;
+    encoderInitialized = encoder !== null;
+    return encoderInitialized;
   } catch (error) {
     console.error("Failed to initialize token encoder:", error);
+    encoder = null;
     encoderInitialized = false;
     return false;
   }
@@ -33,17 +34,21 @@ export const getPromptTokenCount = async (prompt: string): Promise<number> => {
     // Handle empty string case
     if (!prompt || prompt.trim().length === 0) return 0;
     
-    // Ensure encoder is initialized
-    const isReady = await initializeTokenEncoder();
-    if (!isReady || !encoder) {
-      throw new Error("Token encoder not initialized");
+    // Try to initialize encoder up to 3 times
+    for (let i = 0; i < 3; i++) {
+      const isReady = await initializeTokenEncoder();
+      if (isReady && encoder) {
+        return encoder.encode(prompt).length;
+      }
+      // Wait a bit before retrying
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
     
-    // Actual token calculation
-    return encoder.encode(prompt).length;
+    console.warn("Token encoder initialization failed after retries");
+    return 0;
   } catch (error) {
     console.error("Token calculation error:", error);
-    return 0; // Return 0 instead of NaN on error
+    return 0;
   }
 };
 
