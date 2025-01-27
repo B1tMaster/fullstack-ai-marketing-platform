@@ -100,7 +100,6 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
       ))}
 
       {editingPrompt && (
-        console.log('TemplatePromptsList - rendering TemplatePromptEditor with templateId:', templateId),
         <TemplatePromptEditor
           templateId={templateId}
           prompt={editingPrompt}
