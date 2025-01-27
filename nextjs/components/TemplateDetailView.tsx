@@ -90,20 +90,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
     }
   };
 
-  const handleDeletePrompt = async (id: string) => {
-    setIsDeletingPrompt(true);
-    try {
-      await axios.delete(`/api/templates/${template.id}/prompts?id=${id}`);
-      setPrompts(prompts.filter((p) => p.id !== id));
-      toast.success("Prompt deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete prompt:", error);
-      toast.error("Failed to delete prompt. Please try again.");
-    } finally {
-      setDeletePromptId(null);
-      setIsDeletingPrompt(false);
-    }
-  };
 
 
   const handleCloseDialog = () => {
@@ -131,14 +117,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         prompts={prompts}
         templateId={template.id}
         setPrompts={setPrompts}
-      />
-      <ConfirmationModal
-        title="Delete Template Prompt"
-        message="Are you sure you want to delete this template prompt? This action cannot be undone."
-        isOpen={!!deletePromptId}
-        isLoading={isDeletingPrompt}
-        onClose={() => setDeletePromptId(null)}
-        onConfirm={() => deletePromptId && handleDeletePrompt(deletePromptId)}
       />
       <TemplatePromptEditor
         templateId={template.id}
