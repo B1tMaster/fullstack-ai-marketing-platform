@@ -26,7 +26,10 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
   const isEditorOpen = !!editingPrompt;
 
+  console.log('TemplatePromptsList - received templateId:', templateId);
+  
   const handlePromptClick = (prompt: Prompt) => {
+    console.log('TemplatePromptsList - handlePromptClick with templateId:', templateId);
     if (editingPrompt?.id === prompt.id) {
       // If clicking the same prompt, close the editor
       setEditingPrompt(null);
@@ -108,6 +111,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
       ))}
 
       {editingPrompt && (
+        console.log('TemplatePromptsList - rendering TemplatePromptEditor with templateId:', templateId),
         <TemplatePromptEditor
           templateId={templateId}
           prompt={editingPrompt}

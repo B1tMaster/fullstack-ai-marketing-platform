@@ -23,6 +23,7 @@ function TemplatePromptEditor({
   onSave,
   onCancel,
 }: TemplatePromptEditorProps) {
+  console.log('TemplatePromptEditor - constructor with templateId:', templateId);
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
       const endpoint = `/api/templates/${templateId}/prompts`;
