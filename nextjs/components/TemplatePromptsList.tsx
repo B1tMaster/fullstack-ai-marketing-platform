@@ -29,15 +29,15 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
   console.log('TemplatePromptsList - constructor props:', { prompts, templateId, editingPrompt });
   
   const handlePromptClick = (prompt: Prompt) => {
-    console.log('TemplatePromptsList - handlePromptClick with templateId:', templateId);
+    console.log('TemplatePromptsList - handlePromptClick with:', { prompt, templateId });
     if (editingPrompt?.id === prompt.id) {
       // If clicking the same prompt, close the editor
       setEditingPrompt(null);
-      router.push(`?tab=prompts`, { scroll: false });
+      router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
     } else {
       // Open editor for new prompt
       setEditingPrompt(prompt);
-      router.push(`?tab=prompts&promptId=${prompt.id}`, { scroll: false });
+      router.push(`/template/${templateId}?tab=prompts&promptId=${prompt.id}`, { scroll: false });
     }
   };
 
