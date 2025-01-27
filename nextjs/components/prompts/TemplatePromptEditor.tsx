@@ -26,10 +26,8 @@ function TemplatePromptEditor({
   console.log('TemplatePromptEditor - constructor with templateId:', templateId);
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
-      const endpoint = `/api/templates/${templateId}/prompts`;
-      console.log('TemplatePromptEditor - Endpoint:', endpoint);
-      console.log('TemplatePromptEditor - templateId:', templateId);
-      console.log('TemplatePromptEditor - updatedPrompt:', updatedPrompt);
+      console.log('TemplatePromptEditor - handleSave with prompt:', prompt);
+      const endpoint = `/api/templates/${prompt.templateId}/prompts`;
       const response = await axios.patch<CommonPrompt>(
         endpoint,
         updatedPrompt
