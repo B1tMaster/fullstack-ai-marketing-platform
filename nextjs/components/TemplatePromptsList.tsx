@@ -45,6 +45,7 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
 
   const handlePromptUpdate = async (promptId: string, newPrompt: string, currentPrompt: Prompt) => {
     try {
+      console.log('Updating prompt for template:', templateId); // Debug log
       const response = await axios.patch<Prompt>(
         `/api/templates/${templateId}/prompts`,
         {
