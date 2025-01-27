@@ -41,7 +41,12 @@ function TemplatePromptEditor({
         }
       );
       console.log('TemplatePromptEditor - API response:', response.data);
-      onSave(response.data);
+      // Ensure we pass complete prompt data including templateId
+      const completeUpdatedPrompt = {
+        ...response.data,
+        templateId: prompt.templateId
+      };
+      onSave(completeUpdatedPrompt);
       toast.success("Prompt saved successfully");
     } catch (error) {
       console.error("Failed to save prompt:", error);
