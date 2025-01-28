@@ -23,16 +23,28 @@ function TemplatePromptEditor({
   onSave,
   onCancel,
 }: TemplatePromptEditorProps) {
+  const [isSaving, setIsSaving] = React.useState(false);
   console.log('TemplatePromptEditor - constructor with templateId:', templateId);
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
+      setIsSaving(true);
       console.log('TemplatePromptEditor - handleSave called with:', {
         updatedPrompt,
         prompt,
-        templateId: prompt.templateId
+        templateId,
+        promptTemplateId: prompt.templateId
       });
+      
+      // Verify templateIds match
+      if (templateId !== prompt.templateId) {
+        console.warn('TemplatePromptEditor - templateId mismatch:', {
+          propTemplateId: templateId,
+          promptTemplateId: prompt.templateId
+        });
+      }
+      
       const response = await axios.patch<CommonPrompt>(
-        `/api/templates/${prompt.templateId}/prompts`,
+        `/api/templates/${templateId}/prompts`,
         {
           id: updatedPrompt.id,
           name: updatedPrompt.name,
@@ -40,11 +52,12 @@ function TemplatePromptEditor({
           order: updatedPrompt.order
         }
       );
+      
       console.log('TemplatePromptEditor - API response:', response.data);
       if (response.data) {
         const completeUpdatedPrompt = {
           ...response.data,
-          templateId: prompt.templateId
+          templateId
         };
         onSave(completeUpdatedPrompt);
       }
@@ -52,6 +65,8 @@ function TemplatePromptEditor({
     } catch (error) {
       console.error("Failed to save prompt:", error);
       toast.error("Failed to save prompt");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -62,7 +77,7 @@ function TemplatePromptEditor({
       onOpenChange={onOpenChange}
       onSave={handleSave}
       onCancel={onCancel}
-      isSaving={false}
+      isSaving={isSaving}
     />
   );
 }
