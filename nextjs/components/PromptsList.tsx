@@ -58,8 +58,8 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
         prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
       );
       toast.success("Prompt updated successfully");
-    } catch (error) {
-      logger.error("Failed to update prompt", error, {
+    } catch (error: any) {
+      logger.error("Failed to update prompt", error as Error, {
         component: 'PromptsList',
         action: 'handlePromptUpdate',
         projectId,
@@ -79,8 +79,8 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
       });
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");
-    } catch (error) {
-      logger.error("Failed to delete prompt", error, {
+    } catch (error: any) {
+      logger.error("Failed to delete prompt", error as Error, {
         component: 'PromptsList',
         action: 'handleDeletePrompt',
         projectId,
