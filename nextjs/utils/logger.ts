@@ -1,4 +1,4 @@
-import { isDevelopment } from '@/lib/constants';
+import { LoggerConfig, getLoggerConfig } from './loggerConfig';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -8,28 +8,66 @@ interface LogContext {
   [key: string]: any;
 }
 
-const logger = {
-  debug: (message: string, context?: LogContext) => {
-    if (isDevelopment) {
-      console.log(`[DEBUG] ${formatLogMessage(message, context)}`);
-    }
-  },
+class Logger {
+  private config: LoggerConfig;
   
-  info: (message: string, context?: LogContext) => {
-    console.log(`[INFO] ${formatLogMessage(message, context)}`);
-  },
-  
-  warn: (message: string, context?: LogContext) => {
-    console.warn(`[WARN] ${formatLogMessage(message, context)}`);
-  },
-  
-  error: (message: string, error?: Error, context?: LogContext) => {
-    console.error(`[ERROR] ${formatLogMessage(message, context)}`);
-    if (error) {
-      console.error(error);
-    }
+  constructor() {
+    this.config = getLoggerConfig();
   }
-};
+
+  private shouldLog(level: LogLevel): boolean {
+    const levels: LogLevel[] = ['debug', 'info', 'warn', 'error'];
+    const configLevelIndex = levels.indexOf(this.config.logLevel);
+    const messageLevelIndex = levels.indexOf(level);
+    return messageLevelIndex >= configLevelIndex;
+  }
+
+  private log(level: LogLevel, message: string, error?: Error, context?: LogContext) {
+    if (!this.shouldLog(level)) return;
+
+    const formattedMessage = formatLogMessage(message, context);
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${formattedMessage}`;
+
+    if (this.config.enableConsole) {
+      switch (level) {
+        case 'debug':
+          console.log(logEntry);
+          break;
+        case 'info':
+          console.info(logEntry);
+          break;
+        case 'warn':
+          console.warn(logEntry);
+          break;
+        case 'error':
+          console.error(logEntry);
+          if (error) console.error(error);
+          break;
+      }
+    }
+
+    // File logging could be added here
+  }
+
+  debug(message: string, context?: LogContext) {
+    this.log('debug', message, undefined, context);
+  }
+
+  info(message: string, context?: LogContext) {
+    this.log('info', message, undefined, context);
+  }
+
+  warn(message: string, context?: LogContext) {
+    this.log('warn', message, undefined, context);
+  }
+
+  error(message: string, error?: Error, context?: LogContext) {
+    this.log('error', message, error, context);
+  }
+}
+
+const logger = new Logger();
 
 function formatLogMessage(message: string, context?: LogContext): string {
   if (!context) return message;
