@@ -3,7 +3,6 @@
 import { Template } from "@/server/db/schema";
 import React, { useEffect, useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
-// import PromptEditorDialog from "./PromptEditorDialog";
 import TemplateDetailHeader from "./TemplateDetailHeader";
 import axios from "axios";
 import toast from "react-hot-toast";
