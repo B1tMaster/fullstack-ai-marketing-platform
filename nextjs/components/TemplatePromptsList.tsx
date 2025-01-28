@@ -50,9 +50,13 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
 
     setIsDeleting(true);
     try {
-      console.log('TemplatePromptsList - handleDeletePrompt with:', { templateId, promptToDelete });
-      const endpoint = `/api/templates/${templateId}/prompts?id=${promptToDelete}`;
-      console.log('TemplatePromptsList - DELETE endpoint:', endpoint);
+      logger.debug('Deleting prompt', {
+        component: 'TemplatePromptsList',
+        action: 'handleDeletePrompt',
+        templateId,
+        promptToDelete,
+        endpoint: `/api/templates/${templateId}/prompts?id=${promptToDelete}`
+      });
       await axios.delete(endpoint);
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");

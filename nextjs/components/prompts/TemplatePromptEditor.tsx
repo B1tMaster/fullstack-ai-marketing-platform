@@ -24,7 +24,11 @@ function TemplatePromptEditor({
   onCancel,
 }: TemplatePromptEditorProps) {
   const [isSaving, setIsSaving] = React.useState(false);
-  console.log('TemplatePromptEditor - constructor with templateId:', templateId);
+  logger.debug('Editor initialized', { 
+    component: 'TemplatePromptEditor',
+    action: 'constructor',
+    templateId 
+  });
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
       setIsSaving(true);
