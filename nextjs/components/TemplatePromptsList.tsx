@@ -54,10 +54,9 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
         component: 'TemplatePromptsList',
         action: 'handleDeletePrompt',
         templateId,
-        promptToDelete,
-        endpoint: `/api/templates/${templateId}/prompts?id=${promptToDelete}`
+        promptToDelete
       });
-      await axios.delete(endpoint);
+      await axios.delete(`/api/templates/${templateId}/prompts?id=${promptToDelete}`);
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");
     } catch (error) {
@@ -99,7 +98,11 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
             }
           }}
           onSave={(updatedPrompt) => {
-            console.log('TemplatePromptsList - onSave received updatedPrompt:', updatedPrompt);
+            logger.debug('Prompt update received', {
+              component: 'TemplatePromptsList',
+              action: 'onSave',
+              updatedPrompt
+            });
             setPrompts(prev => 
               prev.map(p => p.id === updatedPrompt.id ? updatedPrompt as Prompt : p)
             );

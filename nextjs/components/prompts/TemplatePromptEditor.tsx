@@ -32,16 +32,17 @@ function TemplatePromptEditor({
   const handleSave = async (updatedPrompt: CommonPrompt) => {
     try {
       setIsSaving(true);
-      console.log('TemplatePromptEditor - handleSave called with:', {
+      logger.debug('Saving prompt', {
+        component: 'TemplatePromptEditor',
+        action: 'handleSave',
         updatedPrompt,
-        prompt,
-        templateId,
-        promptTemplateId: prompt.templateId
+        templateId
       });
       
-      // Verify templateIds match
       if (templateId !== prompt.templateId) {
-        console.warn('TemplatePromptEditor - templateId mismatch:', {
+        logger.warn('Template ID mismatch detected', {
+          component: 'TemplatePromptEditor',
+          action: 'handleSave',
           propTemplateId: templateId,
           promptTemplateId: prompt.templateId
         });
@@ -57,7 +58,11 @@ function TemplatePromptEditor({
         }
       );
       
-      console.log('TemplatePromptEditor - API response:', response.data);
+      logger.debug('Prompt saved successfully', {
+        component: 'TemplatePromptEditor',
+        action: 'handleSave',
+        responseData: response.data
+      });
       if (response.data) {
         const completeUpdatedPrompt = {
           ...response.data,

@@ -35,7 +35,11 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         );
         setPrompts(response.data);
 
-        console.log("Prompts:", response.data);
+        logger.debug('Prompts fetched', {
+          component: 'TemplateDetailView',
+          action: 'fetchPrompts',
+          prompts: response.data
+        });
       } catch (error) {
         console.error("Failed to fetch prompts:", error);
         toast.error("Failed to load prompts. Please try again.");
