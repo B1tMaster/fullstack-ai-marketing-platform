@@ -36,7 +36,12 @@ function ProjectPromptEditor({
       onSave(response.data);
       toast.success("Prompt saved successfully");
     } catch (error) {
-      console.error("Failed to save prompt:", error);
+      logger.error("Failed to save prompt", error, {
+        component: 'ProjectPromptEditor',
+        action: 'handleSave',
+        projectId,
+        promptId: updatedPrompt.id
+      });
       toast.error("Failed to save prompt");
     }
   };

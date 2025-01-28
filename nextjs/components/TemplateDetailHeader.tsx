@@ -31,7 +31,11 @@ function TemplateDetailHeader({
       setTitle(response.data.title);
       toast.success("Title updated successfully.");
     } catch (error) {
-      console.error("Error updating title", error);
+      logger.error("Failed to update template title", error, {
+        component: 'TemplateDetailHeader',
+        action: 'handleTitleSubmit',
+        templateId: template.id
+      });
       toast.error("Error updating title. Please try again later.");
     } finally {
       setIsEditing(false);

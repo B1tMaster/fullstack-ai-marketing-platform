@@ -19,7 +19,10 @@ async function initializeTokenEncoder(): Promise<boolean> {
       encoderInitialized = encoder !== null;
       return encoderInitialized;
     } catch (error) {
-      console.error("Failed to initialize token encoder:", error);
+      logger.error("Failed to initialize token encoder", error, {
+        component: 'tokenHelper',
+        action: 'initializeTokenEncoder'
+      });
       encoder = null;
       encoderInitialized = false;
       return false;
@@ -57,10 +60,17 @@ export const getPromptTokenCount = async (prompt: string): Promise<number> => {
       await new Promise(resolve => setTimeout(resolve, delay));
     }
     
-    console.warn("Token encoder initialization failed after retries with backoff");
+    logger.warn("Token encoder initialization failed after retries", {
+      component: 'tokenHelper',
+      action: 'getPromptTokenCount',
+      retryCount: 3
+    });
     return 0;
   } catch (error) {
-    console.error("Token calculation error:", error);
+    logger.error("Token calculation error", error, {
+      component: 'tokenHelper',
+      action: 'getPromptTokenCount'
+    });
     return 0;
   }
 };

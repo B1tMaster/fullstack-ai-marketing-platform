@@ -25,7 +25,12 @@ function TemplateList({ templates }: TemplateListProps) {
         const response = await axios.get<TemplatePrompt[]>(
           `/api/templates/${templateId}/prompts`
         );
-        console.log("template count response", response.data);
+        logger.debug('Template prompts fetched', {
+          component: 'TemplateList',
+          action: 'fetchPromptCount',
+          templateId,
+          count: response.data.length
+        });
         return response.data.length;
       } catch (error) {
         return 0;
