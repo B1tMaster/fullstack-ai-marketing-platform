@@ -3,6 +3,7 @@ import { templatesTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import logger from "@/utils/logger";
 
 export async function PATCH(
   req: NextRequest,
@@ -41,7 +42,11 @@ export async function PATCH(
 
     return NextResponse.json(updatedTemplate[0]);
   } catch (error) {
-    console.error("Error updating template", error);
+    logger.error("Error updating template", error instanceof Error ? error : new Error(String(error)), {
+      component: 'templateRoute',
+      action: 'PATCH',
+      templateId
+    });
     return NextResponse.json(
       { error: "Failed to update template" },
       { status: 500 }
@@ -80,7 +85,11 @@ export async function DELETE(
 
     return NextResponse.json(deletedTemplate[0]);
   } catch (error) {
-    console.error("Error deleting template", error);
+    logger.error("Error deleting template", error instanceof Error ? error : new Error(String(error)), {
+      component: 'templateRoute',
+      action: 'DELETE',
+      templateId
+    });
     return NextResponse.json(
       { error: "Failed to delete template" },
       { status: 500 }
