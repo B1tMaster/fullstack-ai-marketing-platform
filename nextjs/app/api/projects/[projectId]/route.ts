@@ -5,6 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { HttpStatus } from "@/constants/http";
+import logger from "@/utils/logger";
 
 const updateProjectSchema = z.object({
   title: z.string().min(1),
@@ -38,22 +39,34 @@ export async function PATCH(
 
   const { title } = validatedData.data;
 
-  const updatedProject = await db
-    .update(projectsTable)
-    .set({ title })
-    .where(
-      and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
-    )
-    .returning();
+  try {
+    const updatedProject = await db
+      .update(projectsTable)
+      .set({ title })
+      .where(
+        and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
+      )
+      .returning();
 
-  if (updatedProject.length === 0) {
+    if (updatedProject.length === 0) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: HttpStatus.NOT_FOUND }
+      );
+    }
+
+    return NextResponse.json(updatedProject[0]);
+  } catch (error: unknown) {
+    logger.error("Failed to update project", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectRoute',
+      action: 'PATCH',
+      projectId
+    });
     return NextResponse.json(
-      { error: "Project not found" },
-      { status: HttpStatus.NOT_FOUND }
+      { error: "Failed to update project" },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
-
-  return NextResponse.json(updatedProject[0]);
 }
 
 export async function DELETE(
@@ -70,19 +83,31 @@ export async function DELETE(
 
   const projectId = (await params).projectId;
 
-  const deletedProject = await db
-    .delete(projectsTable)
-    .where(
-      and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
-    )
-    .returning();
+  try {
+    const deletedProject = await db
+      .delete(projectsTable)
+      .where(
+        and(eq(projectsTable.userId, userId), eq(projectsTable.id, projectId))
+      )
+      .returning();
 
-  if (deletedProject.length === 0) {
+    if (deletedProject.length === 0) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: HttpStatus.NOT_FOUND }
+      );
+    }
+
+    return NextResponse.json(deletedProject[0]);
+  } catch (error: unknown) {
+    logger.error("Failed to delete project", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectRoute',
+      action: 'DELETE',
+      projectId
+    });
     return NextResponse.json(
-      { error: "Project not found" },
-      { status: HttpStatus.NOT_FOUND }
+      { error: "Failed to delete project" },
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
-
-  return NextResponse.json(deletedProject[0]);
 }
