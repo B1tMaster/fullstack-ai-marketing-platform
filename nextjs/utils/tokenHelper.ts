@@ -3,20 +3,32 @@ import { encodingForModel } from "js-tiktoken";
 
 let encoder: Tiktoken | null = null;
 let encoderInitialized = false;
+let initializationPromise: Promise<boolean> | null = null;
 
 async function initializeTokenEncoder(): Promise<boolean> {
-  try {
-    if (encoderInitialized && encoder) return true;
-    
-    encoder = await encodingForModel("gpt-4o");
-    encoderInitialized = encoder !== null;
-    return encoderInitialized;
-  } catch (error) {
-    console.error("Failed to initialize token encoder:", error);
-    encoder = null;
-    encoderInitialized = false;
-    return false;
-  }
+  // If already initialized successfully, return true
+  if (encoderInitialized && encoder) return true;
+  
+  // If initialization is in progress, wait for it
+  if (initializationPromise) return initializationPromise;
+  
+  // Start new initialization
+  initializationPromise = (async () => {
+    try {
+      encoder = await encodingForModel("gpt-4o");
+      encoderInitialized = encoder !== null;
+      return encoderInitialized;
+    } catch (error) {
+      console.error("Failed to initialize token encoder:", error);
+      encoder = null;
+      encoderInitialized = false;
+      return false;
+    } finally {
+      initializationPromise = null;
+    }
+  })();
+  
+  return initializationPromise;
 }
 
 export function formatTokens(tokenCount: number): string {
@@ -34,17 +46,18 @@ export const getPromptTokenCount = async (prompt: string): Promise<number> => {
     // Handle empty string case
     if (!prompt || prompt.trim().length === 0) return 0;
     
-    // Try to initialize encoder up to 3 times
+    // Try to initialize encoder with exponential backoff
     for (let i = 0; i < 3; i++) {
       const isReady = await initializeTokenEncoder();
       if (isReady && encoder) {
         return encoder.encode(prompt).length;
       }
-      // Wait a bit before retrying
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Exponential backoff between retries
+      const delay = Math.pow(2, i) * 100; // 100ms, 200ms, 400ms
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
     
-    console.warn("Token encoder initialization failed after retries");
+    console.warn("Token encoder initialization failed after retries with backoff");
     return 0;
   } catch (error) {
     console.error("Token calculation error:", error);
