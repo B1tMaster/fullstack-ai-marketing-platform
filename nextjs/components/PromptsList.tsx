@@ -113,7 +113,7 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
           }}
           onSave={(updatedPrompt) => {
             setPrompts(prev => 
-              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt as Prompt : p)
             );
             handleEditorClose();
           }}
