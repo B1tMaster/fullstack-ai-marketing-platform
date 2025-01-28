@@ -6,6 +6,7 @@ import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
+import logger from "@/utils/logger";
 
 const newPromptSchema = z.object({
   name: z.string().default("New Prompt"),
@@ -36,7 +37,11 @@ export async function GET(
 
     return NextResponse.json(prompts);
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to fetch prompts", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectPromptsRoute',
+      action: 'GET',
+      projectId
+    });
     return NextResponse.json(
       { error: "Failed to fetch prompts" },
       { status: 500 }
@@ -75,7 +80,12 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to delete prompt", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectPromptsRoute',
+      action: 'DELETE',
+      projectId,
+      promptId
+    });
     return NextResponse.json(
       { error: "Failed to delete prompt" },
       { status: 500 }
@@ -125,7 +135,12 @@ export async function PATCH(
 
     return NextResponse.json(updatedPrompt);
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to update prompt", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectPromptsRoute',
+      action: 'PATCH',
+      projectId,
+      promptId
+    });
     return NextResponse.json(
       { error: "Failed to update prompt" },
       { status: 500 }
@@ -161,7 +176,11 @@ export async function POST(
 
     return NextResponse.json(newPrompt);
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to create prompt", error instanceof Error ? error : new Error(String(error)), {
+      component: 'projectPromptsRoute',
+      action: 'POST',
+      projectId
+    });
     return NextResponse.json(
       { error: "Failed to create prompt" },
       { status: 500 }
