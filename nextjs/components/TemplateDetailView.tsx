@@ -54,11 +54,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
     fetchPrompts();
   }, [template.id]);
 
-  const handlePromptClick = (prompt: CommonPrompt) => {
-    setSelectedPrompt(prompt);
-    router.push(`?promptId=${prompt.id}`, { scroll: false });
-  };
-
   const handleDeleteTemplate = async () => {
     setIsDeletingTemplate(true);
     try {
