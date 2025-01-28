@@ -5,11 +5,7 @@ import { Prompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
-import {
-  formatTokens,
-  getPromptTokenCount,
-  initializeTokenEncoder,
-} from "@/utils/tokenHelper";
+import { formatTokens, getPromptTokenCount } from "@/utils/tokenHelper";
 import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 
 import {
