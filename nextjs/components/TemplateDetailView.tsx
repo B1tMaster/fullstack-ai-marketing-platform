@@ -25,7 +25,6 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
     useState(false);
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const fetchPrompts = async () => {
