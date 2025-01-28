@@ -66,7 +66,11 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       toast.success("Template deleted successfully.");
       router.push("/templates?deleted=true");
     } catch (error) {
-      console.error("Error deleting template", error);
+      logger.error("Failed to delete template", error, {
+        component: 'TemplateDetailView',
+        action: 'handleDeleteTemplate',
+        templateId: template.id
+      });
       toast.error("Error deleting template. Please try again later");
     } finally {
       setIsDeletingTemplate(false);

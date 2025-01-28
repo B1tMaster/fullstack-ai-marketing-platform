@@ -8,6 +8,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 interface PromptsListProps {
   prompts: Prompt[];
@@ -58,7 +59,12 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
       );
       toast.success("Prompt updated successfully");
     } catch (error) {
-      console.error("Failed to update prompt", error);
+      logger.error("Failed to update prompt", error, {
+        component: 'PromptsList',
+        action: 'handlePromptUpdate',
+        projectId,
+        promptId
+      });
       toast.error("Failed to update prompt");
     }
   };
@@ -74,7 +80,12 @@ function PromptsList({ prompts, projectId, onPromptDeleted, setPrompts }: Prompt
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");
     } catch (error) {
-      console.error("Failed to delete prompt", error);
+      logger.error("Failed to delete prompt", error, {
+        component: 'PromptsList',
+        action: 'handleDeletePrompt',
+        projectId,
+        promptId: promptToDelete
+      });
       toast.error("Failed to delete prompt");
     } finally {
       setIsDeleting(false);
