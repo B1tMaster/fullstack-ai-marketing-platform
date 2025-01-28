@@ -72,8 +72,13 @@ function TemplatePromptEditor({
         onSave(completeUpdatedPrompt);
       }
       toast.success("Prompt saved successfully");
-    } catch (error) {
-      console.error("Failed to save prompt:", error);
+    } catch (error: unknown) {
+      logger.error("Failed to save prompt", error instanceof Error ? error : new Error(String(error)), {
+        component: 'TemplatePromptEditor',
+        action: 'handleSave',
+        templateId,
+        promptId: updatedPrompt.id
+      });
       toast.error("Failed to save prompt");
     } finally {
       setIsSaving(false);

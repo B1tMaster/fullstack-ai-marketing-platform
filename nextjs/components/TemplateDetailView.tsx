@@ -65,8 +65,8 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       await axios.delete(`/api/templates/${template.id}`);
       toast.success("Template deleted successfully.");
       router.push("/templates?deleted=true");
-    } catch (error) {
-      logger.error("Failed to delete template", error, {
+    } catch (error: unknown) {
+      logger.error("Failed to delete template", error instanceof Error ? error : new Error(String(error)), {
         component: 'TemplateDetailView',
         action: 'handleDeleteTemplate',
         templateId: template.id

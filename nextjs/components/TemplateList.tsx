@@ -32,7 +32,12 @@ function TemplateList({ templates }: TemplateListProps) {
           count: response.data.length
         });
         return response.data.length;
-      } catch (error) {
+      } catch (error: unknown) {
+        logger.error("Failed to fetch template prompts", error instanceof Error ? error : new Error(String(error)), {
+          component: 'TemplateList',
+          action: 'fetchPromptCount',
+          templateId
+        });
         return 0;
       }
     };
