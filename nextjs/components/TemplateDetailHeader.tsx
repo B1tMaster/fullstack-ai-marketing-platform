@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import axios from "axios";
 import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 interface TemplateDetailHeaderProps {
   template: Template;
