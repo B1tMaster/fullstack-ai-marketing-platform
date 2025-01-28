@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { Dot } from "lucide-react";
 import { getTimeDifference } from "@/utils/timeUtils";
+import logger from "@/utils/logger";
 
 interface TemplateListProps {
   templates: Template[];
