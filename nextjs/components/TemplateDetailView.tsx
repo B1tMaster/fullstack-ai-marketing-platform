@@ -41,8 +41,8 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
           action: 'fetchPrompts',
           prompts: response.data
         });
-      } catch (error) {
-        logger.error("Failed to fetch prompts", error, {
+      } catch (error: unknown) {
+        logger.error("Failed to fetch prompts", error instanceof Error ? error : new Error(String(error)), {
           component: 'TemplateDetailView',
           action: 'fetchPrompts',
           templateId: template.id
