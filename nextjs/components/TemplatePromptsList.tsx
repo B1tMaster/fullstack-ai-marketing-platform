@@ -8,6 +8,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 interface TemplatePromptsListProps {
   prompts: Prompt[];
