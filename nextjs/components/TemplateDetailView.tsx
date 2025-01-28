@@ -94,8 +94,12 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       const newPrompt = await response.data;
       setPrompts((prev) => [...prev, newPrompt]);
       router.push(`?promptId=${newPrompt.id}`);
-    } catch (error) {
-      console.error("Error creating template prompt", error);
+    } catch (error: unknown) {
+      logger.error("Failed to create template prompt", error instanceof Error ? error : new Error(String(error)), {
+        component: 'TemplateDetailView',
+        action: 'handleCreatePrompt',
+        templateId: template.id
+      });
       toast.error("Error creating template prompt. Please try again later.");
     } finally {
       setIscCreatingPrompt(false);
