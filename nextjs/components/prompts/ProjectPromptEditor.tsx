@@ -5,6 +5,7 @@ import BasePromptEditor from "./BasePromptEditor";
 import { CommonPrompt } from "@/interfaces/CommonPrompt";
 import axios from "axios";
 import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 interface ProjectPromptEditorProps {
   projectId: string;

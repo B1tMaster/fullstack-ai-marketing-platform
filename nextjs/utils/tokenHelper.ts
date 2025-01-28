@@ -1,5 +1,6 @@
 import { Tiktoken } from "js-tiktoken/lite";
 import { encodingForModel } from "js-tiktoken";
+import logger from "@/utils/logger";
 
 let encoder: Tiktoken | null = null;
 let encoderInitialized = false;

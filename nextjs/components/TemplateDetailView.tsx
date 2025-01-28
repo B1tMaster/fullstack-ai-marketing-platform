@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import TemplateDetailBody from "./TemplateDetailBody";
 import { CommonPrompt } from "@/interfaces/CommonPrompt";
 import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
+import logger from "@/utils/logger";
 
 interface TemplateDetailViewProps {
   template: Template;
