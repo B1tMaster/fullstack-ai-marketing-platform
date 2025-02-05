@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { getTemplatesForUser } from "@/server/queries";
+import axios from "axios";
 import { Template } from "@/server/db/schema";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
@@ -49,7 +49,8 @@ export default function TemplateSelectionPopup({
 
       setIsLoading(true);
       try {
-        const userTemplates = await getTemplatesForUser();
+        const response = await axios.get("/api/templates");
+        const userTemplates = response.data;
         setTemplates(userTemplates);
       } catch (error) {
         logger.error(
