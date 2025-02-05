@@ -160,7 +160,7 @@ export default function TemplateSelectionPopup({
                 <SelectTrigger className="w-full h-12 px-4 border border-gray-200 bg-gray-50 hover:border-main focus:border-main focus:ring-2 focus:ring-main/20 rounded-xl">
                   <SelectValue placeholder="Select a template" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-xl">
+                <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-xl max-h-[300px]">
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.title}
