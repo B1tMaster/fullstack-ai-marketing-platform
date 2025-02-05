@@ -49,8 +49,12 @@ export default function TemplateSelectionPopup({
 
       setIsLoading(true);
       try {
-        const response = await axios.get("/api/templates");
+        const response = await axios.get<Template[]>("/api/templates");
         const userTemplates = response.data;
+        if (!userTemplates?.length) {
+          toast.error("No templates found");
+          return;
+        }
         setTemplates(userTemplates);
       } catch (error) {
         logger.error(
@@ -80,35 +84,20 @@ export default function TemplateSelectionPopup({
     setIsInjecting(true);
     try {
       // Fetch template prompts
-      const response = await fetch(
-        `/api/templates/${selectedTemplateId}/prompts`
-      );
-      if (!response.ok) throw new Error("Failed to fetch template prompts");
-
-      const templatePrompts = await response.json();
+      const promptsResponse = await axios.get(`/api/templates/${selectedTemplateId}/prompts`);
+      const templatePrompts = promptsResponse.data;
 
       // Inject prompts into project
-      const injectResponse = await fetch(
-        `/api/projects/${projectId}/prompts/bulk`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompts: templatePrompts.map((prompt) => ({
-              name: prompt.name,
-              prompt: prompt.prompt,
-              order: prompt.order,
-              tokenCount: prompt.tokenCount,
-            })),
-          }),
-        }
-      );
+      const injectResponse = await axios.post(`/api/projects/${projectId}/prompts/bulk`, {
+        prompts: templatePrompts.map((prompt) => ({
+          name: prompt.name,
+          prompt: prompt.prompt,
+          order: prompt.order,
+          tokenCount: prompt.tokenCount,
+        })),
+      });
 
-      if (!injectResponse.ok) throw new Error("Failed to inject prompts");
-
-      const result = await injectResponse.json();
+      const result = injectResponse.data;
       onTemplateInjected(result.insertedCount);
       toast.success(`Injected ${result.insertedCount} prompts from template`);
       onOpenChange(false);
