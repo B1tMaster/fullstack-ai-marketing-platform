@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "./ui/dialog";
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { getTemplatesForUser } from "@/server/queries";
 import { Template } from "@/server/db/schema";
