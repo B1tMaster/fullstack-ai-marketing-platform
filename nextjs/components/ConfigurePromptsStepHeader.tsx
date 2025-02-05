@@ -15,6 +15,7 @@ function ConfigurePromptsStepHeader({
   handlePromptCreate,
   isCreatingPrompt,
   isImportingTemplate,
+  onTemplateLoad,
 }: ConfigurePromptsStepHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row items-start justify-between">
