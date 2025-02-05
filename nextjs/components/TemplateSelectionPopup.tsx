@@ -49,9 +49,26 @@ export default function TemplateSelectionPopup({
 
       setIsLoading(true);
       try {
+        logger.debug("Fetching templates", {
+          component: "TemplateSelectionPopup",
+          action: "fetchTemplates"
+        });
+        
         const response = await axios.get<Template[]>("/api/templates");
         const userTemplates = response.data;
+        
+        logger.debug("Templates response received", {
+          component: "TemplateSelectionPopup",
+          action: "fetchTemplates",
+          templatesCount: userTemplates?.length || 0,
+          templates: userTemplates
+        });
+
         if (!userTemplates?.length) {
+          logger.warn("No templates found", {
+            component: "TemplateSelectionPopup",
+            action: "fetchTemplates"
+          });
           toast.error("No templates found");
           return;
         }

@@ -5,7 +5,16 @@ import { HttpStatus } from "@/constants/http";
 
 export async function GET() {
   try {
+    logger.debug("Fetching templates for user", {
+      component: "api",
+      action: "getTemplates"
+    });
     const templates = await getTemplatesForUser();
+    logger.debug("Templates fetched successfully", {
+      component: "api",
+      action: "getTemplates",
+      templateCount: templates.length
+    });
     return NextResponse.json(templates);
   } catch (error) {
     logger.error(
