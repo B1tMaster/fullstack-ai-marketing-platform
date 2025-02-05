@@ -19,7 +19,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { getTemplatesForUser } from "@/server/queries";
 import { Template } from "@/server/db/schema";
-import { useToast } from "./ui/use-toast";
+import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 import ConfirmationModal from "./ConfirmationModal";
 
@@ -41,7 +41,6 @@ export default function TemplateSelectionPopup({
   const [isLoading, setIsLoading] = useState(false);
   const [isInjecting, setIsInjecting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const { toast } = useToast();
 
   // Fetch templates when dialog opens
   useEffect(() => {
@@ -61,11 +60,7 @@ export default function TemplateSelectionPopup({
             action: "fetchTemplates",
           }
         );
-        toast({
-          title: "Error",
-          description: "Failed to load templates",
-          variant: "destructive",
-        });
+        toast.error("Failed to load templates");
       } finally {
         setIsLoading(false);
       }
@@ -114,10 +109,7 @@ export default function TemplateSelectionPopup({
 
       const result = await injectResponse.json();
       onTemplateInjected(result.insertedCount);
-      toast({
-        title: "Success",
-        description: `Injected ${result.insertedCount} prompts from template`,
-      });
+      toast.success(`Injected ${result.insertedCount} prompts from template`);
       onOpenChange(false);
     } catch (error) {
       logger.error(
@@ -130,11 +122,7 @@ export default function TemplateSelectionPopup({
           templateId: selectedTemplateId,
         }
       );
-      toast({
-        title: "Error",
-        description: "Failed to inject template prompts",
-        variant: "destructive",
-      });
+      toast.error("Failed to inject template prompts");
     } finally {
       setIsInjecting(false);
       setShowConfirmation(false);
