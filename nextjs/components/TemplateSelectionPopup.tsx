@@ -143,22 +143,24 @@ export default function TemplateSelectionPopup({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Load Template Prompts</DialogTitle>
+        <DialogContent className="sm:max-w-[525px] p-6 bg-white rounded-2xl">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              Load Template Prompts
+            </DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="space-y-4">
             {isLoading ? (
               <div className="flex justify-center">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             ) : (
               <Select onValueChange={handleTemplateSelect}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full h-12 px-4 border border-gray-200 bg-gray-50 hover:border-main focus:border-main focus:ring-2 focus:ring-main/20 rounded-xl">
                   <SelectValue placeholder="Select a template" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-xl">
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.title}
@@ -169,17 +171,19 @@ export default function TemplateSelectionPopup({
             )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
             <Button
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isInjecting}
+              className="mt-3 sm:mt-0 w-full sm:w-auto border-main text-main hover:bg-main/5"
             >
               Cancel
             </Button>
             <Button
               onClick={() => setShowConfirmation(true)}
               disabled={!selectedTemplateId || isInjecting}
+              className="w-full sm:w-auto bg-main hover:bg-main/90"
             >
               {isInjecting ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
