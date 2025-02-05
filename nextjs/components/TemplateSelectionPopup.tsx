@@ -115,7 +115,11 @@ export default function TemplateSelectionPopup({
       });
 
       const result = injectResponse.data;
-      onTemplateInjected(result.insertedCount);
+      if (result.insertedCount > 0) {
+        onTemplateInjected(result.insertedCount);
+      } else {
+        throw new Error("No prompts were injected");
+      }
       toast.success(`Injected ${result.insertedCount} prompts from template`);
       onOpenChange(false);
     } catch (error) {

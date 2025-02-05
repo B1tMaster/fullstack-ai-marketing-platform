@@ -50,21 +50,21 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
     }
   };
 
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      try {
-        const response = await axios.get<Prompt[]>(
-          `/api/projects/${projectId}/prompts`
-        );
-        setPrompts(response.data);
-      } catch (error) {
-        console.error("Failed to fetch prompts", error);
-        toast.error("Failed to load prompts");
-      } finally {
-        setIsLoadingPrompts(false);
-      }
-    };
+  const fetchPrompts = async () => {
+    try {
+      const response = await axios.get<Prompt[]>(
+        `/api/projects/${projectId}/prompts`
+      );
+      setPrompts(response.data);
+    } catch (error) {
+      console.error("Failed to fetch prompts", error);
+      toast.error("Failed to load prompts");
+    } finally {
+      setIsLoadingPrompts(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPrompts();
   }, [projectId]);
 
