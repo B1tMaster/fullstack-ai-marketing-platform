@@ -8,6 +8,7 @@ interface ConfigurePromptsStepHeaderProps {
   isCreatingPrompt: boolean;
   isImportingTemplate: boolean;
   handlePromptCreate: () => void;
+  onTemplateLoad: () => void;
 }
 
 function ConfigurePromptsStepHeader({
@@ -22,7 +23,11 @@ function ConfigurePromptsStepHeader({
       </h2>
       <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
         {/* TODO: COME BACK TO AFTER TEMPLATE MODULE */}
-        <Button className="bg-main/10 text-main font-semibold hover:bg-main/15 text-sm sm:text-base rounded-lg w-full sm:w-auto h-8 sm:h-10">
+        <Button 
+          onClick={onTemplateLoad}
+          disabled={isImportingTemplate}
+          className="bg-main/10 text-main font-semibold hover:bg-main/15 text-sm sm:text-base rounded-lg w-full sm:w-auto h-8 sm:h-10"
+        >
           <LayoutTemplate className="h-4 w-4 mr-2" strokeWidth={3} />
           {isImportingTemplate ? "Importing..." : "Load Template"}
         </Button>
