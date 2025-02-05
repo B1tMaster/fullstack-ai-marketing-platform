@@ -10,6 +10,7 @@ import { Prompt } from "@/server/db/schema";
 import { freeTokenEncoder } from "@/utils/tokenHelper";
 import toast from "react-hot-toast";
 import ProjectPromptEditor from "./prompts/ProjectPromptEditor";
+import TemplateSelectionPopup from "./TemplateSelectionPopup";
 
 interface ConfigurePromptsStepProps {
   projectId: string;
@@ -20,7 +21,7 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(true);
   const [isImportingTemplate, setIsImportingTemplate] = useState(false);
   const [isCreatingPrompt, setIsCreatingPrompt] = useState(false);
-
+  const [showTemplatePopup, setShowTemplatePopup] = useState(false);
   const router = useRouter();
 
   const handlePromptCreate = async () => {
@@ -83,6 +84,18 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
         isCreatingPrompt={isCreatingPrompt}
         handlePromptCreate={handlePromptCreate}
         isImportingTemplate={isImportingTemplate}
+        onTemplateLoad={() => setShowTemplatePopup(true)}
+      />
+
+      <TemplateSelectionPopup
+        projectId={projectId}
+        isOpen={showTemplatePopup}
+        onOpenChange={setShowTemplatePopup}
+        onTemplateInjected={(injectedCount) => {
+          // Refresh prompts list
+          fetchPrompts();
+          toast.success(`Successfully injected ${injectedCount} prompts`);
+        }}
       />
 
       <ProjectPromptEditor
