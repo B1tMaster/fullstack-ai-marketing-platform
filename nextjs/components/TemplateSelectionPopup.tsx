@@ -120,7 +120,6 @@ export default function TemplateSelectionPopup({
       } else {
         throw new Error("No prompts were injected");
       }
-      toast.success(`Injected ${result.insertedCount} prompts from template`);
       onOpenChange(false);
     } catch (error) {
       logger.error(
