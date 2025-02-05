@@ -158,7 +158,7 @@ export default function TemplateSelectionPopup({
             ) : (
               <Select onValueChange={handleTemplateSelect}>
                 <SelectTrigger className="w-full h-12 px-4 border border-gray-200 bg-gray-50 hover:border-main focus:border-main focus:ring-2 focus:ring-main/20 rounded-xl">
-                  <SelectValue placeholder="Select a template" />
+                  <SelectValue placeholder="Select a template" className="text-[1.2em]" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-xl max-h-[300px]">
                   {templates.map((template) => (
