@@ -18,7 +18,7 @@ const bulkPromptSchema = z.object({
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const { userId } = getAuth(request);
@@ -26,7 +26,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
     const body = await request.json();
     const parsed = bulkPromptSchema.safeParse(body);
 
