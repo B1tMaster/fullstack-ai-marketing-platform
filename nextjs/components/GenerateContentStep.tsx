@@ -79,14 +79,33 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
           totalTokenCount += asset.tokenCount ?? 0;
         }
         setIsAssetsTokenExceeded(totalTokenCount > MAX_TOKENS_ASSETS);
+        logger.debug('Asset token count check', {
+          totalTokenCount,
+          maxTokens: MAX_TOKENS_ASSETS,
+          isExceeded: totalTokenCount > MAX_TOKENS_ASSETS
+        });
 
         // Check to make sure we don't exceed prompt token limits
+        let promptExceeded = false;
         for (const prompt of promptsResponse.data) {
-          if (prompt?.tokenCount ?? 0 > MAX_TOKENS_PROMPT) {
-            setIsPromptsTokenExceeded(true);
+          const promptTokens = prompt?.tokenCount ?? 0;
+          logger.debug('Checking prompt token count', {
+            promptId: prompt.id,
+            promptTokens,
+            maxTokens: MAX_TOKENS_PROMPT
+          });
+          
+          if (promptTokens > MAX_TOKENS_PROMPT) {
+            promptExceeded = true;
+            logger.info('Prompt exceeds token limit', {
+              promptId: prompt.id,
+              promptTokens,
+              maxTokens: MAX_TOKENS_PROMPT
+            });
             break;
           }
         }
+        setIsPromptsTokenExceeded(promptExceeded);
       } catch (error) {
         logger.error("Failed to fetch project data", error, {
           projectId,
