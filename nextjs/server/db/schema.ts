@@ -24,6 +24,7 @@ export const projectsTable = pgTable("projects", {
 export const projectsRelations = relations(projectsTable, ({ many }) => ({
   assets: many(assetTable),
   prompts: many(promptsTable),
+  generatedContent: many(generatedContentTable),
 }));
 
 export const templatesTable = pgTable("templates", {
@@ -42,7 +43,6 @@ export const templatesTable = pgTable("templates", {
 export const templatesRelations = relations(templatesTable, ({ many }) => ({
   templatePrompts: many(templatePromptsTable),
 }));
-
 
 export const assetTable = pgTable("assets", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -160,6 +160,33 @@ export const templatePromptRelations = relations(
   })
 );
 
+export const generatedContentTable = pgTable("generated_content", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projectsTable.id, {
+      onDelete: "cascade",
+    }),
+  name: text("name").notNull(),
+  result: text("result").notNull(),
+  order: integer("order").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const GeneratedContentRelations = relations(
+  generatedContentTable,
+  ({ one }) => ({
+    project: one(projectsTable, {
+      fields: [generatedContentTable.projectId],
+      references: [projectsTable.id],
+    }),
+  })
+);
+
 // Types
 export type InsertProject = typeof projectsTable.$inferInsert;
 export type Project = typeof projectsTable.$inferSelect;
@@ -174,3 +201,5 @@ export type Template = typeof templatesTable.$inferSelect;
 export type InsertTemplate = typeof templatesTable.$inferInsert;
 export type TemplatePrompt = typeof templatePromptsTable.$inferSelect;
 export type InsertTemplatePrompt = typeof templatePromptsTable.$inferInsert;
+export type GeneratedContent = typeof generatedContentTable.$inferSelect;
+export type InsertGeneratedContent = typeof generatedContentTable.$inferInsert;
