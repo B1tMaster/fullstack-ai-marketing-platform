@@ -1,8 +1,9 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import GenerateStepHeader from "./GenerateStepHeader";
 import axios from "axios";
+import logger from "@/utils/logger";
 import { Asset, GeneratedContent, Prompt } from "@/server/db/schema";
 import { MAX_TOKENS_ASSETS, MAX_TOKENS_PROMPT } from "@/lib/constants";
 import toast from "react-hot-toast";
@@ -87,10 +88,13 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
           }
         }
       } catch (error) {
+        logger.error("Failed to fetch project data", error, {
+          projectId,
+          component: 'GenerateContentStep'
+        });
         toast.error("Failed to fetch project data");
         setProjectHasContent(false);
         setProjectHasPrompts(false);
-        console.error(error);
       } finally {
         setIsLoading(false);
       }

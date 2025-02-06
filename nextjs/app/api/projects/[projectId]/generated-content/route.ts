@@ -31,7 +31,10 @@ export async function GET(
 
     return NextResponse.json(generatedContent);
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to fetch generated content", error, {
+      projectId,
+      component: 'generated-content-api'
+    });
     return NextResponse.json(
       { error: "Failed to fetch generated content" },
       { status: 500 }
