@@ -1,10 +1,11 @@
 import { db } from "@/server/db";
 import { promptsTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { HttpStatus } from "@/constants/http";
 import { z } from "zod";
 import logger from "@/utils/logger";
+import { Params } from "../route";
 
 const bulkPromptSchema = z.object({
   prompts: z.array(
@@ -17,22 +18,30 @@ const bulkPromptSchema = z.object({
   ),
 });
 
+export type Params = Promise<{ projectId: string }>;
+
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ projectId: string }> }
+  { params }: { params: Params }
 ) {
+  const projectId = (await params).projectId;
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
-    const { projectId } = await params;
     const body = await request.json();
     const parsed = bulkPromptSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error }, { status: HttpStatus.BAD_REQUEST });
+      return NextResponse.json(
+        { error: parsed.error },
+        { status: HttpStatus.BAD_REQUEST }
+      );
     }
 
     const inserted = await db.transaction(async (tx) => {
