@@ -2,19 +2,19 @@
 
 import React, { useState } from "react";
 import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
-import { Prompt } from "@/server/db/schema";
-import PromptContainerCard from "./PromptContainerCard";
+import { TemplatePrompt } from "@/server/db/schema";
+import TemplatePromptContainerCard from "./TemplatePromptContainerCard";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
-import { TemplatePrompt } from "@/server/db/schema";
+
 interface TemplatePromptsListProps {
   prompts: TemplatePrompt[];
   templateId: string;
   onPromptDeleted: (deletedPromptId: string) => void;
-  setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setPrompts: React.Dispatch<React.SetStateAction<TemplatePrompt[]>>;
 }
 
 function TemplatePromptsList({
@@ -32,10 +32,12 @@ function TemplatePromptsList({
   );
   const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+  const [editingPrompt, setEditingPrompt] = useState<TemplatePrompt | null>(
+    null
+  );
   const isEditorOpen = !!editingPrompt;
 
-  const handlePromptClick = (prompt: Prompt) => {
+  const handlePromptClick = (prompt: TemplatePrompt) => {
     if (editingPrompt?.id === prompt.id) {
       setEditingPrompt(null);
       router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
@@ -97,7 +99,7 @@ function TemplatePromptsList({
     <div className="space-y-4 mt-6">
       {prompts.map((prompt) => (
         <div key={prompt.id}>
-          <PromptContainerCard
+          <TemplatePromptContainerCard
             key={prompt.id}
             prompt={prompt}
             isActive={searchParams.get("promptId") === prompt.id}
@@ -129,7 +131,9 @@ function TemplatePromptsList({
             });
             setPrompts((prev) =>
               prev.map((p) =>
-                p.id === updatedPrompt.id ? (updatedPrompt as Prompt) : p
+                p.id === updatedPrompt.id
+                  ? (updatedPrompt as TemplatePrompt)
+                  : p
               )
             );
             handleEditorClose();

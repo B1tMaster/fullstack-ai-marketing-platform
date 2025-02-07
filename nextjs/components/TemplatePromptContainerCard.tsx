@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Prompt } from "@/server/db/schema";
+import { TemplatePrompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
@@ -15,20 +15,20 @@ import {
   TooltipTrigger,
 } from "@radix-ui/react-tooltip";
 
-interface PromptContainerCardProps {
-  prompt: Prompt;
+interface TemplatePromptContainerCardProps {
+  prompt: TemplatePrompt;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
   onUpdate: (newPrompt: string) => void;
 }
 
-function PromptContainerCard({
+function TemplatePromptContainerCard({
   prompt,
   isActive,
   onClick,
   onDelete,
-}: PromptContainerCardProps) {
+}: TemplatePromptContainerCardProps) {
   const [isExceeded, setIsExceeded] = useState(false);
   const [tokenCount, setTokenCount] = useState(0);
 
@@ -118,4 +118,4 @@ function PromptContainerCard({
   );
 }
 
-export default PromptContainerCard;
+export default TemplatePromptContainerCard;
