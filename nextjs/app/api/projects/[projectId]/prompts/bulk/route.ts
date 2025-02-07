@@ -5,7 +5,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { HttpStatus } from "@/constants/http";
 import { z } from "zod";
 import logger from "@/utils/logger";
-import { Params } from "../route";
 
 const bulkPromptSchema = z.object({
   prompts: z.array(
