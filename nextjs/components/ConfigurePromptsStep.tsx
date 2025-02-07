@@ -18,7 +18,7 @@ interface ConfigurePromptsStepProps {
 function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(true);
-  const [isImportingTemplate, setIsImportingTemplate] = useState(false);
+  const [isImportingTemplate] = useState(false);
   const [isCreatingPrompt, setIsCreatingPrompt] = useState(false);
   const [showTemplatePopup, setShowTemplatePopup] = useState(false);
   const router = useRouter();

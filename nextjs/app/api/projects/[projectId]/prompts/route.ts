@@ -2,7 +2,6 @@ import { db } from "@/server/db";
 import { promptsTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { getPromptTokenCount } from "@/utils/tokenHelper";
-import { MAX_TOKENS_PROMPT } from "@/lib/constants";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -37,11 +36,15 @@ export async function GET(
 
     return NextResponse.json(prompts);
   } catch (error) {
-    logger.error("Failed to fetch prompts", error instanceof Error ? error : new Error(String(error)), {
-      component: 'projectPromptsRoute',
-      action: 'GET',
-      projectId
-    });
+    logger.error(
+      "Failed to fetch prompts",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "projectPromptsRoute",
+        action: "GET",
+        projectId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to fetch prompts" },
       { status: 500 }
@@ -80,12 +83,16 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("Failed to delete prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'projectPromptsRoute',
-      action: 'DELETE',
-      projectId,
-      promptId
-    });
+    logger.error(
+      "Failed to delete prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "projectPromptsRoute",
+        action: "DELETE",
+        projectId,
+        promptId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to delete prompt" },
       { status: 500 }
@@ -135,12 +142,16 @@ export async function PATCH(
 
     return NextResponse.json(updatedPrompt);
   } catch (error) {
-    logger.error("Failed to update prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'projectPromptsRoute',
-      action: 'PATCH',
-      projectId,
-      promptId
-    });
+    logger.error(
+      "Failed to update prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "projectPromptsRoute",
+        action: "PATCH",
+        projectId,
+        promptId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to update prompt" },
       { status: 500 }
@@ -176,11 +187,15 @@ export async function POST(
 
     return NextResponse.json(newPrompt);
   } catch (error) {
-    logger.error("Failed to create prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'projectPromptsRoute',
-      action: 'POST',
-      projectId
-    });
+    logger.error(
+      "Failed to create prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "projectPromptsRoute",
+        action: "POST",
+        projectId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to create prompt" },
       { status: 500 }

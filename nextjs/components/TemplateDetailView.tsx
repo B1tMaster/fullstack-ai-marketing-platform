@@ -6,7 +6,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import TemplateDetailHeader from "./TemplateDetailHeader";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import TemplateDetailBody from "./TemplateDetailBody";
 import { CommonPrompt } from "@/interfaces/CommonPrompt";
 import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
@@ -19,9 +19,11 @@ interface TemplateDetailViewProps {
 function TemplateDetailView({ template }: TemplateDetailViewProps) {
   const [prompts, setPrompts] = useState<CommonPrompt[]>([]);
   const [isDeletingTemplate, setIsDeletingTemplate] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<CommonPrompt | null>(null);
+  const [selectedPrompt, setSelectedPrompt] = useState<CommonPrompt | null>(
+    null
+  );
   const [isCreatingPrompt, setIscCreatingPrompt] = useState(false);
-  const [showTemplateDeleteConfirmation, setShowTemplateDeleteConfirmation] = 
+  const [showTemplateDeleteConfirmation, setShowTemplateDeleteConfirmation] =
     useState(false);
 
   const router = useRouter();
@@ -34,17 +36,21 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
         );
         setPrompts(response.data);
 
-        logger.debug('Prompts fetched', {
-          component: 'TemplateDetailView',
-          action: 'fetchPrompts',
-          prompts: response.data
+        logger.debug("Prompts fetched", {
+          component: "TemplateDetailView",
+          action: "fetchPrompts",
+          prompts: response.data,
         });
       } catch (error: unknown) {
-        logger.error("Failed to fetch prompts", error instanceof Error ? error : new Error(String(error)), {
-          component: 'TemplateDetailView',
-          action: 'fetchPrompts',
-          templateId: template.id
-        });
+        logger.error(
+          "Failed to fetch prompts",
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            component: "TemplateDetailView",
+            action: "fetchPrompts",
+            templateId: template.id,
+          }
+        );
         toast.error("Failed to load prompts. Please try again.");
       }
     };
@@ -59,11 +65,15 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       toast.success("Template deleted successfully.");
       router.push("/templates?deleted=true");
     } catch (error: unknown) {
-      logger.error("Failed to delete template", error instanceof Error ? error : new Error(String(error)), {
-        component: 'TemplateDetailView',
-        action: 'handleDeleteTemplate',
-        templateId: template.id
-      });
+      logger.error(
+        "Failed to delete template",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "TemplateDetailView",
+          action: "handleDeleteTemplate",
+          templateId: template.id,
+        }
+      );
       toast.error("Error deleting template. Please try again later");
     } finally {
       setIsDeletingTemplate(false);
@@ -88,18 +98,20 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
       setPrompts((prev) => [...prev, newPrompt]);
       router.push(`?promptId=${newPrompt.id}`);
     } catch (error: unknown) {
-      logger.error("Failed to create template prompt", error instanceof Error ? error : new Error(String(error)), {
-        component: 'TemplateDetailView',
-        action: 'handleCreatePrompt',
-        templateId: template.id
-      });
+      logger.error(
+        "Failed to create template prompt",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "TemplateDetailView",
+          action: "handleCreatePrompt",
+          templateId: template.id,
+        }
+      );
       toast.error("Error creating template prompt. Please try again later.");
     } finally {
       setIscCreatingPrompt(false);
     }
   };
-
-
 
   const handleCloseDialog = () => {
     setSelectedPrompt(null);
@@ -135,8 +147,8 @@ function TemplateDetailView({ template }: TemplateDetailViewProps) {
           if (!open) handleCloseDialog();
         }}
         onSave={(updatedPrompt) => {
-          setPrompts(prev => 
-            prev.map(p => p.id === updatedPrompt.id ? updatedPrompt : p)
+          setPrompts((prev) =>
+            prev.map((p) => (p.id === updatedPrompt.id ? updatedPrompt : p))
           );
           handleCloseDialog();
         }}
