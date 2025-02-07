@@ -13,7 +13,7 @@ export async function PATCH(
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
   }
 
   const templateId = (await params).templateId;
@@ -21,7 +21,7 @@ export async function PATCH(
   try {
     const { title } = await request.json();
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
+      return NextResponse.json({ error: "Title is required" }, { status: HttpStatus.BAD_REQUEST });
     }
 
     const updatedTemplate = await db
@@ -38,7 +38,7 @@ export async function PATCH(
     if (updatedTemplate.length === 0) {
       return NextResponse.json(
         { error: "Template not found" },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       );
     }
 
@@ -55,7 +55,7 @@ export async function PATCH(
     );
     return NextResponse.json(
       { error: "Failed to update template" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -66,7 +66,7 @@ export async function DELETE(
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
   }
 
   const templateId = (await params).templateId;
@@ -85,7 +85,7 @@ export async function DELETE(
     if (deletedTemplate.length === 0) {
       return NextResponse.json(
         { error: "Template not found" },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       );
     }
 
@@ -102,7 +102,7 @@ export async function DELETE(
     );
     return NextResponse.json(
       { error: "Failed to delete template" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
