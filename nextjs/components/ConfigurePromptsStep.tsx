@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ConfirmationModal from "./ConfirmationModal";
 import ConfigurePromptsStepHeader from "./ConfigurePromptsStepHeader";
 import PromptsList from "./PromptsList";
 import { useRouter } from "next/navigation";
