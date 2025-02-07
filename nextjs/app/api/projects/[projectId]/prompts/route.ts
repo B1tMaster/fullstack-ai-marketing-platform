@@ -24,7 +24,10 @@ export async function GET(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
     const projectId = (await params).projectId;
@@ -60,7 +63,10 @@ export async function DELETE(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
     const projectId = (await params).projectId;
@@ -104,15 +110,18 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { projectId: string; promptId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
-    const { projectId } = await params;
+    const projectId = (await params).projectId;
     const { promptId, name, prompt: newPrompt } = await request.json();
 
     if (!promptId || !newPrompt || !name) {
@@ -168,7 +177,10 @@ export async function POST(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
     const projectId = (await params).projectId;
@@ -177,7 +189,10 @@ export async function POST(
     const parsedPrompt = newPromptSchema.safeParse(json);
 
     if (!parsedPrompt.success) {
-      return NextResponse.json({ error: parsedPrompt.error }, { status: HttpStatus.BAD_REQUEST });
+      return NextResponse.json(
+        { error: parsedPrompt.error },
+        { status: HttpStatus.BAD_REQUEST }
+      );
     }
 
     const promptData = parsedPrompt.data;
