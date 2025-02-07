@@ -4,6 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";
+import { HttpStatus } from "@/constants/http";
 
 type Params = Promise<{ templateId: string }>;
 
@@ -13,7 +14,10 @@ export async function PATCH(
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   const templateId = (await params).templateId;
@@ -21,7 +25,10 @@ export async function PATCH(
   try {
     const { title } = await request.json();
     if (!title) {
-      return NextResponse.json({ error: "Title is required" }, { status: HttpStatus.BAD_REQUEST });
+      return NextResponse.json(
+        { error: "Title is required" },
+        { status: HttpStatus.BAD_REQUEST }
+      );
     }
 
     const updatedTemplate = await db
@@ -66,7 +73,10 @@ export async function DELETE(
 ) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: HttpStatus.UNAUTHORIZED }
+    );
   }
 
   const templateId = (await params).templateId;

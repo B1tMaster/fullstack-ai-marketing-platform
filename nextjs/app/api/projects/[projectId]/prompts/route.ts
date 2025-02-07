@@ -15,7 +15,7 @@ const newPromptSchema = z.object({
   tokenCount: z.number().default(0),
 });
 
-type Params = Promise<{ projectId: string }>;
+export type Params = Promise<{ projectId: string }>;
 
 export async function GET(
   request: NextRequest,
