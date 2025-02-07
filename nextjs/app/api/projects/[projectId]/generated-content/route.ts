@@ -44,7 +44,7 @@ export async function GET(
     });
     return NextResponse.json(
       { error: "Failed to fetch generated content" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -73,7 +73,7 @@ export async function POST(
     });
 
     if (!project) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+      return NextResponse.json({ error: "Project not found" }, { status: HttpStatus.NOT_FOUND });
     }
 
     const { assets, prompts } = project;
@@ -156,7 +156,7 @@ export async function POST(
     });
     return NextResponse.json(
       { error: "Failed to generate content" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -185,7 +185,7 @@ export async function DELETE(
 
     return NextResponse.json(
       { message: "Generated content deleted" },
-      { status: 200 }
+      { status: HttpStatus.OK }
     );
   } catch (error: unknown) {
     logger.error("Failed to delete generated content", error instanceof Error ? error : new Error(String(error)), {
@@ -194,7 +194,7 @@ export async function DELETE(
     });
     return NextResponse.json(
       { error: "Failed to delete generated content" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -209,7 +209,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const parseResults = updateGeneratedContentSchema.safeParse(body);
     if (!parseResults.success) {
-      return NextResponse.json({ error: parseResults.error }, { status: 400 });
+      return NextResponse.json({ error: parseResults.error }, { status: HttpStatus.BAD_REQUEST });
     }
 
     const { id, result } = parseResults.data;
@@ -223,7 +223,7 @@ export async function PATCH(request: Request) {
     if (updatedContent.length === 0) {
       return NextResponse.json(
         { error: "Generated content not found" },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       );
     }
 
@@ -234,7 +234,7 @@ export async function PATCH(request: Request) {
     });
     return NextResponse.json(
       { error: "Failed to update generated content" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
