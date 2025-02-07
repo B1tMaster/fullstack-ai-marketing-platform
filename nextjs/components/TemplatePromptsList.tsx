@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
-import { TemplatePrompt } from "@/server/db/schema";
+import { TemplatePrompt } from "@/interfaces/TemplatePrompt";
 import TemplatePromptContainerCard from "./TemplatePromptContainerCard";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRouter, useSearchParams } from "next/navigation";

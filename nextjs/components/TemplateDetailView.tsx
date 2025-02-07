@@ -8,7 +8,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import TemplateDetailBody from "./TemplateDetailBody";
-import { CommonPrompt } from "@/interfaces/CommonPrompt";
+import { TemplatePrompt } from "@/interfaces/TemplatePrompt";
 import TemplatePromptEditor from "./prompts/TemplatePromptEditor";
 import logger from "@/utils/logger";
 
@@ -17,9 +17,9 @@ interface TemplateDetailViewProps {
 }
 
 function TemplateDetailView({ template }: TemplateDetailViewProps) {
-  const [prompts, setPrompts] = useState<CommonPrompt[]>([]);
+  const [prompts, setPrompts] = useState<TemplatePrompt[]>([]);
   const [isDeletingTemplate, setIsDeletingTemplate] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<CommonPrompt | null>(
+  const [selectedPrompt, setSelectedPrompt] = useState<TemplatePrompt | null>(
     null
   );
   const [isCreatingPrompt, setIscCreatingPrompt] = useState(false);

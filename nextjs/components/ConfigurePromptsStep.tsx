@@ -105,6 +105,8 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
           prompt: "",
           tokenCount: 0,
           order: 0,
+          createdAt: null,
+          updatedAt: null,
         }}
         isOpen={false}
         onOpenChange={() => {}}

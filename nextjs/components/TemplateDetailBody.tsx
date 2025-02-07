@@ -2,7 +2,7 @@ import React from "react";
 import TemplatePromptsList from "./TemplatePromptsList";
 import { Button } from "./ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { TemplatePrompt } from "@/server/db/schema";
+import { TemplatePrompt } from "@/interfaces/TemplatePrompt";
 
 interface TemplateDetailBodyProps {
   handleCreatePrompt: () => void;

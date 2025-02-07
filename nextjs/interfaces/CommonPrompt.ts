@@ -4,4 +4,6 @@ export interface CommonPrompt {
   prompt: string | null;
   order: number;
   tokenCount: number | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
