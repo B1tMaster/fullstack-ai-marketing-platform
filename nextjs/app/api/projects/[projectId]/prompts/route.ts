@@ -3,6 +3,7 @@ import { promptsTable } from "@/server/db/schema";
 import { getAuth } from "@clerk/nextjs/server";
 import { getPromptTokenCount } from "@/utils/tokenHelper";
 import { NextRequest, NextResponse } from "next/server";
+import { HttpStatus } from "@/constants/http";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import logger from "@/utils/logger";
@@ -23,7 +24,7 @@ export async function GET(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
     }
 
     const projectId = (await params).projectId;
@@ -47,7 +48,7 @@ export async function GET(
     );
     return NextResponse.json(
       { error: "Failed to fetch prompts" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -59,7 +60,7 @@ export async function DELETE(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
     }
 
     const projectId = (await params).projectId;
@@ -69,7 +70,7 @@ export async function DELETE(
     if (!promptId) {
       return NextResponse.json(
         { error: "promptId is required" },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       );
     }
 
@@ -96,7 +97,7 @@ export async function DELETE(
     );
     return NextResponse.json(
       { error: "Failed to delete prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -108,7 +109,7 @@ export async function PATCH(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
     }
 
     const { projectId } = await params;
@@ -117,7 +118,7 @@ export async function PATCH(
     if (!promptId || !newPrompt || !name) {
       return NextResponse.json(
         { error: "promptId, name and prompt are required" },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       );
     }
 
@@ -155,7 +156,7 @@ export async function PATCH(
     );
     return NextResponse.json(
       { error: "Failed to update prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -167,7 +168,7 @@ export async function POST(
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
     }
 
     const projectId = (await params).projectId;
@@ -176,7 +177,7 @@ export async function POST(
     const parsedPrompt = newPromptSchema.safeParse(json);
 
     if (!parsedPrompt.success) {
-      return NextResponse.json({ error: parsedPrompt.error }, { status: 400 });
+      return NextResponse.json({ error: parsedPrompt.error }, { status: HttpStatus.BAD_REQUEST });
     }
 
     const promptData = parsedPrompt.data;
@@ -199,7 +200,7 @@ export async function POST(
     );
     return NextResponse.json(
       { error: "Failed to create prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
