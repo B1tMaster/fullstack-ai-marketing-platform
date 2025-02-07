@@ -22,6 +22,7 @@ import { Template } from "@/server/db/schema";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
 import ConfirmationModal from "./ConfirmationModal";
+import { TemplatePrompt } from "@/interfaces/TemplatePrompt";
 
 interface TemplateSelectionPopupProps {
   projectId: string;
@@ -51,23 +52,23 @@ export default function TemplateSelectionPopup({
       try {
         logger.debug("Fetching templates", {
           component: "TemplateSelectionPopup",
-          action: "fetchTemplates"
+          action: "fetchTemplates",
         });
-        
+
         const response = await axios.get<Template[]>("/api/templates");
         const userTemplates = response.data;
-        
+
         logger.debug("Templates response received", {
           component: "TemplateSelectionPopup",
           action: "fetchTemplates",
           templatesCount: userTemplates?.length || 0,
-          templates: userTemplates
+          templates: userTemplates,
         });
 
         if (!userTemplates?.length) {
           logger.warn("No templates found", {
             component: "TemplateSelectionPopup",
-            action: "fetchTemplates"
+            action: "fetchTemplates",
           });
           toast.error("No templates found");
           return;
@@ -89,7 +90,7 @@ export default function TemplateSelectionPopup({
     };
 
     fetchTemplates();
-  }, [isOpen, toast]);
+  }, [isOpen]);
 
   const handleTemplateSelect = (value: string) => {
     setSelectedTemplateId(value);
@@ -101,18 +102,23 @@ export default function TemplateSelectionPopup({
     setIsInjecting(true);
     try {
       // Fetch template prompts
-      const promptsResponse = await axios.get(`/api/templates/${selectedTemplateId}/prompts`);
-      const templatePrompts = promptsResponse.data;
+      const promptsResponse = await axios.get(
+        `/api/templates/${selectedTemplateId}/prompts`
+      );
 
+      const templatePrompts: TemplatePrompt[] = promptsResponse.data;
       // Inject prompts into project
-      const injectResponse = await axios.post(`/api/projects/${projectId}/prompts/bulk`, {
-        prompts: templatePrompts.map((prompt) => ({
-          name: prompt.name,
-          prompt: prompt.prompt,
-          order: prompt.order,
-          tokenCount: prompt.tokenCount,
-        })),
-      });
+      const injectResponse = await axios.post(
+        `/api/projects/${projectId}/prompts/bulk`,
+        {
+          prompts: templatePrompts.map((prompt) => ({
+            name: prompt.name,
+            prompt: prompt.prompt,
+            order: prompt.order,
+            tokenCount: prompt.tokenCount,
+          })),
+        }
+      );
 
       const result = injectResponse.data;
       if (result.insertedCount > 0) {
@@ -157,7 +163,10 @@ export default function TemplateSelectionPopup({
             ) : (
               <Select onValueChange={handleTemplateSelect}>
                 <SelectTrigger className="w-full h-12 px-4 border border-gray-200 bg-gray-50 hover:border-main focus:border-main focus:ring-2 focus:ring-main/20 rounded-xl">
-                  <SelectValue placeholder="Select a template" className="text-[1.2em]" />
+                  <SelectValue
+                    placeholder="Select a template"
+                    className="text-[1.2em]"
+                  />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg rounded-xl max-h-[300px]">
                   {templates.map((template) => (
