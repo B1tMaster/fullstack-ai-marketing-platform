@@ -2,17 +2,18 @@
 
 import React from "react";
 import BasePromptEditor from "./BasePromptEditor";
-import { CommonPrompt } from "@/interfaces/CommonPrompt";
 import axios from "axios";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
+import { TemplatePrompt } from "@/interfaces/TemplatePrompt";
+import { CommonPrompt } from "@/interfaces/CommonPrompt";
 
 interface TemplatePromptEditorProps {
   templateId: string;
-  prompt: CommonPrompt;
+  prompt: TemplatePrompt;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedPrompt: CommonPrompt) => void;
+  onSave: (updatedPrompt: TemplatePrompt) => void;
   onCancel: () => void;
 }
 
@@ -40,7 +41,7 @@ function TemplatePromptEditor({
         templateId,
       });
 
-      const response = await axios.patch<CommonPrompt>(
+      const response = await axios.patch<TemplatePrompt>(
         `/api/templates/${templateId}/prompts`,
         {
           id: updatedPrompt.id,
