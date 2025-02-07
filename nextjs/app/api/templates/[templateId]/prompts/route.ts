@@ -6,6 +6,7 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import logger from "@/utils/logger";
+import { HttpStatus } from "@/constants/http";
 
 const newPromptSchema = z.object({
   name: z.string().min(1, "Name is required"),
