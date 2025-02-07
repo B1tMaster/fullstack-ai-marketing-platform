@@ -3,5 +3,5 @@ export interface CommonPrompt {
   name: string;
   prompt: string | null;
   order: number;
-  tokenCount: number;
+  tokenCount: number | null;
 }

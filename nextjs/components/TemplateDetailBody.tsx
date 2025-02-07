@@ -2,14 +2,14 @@ import React from "react";
 import TemplatePromptsList from "./TemplatePromptsList";
 import { Button } from "./ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { Prompt } from "@/server/db/schema";
+import { TemplatePrompt } from "@/server/db/schema";
 
 interface TemplateDetailBodyProps {
   handleCreatePrompt: () => void;
   isCreatingPrompt: boolean;
-  prompts: Prompt[];
+  prompts: TemplatePrompt[];
   templateId: string;
-  setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  setPrompts: React.Dispatch<React.SetStateAction<TemplatePrompt[]>>;
 }
 
 function TemplateDetailBody({
@@ -45,7 +45,7 @@ function TemplateDetailBody({
         prompts={prompts}
         templateId={templateId}
         onPromptDeleted={(deletedPromptId) => {
-          setPrompts(prev => prev.filter(p => p.id !== deletedPromptId));
+          setPrompts((prev) => prev.filter((p) => p.id !== deletedPromptId));
         }}
         setPrompts={setPrompts}
       />

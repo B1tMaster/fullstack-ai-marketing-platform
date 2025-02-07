@@ -9,19 +9,27 @@ import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
 import logger from "@/utils/logger";
-
+import { TemplatePrompt } from "@/server/db/schema";
 interface TemplatePromptsListProps {
-  prompts: Prompt[];
+  prompts: TemplatePrompt[];
   templateId: string;
   onPromptDeleted: (deletedPromptId: string) => void;
   setPrompts: React.Dispatch<React.SetStateAction<Prompt[]>>;
 }
 
-function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts }: TemplatePromptsListProps) {
+function TemplatePromptsList({
+  prompts,
+  templateId,
+  onPromptDeleted,
+  setPrompts,
+}: TemplatePromptsListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
-  const [promptToDelete, setPromptToDelete] = React.useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] =
+    React.useState(false);
+  const [promptToDelete, setPromptToDelete] = React.useState<string | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
@@ -33,7 +41,9 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
       router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
     } else {
       setEditingPrompt(prompt);
-      router.push(`/template/${templateId}?tab=prompts&promptId=${prompt.id}`, { scroll: false });
+      router.push(`/template/${templateId}?tab=prompts&promptId=${prompt.id}`, {
+        scroll: false,
+      });
     }
   };
 
@@ -42,31 +52,39 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
     router.push(`/template/${templateId}?tab=prompts`, { scroll: false });
   };
 
-
   const handleDeletePrompt = async () => {
     if (!promptToDelete || !templateId) {
-      console.error('Missing promptToDelete or templateId:', { promptToDelete, templateId });
+      console.error("Missing promptToDelete or templateId:", {
+        promptToDelete,
+        templateId,
+      });
       return;
     }
 
     setIsDeleting(true);
     try {
-      logger.debug('Deleting prompt', {
-        component: 'TemplatePromptsList',
-        action: 'handleDeletePrompt',
+      logger.debug("Deleting prompt", {
+        component: "TemplatePromptsList",
+        action: "handleDeletePrompt",
         templateId,
-        promptToDelete
+        promptToDelete,
       });
-      await axios.delete(`/api/templates/${templateId}/prompts?id=${promptToDelete}`);
+      await axios.delete(
+        `/api/templates/${templateId}/prompts?id=${promptToDelete}`
+      );
       onPromptDeleted(promptToDelete);
       toast.success("Prompt deleted successfully");
     } catch (error: unknown) {
-      logger.error("Failed to delete prompt", error instanceof Error ? error : new Error(String(error)), {
-        component: 'TemplatePromptsList',
-        action: 'handleDeletePrompt',
-        templateId,
-        promptId: promptToDelete
-      });
+      logger.error(
+        "Failed to delete prompt",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "TemplatePromptsList",
+          action: "handleDeletePrompt",
+          templateId,
+          promptId: promptToDelete,
+        }
+      );
       toast.error("Failed to delete prompt");
     } finally {
       setIsDeleting(false);
@@ -104,13 +122,15 @@ function TemplatePromptsList({ prompts, templateId, onPromptDeleted, setPrompts 
             }
           }}
           onSave={(updatedPrompt) => {
-            logger.debug('Prompt update received', {
-              component: 'TemplatePromptsList',
-              action: 'onSave',
-              updatedPrompt
+            logger.debug("Prompt update received", {
+              component: "TemplatePromptsList",
+              action: "onSave",
+              updatedPrompt,
             });
-            setPrompts(prev => 
-              prev.map(p => p.id === updatedPrompt.id ? updatedPrompt as Prompt : p)
+            setPrompts((prev) =>
+              prev.map((p) =>
+                p.id === updatedPrompt.id ? (updatedPrompt as Prompt) : p
+              )
             );
             handleEditorClose();
           }}

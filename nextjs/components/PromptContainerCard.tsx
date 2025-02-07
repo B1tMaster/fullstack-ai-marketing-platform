@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Prompt } from "@/server/db/schema";
+import { Prompt, TemplatePrompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@radix-ui/react-tooltip";
 
 interface PromptContainerCardProps {
-  prompt: Prompt;
+  prompt: TemplatePrompt;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
