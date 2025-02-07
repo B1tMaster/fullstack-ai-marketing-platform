@@ -21,6 +21,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Params }
 ) {
+  const projectId = (await params).projectId;
+
   try {
     const { userId } = getAuth(request);
     if (!userId) {
@@ -29,8 +31,6 @@ export async function GET(
         { status: HttpStatus.UNAUTHORIZED }
       );
     }
-
-    const projectId = (await params).projectId;
 
     const prompts = await db
       .select()
@@ -60,6 +60,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Params }
 ) {
+  const projectId = (await params).projectId;
+  const promptId = await request.json();
+
   try {
     const { userId } = getAuth(request);
     if (!userId) {
@@ -68,10 +71,6 @@ export async function DELETE(
         { status: HttpStatus.UNAUTHORIZED }
       );
     }
-
-    const projectId = (await params).projectId;
-
-    const { promptId } = await request.json();
 
     if (!promptId) {
       return NextResponse.json(
@@ -112,6 +111,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Params }
 ) {
+  const projectId = (await params).projectId;
+  const { promptId, name, prompt: newPrompt } = await request.json();
+
   try {
     const { userId } = getAuth(request);
     if (!userId) {
@@ -120,9 +122,6 @@ export async function PATCH(
         { status: HttpStatus.UNAUTHORIZED }
       );
     }
-
-    const projectId = (await params).projectId;
-    const { promptId, name, prompt: newPrompt } = await request.json();
 
     if (!promptId || !newPrompt || !name) {
       return NextResponse.json(
@@ -174,6 +173,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Params }
 ) {
+  const projectId = (await params).projectId;
   try {
     const { userId } = getAuth(request);
     if (!userId) {
@@ -182,8 +182,6 @@ export async function POST(
         { status: HttpStatus.UNAUTHORIZED }
       );
     }
-
-    const projectId = (await params).projectId;
 
     const json = await request.json();
     const parsedPrompt = newPromptSchema.safeParse(json);
