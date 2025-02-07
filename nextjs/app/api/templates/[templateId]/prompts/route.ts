@@ -37,11 +37,15 @@ export async function GET(
     });
     return NextResponse.json(prompts);
   } catch (error) {
-    logger.error("Error fetching prompts", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templatePromptsRoute',
-      action: 'GET',
-      templateId
-    });
+    logger.error(
+      "Error fetching prompts",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templatePromptsRoute",
+        action: "GET",
+        templateId,
+      }
+    );
     return NextResponse.json(
       { error: "Error fetching prompts" },
       { status: 500 }
@@ -90,11 +94,15 @@ export async function POST(
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("Failed to create template prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templatePromptsRoute',
-      action: 'POST',
-      templateId
-    });
+    logger.error(
+      "Failed to create template prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templatePromptsRoute",
+        action: "POST",
+        templateId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to create template prompt" },
       { status: 500 }
@@ -138,12 +146,16 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Prompt deleted successfully" });
   } catch (error) {
-    logger.error("Failed to delete template prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templatePromptsRoute',
-      action: 'DELETE',
-      templateId,
-      promptId
-    });
+    logger.error(
+      "Failed to delete template prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templatePromptsRoute",
+        action: "DELETE",
+        templateId,
+        promptId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to delete template prompt" },
       { status: 500 }
@@ -198,12 +210,15 @@ export async function PATCH(
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("Failed to update template prompt", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templatePromptsRoute',
-      action: 'PATCH',
-      templateId,
-      promptId: id
-    });
+    logger.error(
+      "Failed to update template prompt",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templatePromptsRoute",
+        action: "PATCH",
+        templateId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to update template prompt" },
       { status: 500 }
