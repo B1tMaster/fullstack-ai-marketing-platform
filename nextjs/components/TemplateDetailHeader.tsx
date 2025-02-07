@@ -31,8 +31,8 @@ function TemplateDetailHeader({
       });
       setTitle(response.data.title);
       toast.success("Title updated successfully.");
-    } catch (error) {
-      logger.error("Failed to update template title", error, {
+    } catch (error: unknown) {
+      logger.error("Failed to update template title", error instanceof Error ? error : new Error(String(error)), {
         component: 'TemplateDetailHeader',
         action: 'handleTitleSubmit',
         templateId: template.id
