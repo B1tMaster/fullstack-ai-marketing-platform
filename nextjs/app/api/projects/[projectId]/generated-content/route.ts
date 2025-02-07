@@ -188,6 +188,10 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
+    logger.error("Failed to delete generated content", error as Error, {
+      projectId,
+      component: 'generated-content-api'
+    });
     return NextResponse.json(
       { error: "Failed to delete generated content" },
       { status: 500 }
