@@ -106,8 +106,8 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
           }
         }
         setIsPromptsTokenExceeded(promptExceeded);
-      } catch (error) {
-        logger.error("Failed to fetch project data", error, {
+      } catch (error: unknown) {
+        logger.error("Failed to fetch project data", error instanceof Error ? error : new Error(String(error)), {
           projectId,
           component: "GenerateContentStep",
         });
@@ -171,7 +171,10 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
           toast.success("Content generation complete");
         }
       } catch (error) {
-        console.error(error);
+        logger.error("Failed to fetch generated content", error instanceof Error ? error : new Error(String(error)), {
+          projectId,
+          component: "GenerateContentStep"
+        });
         toast.error("Failed to fetch generated content");
       }
     };
@@ -201,7 +204,10 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
         `/api/projects/${projectId}/generated-content`
       );
     } catch (error) {
-      console.error(error);
+      logger.error("Failed to generate content", error instanceof Error ? error : new Error(String(error)), {
+        projectId,
+        component: "GenerateContentStep"
+      });
       toast.error("Failed to generate content");
       setIsGenerating(false);
     }
