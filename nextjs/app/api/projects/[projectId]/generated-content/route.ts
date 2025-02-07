@@ -187,8 +187,8 @@ export async function DELETE(
       { message: "Generated content deleted" },
       { status: 200 }
     );
-  } catch (error) {
-    logger.error("Failed to delete generated content", error as Error, {
+  } catch (error: unknown) {
+    logger.error("Failed to delete generated content", error instanceof Error ? error : new Error(String(error)), {
       projectId,
       component: 'generated-content-api'
     });
