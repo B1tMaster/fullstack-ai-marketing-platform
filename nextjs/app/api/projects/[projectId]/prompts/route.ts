@@ -61,7 +61,7 @@ export async function DELETE(
   { params }: { params: Params }
 ) {
   const projectId = (await params).projectId;
-  const promptId = await request.json();
+  const { promptId } = await request.json();
 
   try {
     const { userId } = getAuth(request);
