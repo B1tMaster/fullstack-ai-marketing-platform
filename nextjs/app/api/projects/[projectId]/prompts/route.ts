@@ -54,7 +54,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { projectId: string; promptId: string } }
+  { params }: { params: Params }
 ) {
   try {
     const { userId } = getAuth(request);
@@ -62,7 +62,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { projectId } = params;
+    const projectId = (await params).projectId;
+
     const { promptId } = await request.json();
 
     if (!promptId) {
