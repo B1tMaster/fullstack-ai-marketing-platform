@@ -38,7 +38,7 @@ export async function GET(
 
     return NextResponse.json(generatedContent);
   } catch (error) {
-    logger.error("Failed to fetch generated content", error, {
+    logger.error("Failed to fetch generated content", error instanceof Error ? error : new Error(String(error)), {
       projectId,
       component: "generated-content-api",
     });
@@ -150,7 +150,7 @@ export async function POST(
 
     return NextResponse.json(insertedContentList, { status: 201 });
   } catch (error) {
-    logger.error("Failed to generate content", error, {
+    logger.error("Failed to generate content", error instanceof Error ? error : new Error(String(error)), {
       projectId,
       component: 'generated-content-api'
     });
@@ -229,7 +229,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(updatedContent[0]);
   } catch (error) {
-    logger.error("Failed to update generated content", error, {
+    logger.error("Failed to update generated content", error instanceof Error ? error : new Error(String(error)), {
       component: 'generated-content-api'
     });
     return NextResponse.json(
