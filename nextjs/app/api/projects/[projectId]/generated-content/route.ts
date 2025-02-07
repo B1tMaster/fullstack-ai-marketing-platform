@@ -150,7 +150,10 @@ export async function POST(
 
     return NextResponse.json(insertedContentList, { status: 201 });
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to generate content", error, {
+      projectId,
+      component: 'generated-content-api'
+    });
     return NextResponse.json(
       { error: "Failed to generate content" },
       { status: 500 }
@@ -222,7 +225,9 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(updatedContent[0]);
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to update generated content", error, {
+      component: 'generated-content-api'
+    });
     return NextResponse.json(
       { error: "Failed to update generated content" },
       { status: 500 }
