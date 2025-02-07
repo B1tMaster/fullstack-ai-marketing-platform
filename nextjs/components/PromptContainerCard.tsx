@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Prompt, TemplatePrompt } from "@/server/db/schema";
+import { TemplatePrompt } from "@/server/db/schema";
 import { cn } from "@/lib/utils";
 import { Trash2, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
