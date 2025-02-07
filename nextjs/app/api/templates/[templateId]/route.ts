@@ -5,19 +5,21 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import logger from "@/utils/logger";
 
+type Params = Promise<{ templateId: string }>;
+
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { templateId: string } }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
-  const { userId } = getAuth(req);
+  const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const templateId = await params.templateId;
+  const templateId = (await params).templateId;
 
   try {
-    const { title } = await req.json();
+    const { title } = await request.json();
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
@@ -42,11 +44,15 @@ export async function PATCH(
 
     return NextResponse.json(updatedTemplate[0]);
   } catch (error) {
-    logger.error("Error updating template", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templateRoute',
-      action: 'PATCH',
-      templateId
-    });
+    logger.error(
+      "Error updating template",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templateRoute",
+        action: "PATCH",
+        templateId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to update template" },
       { status: 500 }
@@ -55,15 +61,15 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { templateId: string } }
+  request: NextRequest,
+  { params }: { params: Params }
 ) {
-  const { userId } = getAuth(req);
+  const { userId } = getAuth(request);
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const templateId = await params.templateId;
+  const templateId = (await params).templateId;
 
   try {
     const deletedTemplate = await db
@@ -85,11 +91,15 @@ export async function DELETE(
 
     return NextResponse.json(deletedTemplate[0]);
   } catch (error) {
-    logger.error("Error deleting template", error instanceof Error ? error : new Error(String(error)), {
-      component: 'templateRoute',
-      action: 'DELETE',
-      templateId
-    });
+    logger.error(
+      "Error deleting template",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "templateRoute",
+        action: "DELETE",
+        templateId,
+      }
+    );
     return NextResponse.json(
       { error: "Failed to delete template" },
       { status: 500 }
