@@ -28,7 +28,7 @@ export async function GET(
 
   const { userId } = getAuth(request);
   if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
 
   try {
     const prompts = await db.query.templatePromptsTable.findMany({
@@ -48,7 +48,7 @@ export async function GET(
     );
     return NextResponse.json(
       { error: "Error fetching prompts" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -61,7 +61,7 @@ export async function POST(
 
   const { userId } = getAuth(request);
   if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
 
   try {
     const json = await request.json();
@@ -70,7 +70,7 @@ export async function POST(
     if (!parseResult.success) {
       return NextResponse.json(
         { error: parseResult.error.errors },
-        { status: 400 }
+        { status: HttpStatus.BAD_REQUEST }
       );
     }
     const { name, order, prompt } = parseResult.data;
@@ -89,10 +89,10 @@ export async function POST(
       })
       .returning();
 
-    return NextResponse.json(newPrompt[0], { status: 201 });
+    return NextResponse.json(newPrompt[0], { status: HttpStatus.CREATED });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.errors }, { status: HttpStatus.BAD_REQUEST });
     }
     logger.error(
       "Failed to create template prompt",
@@ -105,7 +105,7 @@ export async function POST(
     );
     return NextResponse.json(
       { error: "Failed to create template prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -117,7 +117,7 @@ export async function DELETE(
   const templateId = (await params).templateId;
   const { userId } = getAuth(request);
   if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
 
   const { searchParams } = new URL(request.url);
   const promptId = searchParams.get("id");
@@ -125,7 +125,7 @@ export async function DELETE(
   if (!promptId) {
     return NextResponse.json(
       { error: "Prompt ID is required" },
-      { status: 400 }
+      { status: HttpStatus.BAD_REQUEST }
     );
   }
 
@@ -141,7 +141,7 @@ export async function DELETE(
       .returning();
 
     if (deletedPrompt.length === 0) {
-      return NextResponse.json({ error: "Prompt not found" }, { status: 404 });
+      return NextResponse.json({ error: "Prompt not found" }, { status: HttpStatus.NOT_FOUND });
     }
 
     return NextResponse.json({ message: "Prompt deleted successfully" });
@@ -158,7 +158,7 @@ export async function DELETE(
     );
     return NextResponse.json(
       { error: "Failed to delete template prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
@@ -171,7 +171,7 @@ export async function PATCH(
 
   const { userId } = getAuth(request);
   if (!userId)
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: HttpStatus.UNAUTHORIZED });
 
   try {
     const json = await request.json();
@@ -201,7 +201,7 @@ export async function PATCH(
     if (updatedPrompt.length === 0) {
       return NextResponse.json(
         { error: `Prompt with id ${id} not found` },
-        { status: 404 }
+        { status: HttpStatus.NOT_FOUND }
       );
     }
 
@@ -221,7 +221,7 @@ export async function PATCH(
     );
     return NextResponse.json(
       { error: "Failed to update template prompt" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
