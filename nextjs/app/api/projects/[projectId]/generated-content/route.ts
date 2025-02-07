@@ -110,7 +110,11 @@ export async function POST(
           break;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-          console.error(`Failed to generate content using ${model}`, error);
+          logger.error(`Failed to generate content using ${model}`, error, {
+            model,
+            promptId: prompt.id,
+            component: 'generated-content-api'
+          });
 
           // Check if error is retryable
           if (
