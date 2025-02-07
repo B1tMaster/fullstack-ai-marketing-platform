@@ -103,7 +103,6 @@ function ConfigurePromptsStep({ projectId }: ConfigurePromptsStepProps) {
           id: "",
           name: "",
           prompt: "",
-          projectId,
           tokenCount: 0,
           order: 0,
         }}
