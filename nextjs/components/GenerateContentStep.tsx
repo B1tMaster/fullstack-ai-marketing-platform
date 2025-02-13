@@ -227,6 +227,7 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
         totalPrompts={totalPrompts}
         errorMessage={errorMessage}
         generatedContent={generatedContent}
+        setGeneratedContent={setGeneratedContent}
       />
     </div>
   );

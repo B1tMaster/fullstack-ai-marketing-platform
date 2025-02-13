@@ -17,6 +17,7 @@ interface GenerateStepBodyProps {
   totalPrompts: number;
   errorMessage: string | null;
   generatedContent: GeneratedContent[];
+  setGeneratedContent: React.Dispatch<React.SetStateAction<GeneratedContent[]>>;
 }
 
 function GenerateStepBody({
@@ -63,7 +64,7 @@ function GenerateStepBody({
     } catch (error) {
       toast.error("Failed to save content");
       logger.error("Failed to save edited content", error instanceof Error ? error : new Error(String(error)), {
-        contentId: id,
+        id,
         component: "GenerateStepBody"
       });
     } finally {
