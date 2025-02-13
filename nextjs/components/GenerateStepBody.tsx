@@ -75,13 +75,13 @@ function GenerateStepBody({
       )}
 
       {/* GENERATED CONTENT */}
-      <div>
+      <div className="space-y-6">
         {generatedContent.map((content) => (
           <Card
             key={content.id}
             className="border border-gray-200 rounded-xl lg:rounded-2xl shadow-sm hover:border-main hover:shadow-md hover:scale-[1.01] transition-all duration-300"
           >
-            <CardContent>
+            <CardContent className="p-4 lg:p-8 space-y-1 flex-grow min-w-0">
               <div className="flex flex-row items-center justify-between">
                 <h3 className="font-bold text-lg lg:text-xl text-main truncate lg:mb-0">
                   {content.name}
