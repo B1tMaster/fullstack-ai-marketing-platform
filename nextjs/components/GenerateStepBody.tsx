@@ -1,11 +1,16 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Skeleton } from "./ui/skeleton";
 import { GeneratedContent } from "@/server/db/schema";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "./ui/button";
-import { Copy, Edit } from "lucide-react";
+import { Copy, Edit, Save, X } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
+import logger from "@/utils/logger";
 
 interface GenerateStepBodyProps {
+  projectId: string;
   isLoading: boolean;
   isGenerating: boolean;
   generatedCount: number;
@@ -15,6 +20,7 @@ interface GenerateStepBodyProps {
 }
 
 function GenerateStepBody({
+  projectId,
   isLoading,
   isGenerating,
   generatedCount,
@@ -22,6 +28,61 @@ function GenerateStepBody({
   errorMessage,
   generatedContent,
 }: GenerateStepBodyProps) {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleEdit = (id: string, content: string) => {
+    setEditingId(id);
+    setEditedContent(content);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditedContent("");
+  };
+
+  const handleSave = async (id: string) => {
+    try {
+      setIsSaving(true);
+      await axios.patch(`/api/projects/${projectId}/generated-content`, {
+        id,
+        result: editedContent,
+      });
+      
+      // Update the content in the UI
+      setGeneratedContent((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, result: editedContent } : item
+        )
+      );
+      
+      setEditingId(null);
+      setEditedContent("");
+      toast.success("Content saved successfully");
+    } catch (error) {
+      toast.error("Failed to save content");
+      logger.error("Failed to save edited content", error instanceof Error ? error : new Error(String(error)), {
+        contentId: id,
+        component: "GenerateStepBody"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard");
+    } catch (error) {
+      toast.error("Failed to copy to clipboard");
+      logger.error("Failed to copy to clipboard", error instanceof Error ? error : new Error(String(error)), {
+        component: "GenerateStepBody"
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4 lg:space-y-6">
@@ -88,14 +149,14 @@ function GenerateStepBody({
                 </h3>
                 <div className="space-x-2 flex-shrink-0 lg:ml-2">
                   <Button
-                    // onClick={() => handleEdit(item.id, item.result)}
+                    onClick={() => handleEdit(content.id, content.result)}
                     className="bg-main/10 text-main hover:bg-main/20 rounded-full w-8 h-8 p-0"
                     title="Edit"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
-                    // onClick={() => copyToClipboard(item.result)}
+                    onClick={() => copyToClipboard(content.result)}
                     className="bg-main/10 text-main hover:bg-main/20 rounded-full w-8 h-8 p-0"
                     title="Copy to Clipboard"
                   >
@@ -103,10 +164,41 @@ function GenerateStepBody({
                   </Button>
                 </div>
               </div>
-              {/* TODO: If editing, turn into text area with action buttons at bottom */}
-              <div className="whitespace-pre-wrap text-gray-700 lg:px-2 text-sm lg:text-base">
-                {content.result}
-              </div>
+              {editingId === content.id ? (
+                <div className="space-y-4">
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="w-full min-h-[200px] p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-main/20 text-sm lg:text-base"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      onClick={handleCancel}
+                      className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      disabled={isSaving}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => handleSave(content.id)}
+                      className="bg-main text-white hover:bg-main/90"
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="whitespace-pre-wrap text-gray-700 lg:px-2 text-sm lg:text-base">
+                  {content.result}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

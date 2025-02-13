@@ -220,6 +220,7 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
         startGeneration={startGeneration}
       />
       <GenerateStepBody
+        projectId={projectId}
         isLoading={isLoading}
         isGenerating={isGenerating}
         generatedCount={generatedCount}
