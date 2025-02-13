@@ -28,6 +28,7 @@ function GenerateStepBody({
   totalPrompts,
   errorMessage,
   generatedContent,
+  setGeneratedContent,
 }: GenerateStepBodyProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string>("");
@@ -63,9 +64,10 @@ function GenerateStepBody({
       toast.success("Content saved successfully");
     } catch (error) {
       toast.error("Failed to save content");
-      logger.error("Failed to save edited content", error instanceof Error ? error : new Error(String(error)), {
+      logger.error("Error while saving edited content", error instanceof Error ? error : new Error(String(error)), {
         id,
-        component: "GenerateStepBody"
+        component: "GenerateStepBody",
+        status: error instanceof Error ? 'error' : 'success'
       });
     } finally {
       setIsSaving(false);
