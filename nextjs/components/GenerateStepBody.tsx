@@ -76,6 +76,25 @@ function GenerateStepBody({
 
   const copyToClipboard = async (text: string) => {
     try {
+      if (!navigator?.clipboard) {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          toast.success("Copied to clipboard");
+        } catch (err) {
+          toast.error("Failed to copy to clipboard");
+          logger.error("Failed to copy to clipboard using fallback", err instanceof Error ? err : new Error(String(err)), {
+            component: "GenerateStepBody"
+          });
+        }
+        document.body.removeChild(textArea);
+        return;
+      }
+
       await navigator.clipboard.writeText(text);
       toast.success("Copied to clipboard");
     } catch (error) {
