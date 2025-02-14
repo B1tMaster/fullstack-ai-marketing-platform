@@ -187,6 +187,25 @@ export const GeneratedContentRelations = relations(
   })
 );
 
+export const stripeCustomersTable = pgTable("stripe_customers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id", { length: 50 }).notNull().unique(),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 100 })
+    .notNull()
+    .unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const subscriptionsTable = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id", { length: 50 }).notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 100 })
+    .notNull()
+    .unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+
 // Types
 export type InsertProject = typeof projectsTable.$inferInsert;
 export type Project = typeof projectsTable.$inferSelect;
@@ -203,3 +222,7 @@ export type TemplatePrompt = typeof templatePromptsTable.$inferSelect;
 export type InsertTemplatePrompt = typeof templatePromptsTable.$inferInsert;
 export type GeneratedContent = typeof generatedContentTable.$inferSelect;
 export type InsertGeneratedContent = typeof generatedContentTable.$inferInsert;
+export type StripeCustomer = typeof stripeCustomersTable.$inferSelect;
+export type InsertStripeCustomer = typeof stripeCustomersTable.$inferInsert;
+export type Subscription = typeof subscriptionsTable.$inferSelect;
+export type InsertSubscription = typeof subscriptionsTable.$inferInsert;
