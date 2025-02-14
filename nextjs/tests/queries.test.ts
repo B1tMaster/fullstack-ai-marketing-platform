@@ -58,17 +58,25 @@ describe('Queries', () => {
     jest.clearAllMocks();
     mockedAuth.mockResolvedValue({ 
       userId: mockUserId,
-      sessionClaims: {},
+      sessionClaims: {
+        __raw: "test-raw",
+        iss: "test-issuer",
+        sub: "test-subject",
+        sid: "test-sid",
+        iat: 123,
+        exp: 456,
+        azp: "test-azp"
+      },
       sessionId: "test-session",
-      actor: null,
-      orgId: null,
-      orgRole: null,
-      orgSlug: null,
-      orgPermissions: [],
+      actor: undefined,
+      orgId: undefined,
+      orgRole: undefined,
+      orgSlug: undefined,
+      orgPermissions: undefined,
       getToken: async () => "test-token",
       debug: () => ({ userId: mockUserId }),
       has: () => true,
-      redirectToSignIn: () => {}
+      redirectToSignIn: () => { throw new Error("Not implemented"); }
     });
   });
 
@@ -103,17 +111,17 @@ describe('Queries', () => {
     it('should throw error if user is not authenticated', async () => {
       mockedAuth.mockResolvedValue({ 
         userId: null,
-        sessionClaims: {},
+        sessionClaims: null,
         sessionId: null,
-        actor: null,
-        orgId: null,
-        orgRole: null,
-        orgSlug: null,
-        orgPermissions: [],
+        actor: undefined,
+        orgId: undefined,
+        orgRole: undefined,
+        orgSlug: undefined,
+        orgPermissions: undefined,
         getToken: async () => null,
         debug: () => ({ userId: null }),
         has: () => false,
-        redirectToSignIn: () => {}
+        redirectToSignIn: () => { throw new Error("Not implemented"); }
       });
 
       await expect(getProjectsForUser()).rejects.toThrow('User not found');
@@ -142,7 +150,20 @@ describe('Queries', () => {
     });
 
     it('should throw error if user is not authenticated', async () => {
-      mockedAuth.mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ 
+        userId: null,
+        sessionClaims: null,
+        sessionId: null,
+        actor: undefined,
+        orgId: undefined,
+        orgRole: undefined,
+        orgSlug: undefined,
+        orgPermissions: undefined,
+        getToken: async () => null,
+        debug: () => ({ userId: null }),
+        has: () => false,
+        redirectToSignIn: () => { throw new Error("Not implemented"); }
+      });
 
       await expect(getProject(projectId)).rejects.toThrow('User not found');
     });
