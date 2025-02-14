@@ -1,4 +1,4 @@
-import { Stripe } from 'stripe';
+import Stripe from 'stripe';
 import logger from '@/utils/logger';
 
 if (!process.env.STRIPE_SECRET_KEY) {
