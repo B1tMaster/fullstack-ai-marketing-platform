@@ -99,6 +99,11 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
     });
 
     if (!dbSubscription?.stripeSubscriptionId) {
+      logger.debug("No subscription found for user", {
+        component: "queries",
+        action: "getUserSubscription",
+        userId
+      });
       return null;
     }
 
@@ -116,15 +121,20 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
 
     return subscription;
   } catch (error) {
-    logger.error(
-      "Failed to get user subscription",
-      error instanceof Error ? error : new Error(String(error)),
-      {
-        component: "queries",
-        action: "getUserSubscription",
-        userId
-      }
-    );
+    // Only log as error if it's a real error, not an expected case
+    if (error instanceof Error && 
+        !error.message.includes("relation") && 
+        !error.message.includes("does not exist")) {
+      logger.error(
+        "Failed to get user subscription",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "queries",
+          action: "getUserSubscription",
+          userId
+        }
+      );
+    }
     return null;
   }
 }
