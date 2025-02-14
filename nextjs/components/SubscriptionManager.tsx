@@ -9,8 +9,10 @@ import { formatDistance } from "date-fns";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+import type Stripe from 'stripe';
+
 interface SubscriptionManagerProps {
-  subscription: any | null;
+  subscription: Stripe.Subscription | null;
 }
 
 export default function SubscriptionManager({ subscription }: SubscriptionManagerProps) {
