@@ -9,6 +9,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 import type { Stripe } from "stripe";
+import logger from "@/utils/logger";
 
 interface SubscriptionManagerProps {
   subscription: Stripe.Subscription | null;
@@ -28,7 +29,10 @@ export default function SubscriptionManager({
         const { unit_amount } = response.data;
         setPrice((unit_amount / 100).toFixed(2));
       } catch (error) {
-        console.error("Failed to fetch price:", error);
+        logger.error("Failed to fetch price", error instanceof Error ? error : new Error(String(error)), {
+          component: "SubscriptionManager",
+          action: "fetchPrice"
+        });
         setPrice("Failed"); // Fallback price
       }
     };
@@ -68,7 +72,10 @@ export default function SubscriptionManager({
           ? error.response.data.error
           : "Failed to start subscription process";
       toast.error(errorMessage);
-      console.error("Subscription error:", error);
+      logger.error("Subscription error", error instanceof Error ? error : new Error(String(error)), {
+        component: "SubscriptionManager",
+        action: "handleSubscribe"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +88,10 @@ export default function SubscriptionManager({
       window.location.href = response.data.url;
     } catch (error) {
       toast.error("Failed to open subscription management");
-      console.error("Portal session error:", error);
+      logger.error("Portal session error", error instanceof Error ? error : new Error(String(error)), {
+        component: "SubscriptionManager",
+        action: "handleManageSubscription"
+      });
     } finally {
       setIsLoading(false);
     }
