@@ -121,19 +121,8 @@ describe('Queries', () => {
 
     it('should throw error if user is not authenticated', async () => {
       mockedAuth.mockResolvedValue({ 
-        userId: null,
-        sessionClaims: null,
-        sessionId: null,
-        actor: undefined,
-        orgId: undefined,
-        orgRole: undefined,
-        orgSlug: undefined,
-        orgPermissions: undefined,
-        getToken: async () => null,
-        debug: () => ({ userId: null }),
-        has: () => false,
-        redirectToSignIn: () => { throw new Error("Not implemented"); }
-      });
+        userId: null 
+      } as any);
 
       await expect(getProject(projectId)).rejects.toThrow('User not found');
     });
@@ -204,7 +193,9 @@ describe('Queries', () => {
     });
 
     it('should throw error if user is not authenticated', async () => {
-      mockedAuth.mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ 
+        userId: null 
+      } as any);
 
       await expect(getTemplate(templateId)).rejects.toThrow('User not found');
     });
