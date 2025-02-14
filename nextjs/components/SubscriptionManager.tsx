@@ -61,7 +61,10 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
       const response = await axios.post("/api/stripe/create-checkout-session");
       window.location.href = response.data.url;
     } catch (error) {
-      toast.error("Failed to start subscription process");
+      const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
+        ? error.response.data.error
+        : "Failed to start subscription process";
+      toast.error(errorMessage);
       console.error("Subscription error:", error);
     } finally {
       setIsLoading(false);

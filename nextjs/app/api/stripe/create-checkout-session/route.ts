@@ -6,15 +6,37 @@ import { auth } from "@clerk/nextjs";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
+      logger.error("Unauthorized request to create checkout session", undefined, {
+        component: "api",
+        action: "createCheckoutSession"
+      });
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
+    if (!process.env.STRIPE_PRICE_ID) {
+      logger.error("Missing STRIPE_PRICE_ID", undefined, {
+        component: "api",
+        action: "createCheckoutSession"
+      });
+      return NextResponse.json(
+        { error: "Stripe price ID not configured" },
+        { status: 500 }
+      );
+    }
+
     const customerId = await getOrCreateStripeCustomer();
+    
+    logger.debug("Creating checkout session", {
+      component: "api",
+      action: "createCheckoutSession",
+      userId,
+      customerId
+    });
 
     // Create checkout session
     const session = await stripe.checkout.sessions.create({
