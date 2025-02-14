@@ -8,38 +8,40 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import type { Stripe } from 'stripe';
+import type { Stripe } from "stripe";
 
 interface SubscriptionManagerProps {
   subscription: Stripe.Subscription | null;
 }
 
-export default function SubscriptionManager({ subscription }: SubscriptionManagerProps) {
+export default function SubscriptionManager({
+  subscription,
+}: SubscriptionManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [price, setPrice] = useState<string>('');
-  
+  const [price, setPrice] = useState<string>("");
+
   useEffect(() => {
     // Fetch price from API
     const fetchPrice = async () => {
       try {
-        const response = await axios.get('/api/stripe/price');
+        const response = await axios.get("/api/stripe/price");
         const { unit_amount } = response.data;
         setPrice((unit_amount / 100).toFixed(2));
       } catch (error) {
-        console.error('Failed to fetch price:', error);
-        setPrice('29.99'); // Fallback price
+        console.error("Failed to fetch price:", error);
+        setPrice("Failed"); // Fallback price
       }
     };
-    
+
     fetchPrice();
-    
+
     // Show success/error messages when returning from Stripe
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('success')) {
-      toast.success('Successfully subscribed to premium plan!');
+    if (urlParams.get("success")) {
+      toast.success("Successfully subscribed to premium plan!");
     }
-    if (urlParams.get('canceled')) {
-      toast.error('Subscription canceled.');
+    if (urlParams.get("canceled")) {
+      toast.error("Subscription canceled.");
     }
   }, []);
 
@@ -48,10 +50,10 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
     const now = new Date();
     const diffTime = date.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return {
       date: date.toLocaleDateString(),
-      daysRemaining: `${diffDays} days remaining`
+      daysRemaining: `${diffDays} days remaining`,
     };
   };
 
@@ -61,9 +63,10 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
       const response = await axios.post("/api/stripe/create-checkout-session");
       window.location.href = response.data.url;
     } catch (error) {
-      const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
-        ? error.response.data.error
-        : "Failed to start subscription process";
+      const errorMessage =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to start subscription process";
       toast.error(errorMessage);
       console.error("Subscription error:", error);
     } finally {
@@ -87,7 +90,9 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">Subscription Settings</CardTitle>
+        <CardTitle className="text-2xl font-bold">
+          Subscription Settings
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {subscription ? (
@@ -95,21 +100,29 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
           <div className="space-y-4">
             <div className="text-lg font-medium">
               Premium Plan
-              <span className={cn(
-                "ml-2",
-                subscription.status === 'active' && "text-green-600",
-                subscription.status === 'past_due' && "text-yellow-600",
-                subscription.status === 'canceled' && "text-red-600"
-              )}>
-                ({subscription.status === 'active' ? 'Active' : 
-                  subscription.status === 'past_due' ? 'Payment Required' :
-                  subscription.status === 'canceled' ? 'Canceled' : 
-                  subscription.status})
+              <span
+                className={cn(
+                  "ml-2",
+                  subscription.status === "active" && "text-green-600",
+                  subscription.status === "past_due" && "text-yellow-600",
+                  subscription.status === "canceled" && "text-red-600"
+                )}
+              >
+                (
+                {subscription.status === "active"
+                  ? "Active"
+                  : subscription.status === "past_due"
+                  ? "Payment Required"
+                  : subscription.status === "canceled"
+                  ? "Canceled"
+                  : subscription.status}
+                )
               </span>
             </div>
             {subscription.current_period_end && (
               <div className="text-gray-600">
-                Next billing date: {formatDate(subscription.current_period_end).date}
+                Next billing date:{" "}
+                {formatDate(subscription.current_period_end).date}
                 <div className="text-sm">
                   ({formatDate(subscription.current_period_end).daysRemaining})
                 </div>
@@ -129,7 +142,9 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
             <div className="text-lg font-medium">Free Plan</div>
             <div className="space-y-4">
               <div className="space-y-3">
-                <h3 className="text-lg font-medium">Upgrade to Premium to unlock:</h3>
+                <h3 className="text-lg font-medium">
+                  Upgrade to Premium to unlock:
+                </h3>
                 <div className="space-y-2">
                   {[
                     { icon: Star, text: "Unlimited projects" },
@@ -146,10 +161,7 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
               <Button
                 onClick={handleSubscribe}
                 disabled={isLoading}
-                className={cn(
-                  "w-full sm:w-auto",
-                  "bg-main hover:bg-main/90"
-                )}
+                className={cn("w-full sm:w-auto", "bg-main hover:bg-main/90")}
               >
                 Subscribe Now - ${price}/month
               </Button>
