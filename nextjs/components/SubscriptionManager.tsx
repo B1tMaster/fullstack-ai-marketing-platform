@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import type Stripe from 'stripe';
+import type { Stripe } from 'stripe';
 
 interface SubscriptionManagerProps {
   subscription: Stripe.Subscription | null;
