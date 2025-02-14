@@ -56,14 +56,39 @@ describe('Queries', () => {
   
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedAuth.mockResolvedValue({ userId: mockUserId });
+    mockedAuth.mockResolvedValue({ 
+      userId: mockUserId,
+      sessionClaims: {},
+      sessionId: "test-session",
+      actor: null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      orgPermissions: [],
+      getToken: async () => "test-token",
+      debug: () => ({ userId: mockUserId }),
+      has: () => true,
+      redirectToSignIn: () => {}
+    });
   });
 
   describe('getProjectsForUser', () => {
     it('should fetch projects for authenticated user', async () => {
       const mockProjects = [
-        { id: '1', name: 'Project 1', userId: mockUserId },
-        { id: '2', name: 'Project 2', userId: mockUserId }
+        { 
+          id: '1', 
+          title: 'Project 1', 
+          userId: mockUserId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        { 
+          id: '2', 
+          title: 'Project 2', 
+          userId: mockUserId,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
       ];
 
       mockedProjectsFindMany.mockResolvedValue(mockProjects);
@@ -76,7 +101,20 @@ describe('Queries', () => {
     });
 
     it('should throw error if user is not authenticated', async () => {
-      mockedAuth.mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ 
+        userId: null,
+        sessionClaims: {},
+        sessionId: null,
+        actor: null,
+        orgId: null,
+        orgRole: null,
+        orgSlug: null,
+        orgPermissions: [],
+        getToken: async () => null,
+        debug: () => ({ userId: null }),
+        has: () => false,
+        redirectToSignIn: () => {}
+      });
 
       await expect(getProjectsForUser()).rejects.toThrow('User not found');
     });
@@ -86,7 +124,13 @@ describe('Queries', () => {
     const projectId = 'test-project-id';
 
     it('should fetch single project for authenticated user', async () => {
-      const mockProject = { id: projectId, name: 'Test Project', userId: mockUserId };
+      const mockProject = { 
+        id: projectId, 
+        title: 'Test Project', 
+        userId: mockUserId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
       
       mockedProjectsFindFirst.mockResolvedValue(mockProject);
 
@@ -107,8 +151,24 @@ describe('Queries', () => {
   describe('getTemplatesForUser', () => {
     it('should fetch templates for authenticated user', async () => {
       const mockTemplates = [
-        { id: '1', name: 'Template 1', userId: mockUserId },
-        { id: '2', name: 'Template 2', userId: mockUserId }
+        { 
+          id: '1', 
+          title: 'Template 1', 
+          userId: mockUserId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          description: null,
+          isPublic: false
+        },
+        { 
+          id: '2', 
+          title: 'Template 2', 
+          userId: mockUserId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          description: null,
+          isPublic: false
+        }
       ];
 
       mockedTemplatesFindMany.mockResolvedValue(mockTemplates);
@@ -131,7 +191,15 @@ describe('Queries', () => {
     const templateId = 'test-template-id';
 
     it('should fetch single template for authenticated user', async () => {
-      const mockTemplate = { id: templateId, name: 'Test Template', userId: mockUserId };
+      const mockTemplate = { 
+        id: templateId, 
+        title: 'Test Template', 
+        userId: mockUserId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: null,
+        isPublic: false
+      };
       
       mockedTemplatesFindFirst.mockResolvedValue(mockTemplate);
 
