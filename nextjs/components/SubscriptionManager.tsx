@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Star, LayoutTemplate, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,32 @@ interface SubscriptionManagerProps {
 
 export default function SubscriptionManager({ subscription }: SubscriptionManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [price, setPrice] = useState<string>('');
+  
+  useEffect(() => {
+    // Fetch price from API
+    const fetchPrice = async () => {
+      try {
+        const response = await axios.get('/api/stripe/price');
+        const { unit_amount } = response.data;
+        setPrice((unit_amount / 100).toFixed(2));
+      } catch (error) {
+        console.error('Failed to fetch price:', error);
+        setPrice('29.99'); // Fallback price
+      }
+    };
+    
+    fetchPrice();
+    
+    // Show success/error messages when returning from Stripe
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success')) {
+      toast.success('Successfully subscribed to premium plan!');
+    }
+    if (urlParams.get('canceled')) {
+      toast.error('Subscription canceled.');
+    }
+  }, []);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
@@ -63,8 +89,16 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
           <div className="space-y-4">
             <div className="text-lg font-medium">
               Premium Plan
-              <span className="ml-2 text-green-600">
-                ({subscription.status})
+              <span className={cn(
+                "ml-2",
+                subscription.status === 'active' && "text-green-600",
+                subscription.status === 'past_due' && "text-yellow-600",
+                subscription.status === 'canceled' && "text-red-600"
+              )}>
+                ({subscription.status === 'active' ? 'Active' : 
+                  subscription.status === 'past_due' ? 'Payment Required' :
+                  subscription.status === 'canceled' ? 'Canceled' : 
+                  subscription.status})
               </span>
             </div>
             {subscription.current_period_end && (
@@ -111,7 +145,7 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
                   "bg-main hover:bg-main/90"
                 )}
               >
-                Subscribe Now - $29.99/month
+                Subscribe Now - ${price}/month
               </Button>
             </div>
           </div>
