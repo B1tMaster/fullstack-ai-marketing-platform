@@ -44,3 +44,12 @@ next-env.d.ts
 
 # any other file to ignore
 *.ignore
+
+# python environment
+.venv
+bin/*
+include/*
+lib/python3.*
+pyenv.cfg
+pyvenv.cfg
+
