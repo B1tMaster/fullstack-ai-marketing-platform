@@ -1,3 +1,13 @@
+/**
+ * Test suite for database query functions
+ * 
+ * Tests the following functionality:
+ * - Authentication checks for all queries
+ * - Project retrieval (single and multiple)
+ * - Template retrieval (single and multiple)
+ * - Error handling for unauthenticated requests
+ */
+
 import { getProjectsForUser, getProject, getTemplatesForUser, getTemplate } from '../server/queries';
 import { auth } from "@clerk/nextjs/server";
 import { db } from "../server/db";
