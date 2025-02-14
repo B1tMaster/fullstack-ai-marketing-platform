@@ -5,7 +5,6 @@ import { Button } from "./ui/button";
 import { Star, LayoutTemplate, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { formatDistance } from "date-fns";
 import axios from "axios";
 import toast from "react-hot-toast";
 
@@ -46,9 +45,13 @@ export default function SubscriptionManager({ subscription }: SubscriptionManage
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
     return {
       date: date.toLocaleDateString(),
-      daysRemaining: formatDistance(date, new Date(), { addSuffix: true })
+      daysRemaining: `${diffDays} days remaining`
     };
   };
 
