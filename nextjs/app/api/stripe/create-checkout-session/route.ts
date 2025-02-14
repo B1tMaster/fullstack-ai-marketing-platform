@@ -4,6 +4,11 @@ import { getOrCreateStripeCustomer } from "@/server/queries";
 import logger from "@/utils/logger";
 import { auth } from "@clerk/nextjs";
 
+/**
+ * Creates a Stripe Checkout Session for new subscriptions
+ * Called when a user clicks the "Subscribe Now" button
+ * Returns a URL to Stripe's hosted checkout page
+ */
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();

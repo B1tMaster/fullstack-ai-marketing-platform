@@ -3,6 +3,11 @@ import stripe from "@/lib/StripeClient";
 import { getOrCreateStripeCustomer } from "@/server/queries";
 import logger from "@/utils/logger";
 
+/**
+ * Creates a Stripe Customer Portal Session for subscription management
+ * Called when a user clicks the "Manage Subscription" button
+ * Returns a URL to Stripe's hosted customer portal
+ */
 export async function POST(req: NextRequest) {
   try {
     const customerId = await getOrCreateStripeCustomer();
