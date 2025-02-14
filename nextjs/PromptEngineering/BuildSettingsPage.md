@@ -19,6 +19,16 @@
 
 - A user can have eiher default Free Plan or a Premium Plan. for a premium plan user will need to subscribe to the plan using stripe. Unlimited plan will have access to all features.  Free paln will have limited access.
 
+- we will use already defined in schema.ts : stripeCustomersTable and subscriptionsTable to manage the subscription details with stripe. 
+
+- we will need to  we need to implement the Stripe webhook endpoint o handle subscription status changes  . use STRIPE_WEBHOOK_SECRET from .env file to implement the webhook endpoint. 
+
+- we will need to fetch the price details from stripe as we already defined the product in stripe. 
+use STRIPE_PRICE_ID from .env file to fetch the price details. 
+
+- we alread have  Stripe Customer Portal For the subscription management redirect.
+
+
 ## Context
 
 /add nextjs/app/(dashboard)/settings/page.tsx
