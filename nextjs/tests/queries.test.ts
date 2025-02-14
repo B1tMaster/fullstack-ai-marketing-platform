@@ -57,27 +57,8 @@ describe('Queries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAuth.mockResolvedValue({ 
-      userId: mockUserId,
-      sessionClaims: {
-        __raw: "test-raw",
-        iss: "test-issuer",
-        sub: "test-subject",
-        sid: "test-sid",
-        iat: 123,
-        exp: 456,
-        azp: "test-azp"
-      },
-      sessionId: "test-session",
-      actor: undefined,
-      orgId: undefined,
-      orgRole: undefined,
-      orgSlug: undefined,
-      orgPermissions: undefined,
-      getToken: async () => "test-token",
-      debug: () => ({ userId: mockUserId }),
-      has: () => true,
-      redirectToSignIn: () => { throw new Error("Not implemented"); }
-    });
+      userId: mockUserId 
+    } as any);
   });
 
   describe('getProjectsForUser', () => {
@@ -110,19 +91,8 @@ describe('Queries', () => {
 
     it('should throw error if user is not authenticated', async () => {
       mockedAuth.mockResolvedValue({ 
-        userId: null,
-        sessionClaims: null,
-        sessionId: null,
-        actor: undefined,
-        orgId: undefined,
-        orgRole: undefined,
-        orgSlug: undefined,
-        orgPermissions: undefined,
-        getToken: async () => null,
-        debug: () => ({ userId: null }),
-        has: () => false,
-        redirectToSignIn: () => { throw new Error("Not implemented"); }
-      });
+        userId: null 
+      } as any);
 
       await expect(getProjectsForUser()).rejects.toThrow('User not found');
     });
@@ -202,7 +172,9 @@ describe('Queries', () => {
     });
 
     it('should throw error if user is not authenticated', async () => {
-      mockedAuth.mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ 
+        userId: null 
+      } as any);
 
       await expect(getTemplatesForUser()).rejects.toThrow('User not found');
     });
