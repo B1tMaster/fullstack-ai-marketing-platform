@@ -10,8 +10,8 @@
     "ts-jest": "^29.1.2"
   },
   "scripts": {
-    "test": "yarn jest",
-    "test:watch": "yarn jest --watch",
-    "test:coverage": "yarn jest --coverage"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --coverageDirectory='coverage'"
   }
 }
