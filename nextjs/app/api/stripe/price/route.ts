@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import stripe from "@/lib/stripe";
+import stripe from "@/lib/StripeClient";
 import logger from "@/utils/logger";
 
 export async function GET() {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import stripe from "@/lib/stripe";
+import stripe from "@/lib/StripeClient";
 import { db } from "@/server/db";
 import { subscriptionsTable } from "@/server/db/schema";
 import { eq } from "drizzle-orm";

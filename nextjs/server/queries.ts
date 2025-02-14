@@ -12,7 +12,7 @@ import {
   Subscription
 } from "./db/schema";
 import { eq } from "drizzle-orm";
-import stripe from "@/lib/stripe";
+import stripe from "@/lib/StripeClient";
 import logger from "@/utils/logger";
 
 export async function getProjectsForUser(): Promise<Project[]> {
