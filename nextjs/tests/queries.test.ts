@@ -1,11 +1,22 @@
 /**
  * Test suite for database query functions
  * 
+ * This suite uses Jest mocks to simulate responses from:
+ * - Clerk authentication (@clerk/nextjs/server)
+ * - Database queries (db.query)
+ * 
+ * No actual network calls or database operations are performed.
+ * 
  * Tests the following functionality:
  * - Authentication checks for all queries
  * - Project retrieval (single and multiple)
  * - Template retrieval (single and multiple)
  * - Error handling for unauthenticated requests
+ * 
+ * Mock implementation:
+ * - auth() is mocked to return either a valid userId or null
+ * - Database queries are mocked to return predefined test data
+ * - All external calls are verified using Jest's expect().toHaveBeenCalled()
  */
 
 import { getProjectsForUser, getProject, getTemplatesForUser, getTemplate } from '../server/queries';
