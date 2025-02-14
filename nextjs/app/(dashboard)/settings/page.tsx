@@ -1,6 +1,12 @@
-import React from "react";
+import { getUserSubscription } from "@/server/queries";
+import SubscriptionManager from "@/components/SubscriptionManager";
 
-export default function SettingsPage() {
-  // TODO: Grab customer stripe data
-  return <div>SettingsPage</div>;
+export default async function SettingsPage() {
+  const subscription = await getUserSubscription();
+  
+  return (
+    <div className="container mx-auto p-6">
+      <SubscriptionManager subscription={subscription} />
+    </div>
+  );
 }
