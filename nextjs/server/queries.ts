@@ -2,8 +2,18 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "./db";
-import { Project, projectsTable, Template, templatesTable } from "./db/schema";
+import { 
+  Project, 
+  projectsTable, 
+  Template, 
+  templatesTable,
+  stripeCustomersTable,
+  subscriptionsTable,
+  Subscription
+} from "./db/schema";
 import { eq } from "drizzle-orm";
+import stripe from "@/lib/stripe";
+import logger from "@/utils/logger";
 
 export async function getProjectsForUser(): Promise<Project[]> {
   // Figure out who the user is
@@ -73,4 +83,99 @@ export async function getTemplate(id: string): Promise<Template | undefined> {
   });
 
   return template;
+}
+
+export async function getUserSubscription(): Promise<Stripe.Subscription | null> {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  try {
+    // Get subscription from our database
+    const dbSubscription = await db.query.subscriptionsTable.findFirst({
+      where: eq(subscriptionsTable.userId, userId),
+    });
+
+    if (!dbSubscription?.stripeSubscriptionId) {
+      return null;
+    }
+
+    // Get full subscription details from Stripe
+    const subscription = await stripe.subscriptions.retrieve(
+      dbSubscription.stripeSubscriptionId
+    );
+
+    logger.debug("Retrieved user subscription", {
+      component: "queries",
+      action: "getUserSubscription",
+      subscriptionId: subscription.id,
+      status: subscription.status
+    });
+
+    return subscription;
+  } catch (error) {
+    logger.error(
+      "Failed to get user subscription",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "queries",
+        action: "getUserSubscription",
+        userId
+      }
+    );
+    return null;
+  }
+}
+
+export async function getOrCreateStripeCustomer(): Promise<string> {
+  const { userId } = await auth();
+  
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  try {
+    // Check if customer already exists
+    const existingCustomer = await db.query.stripeCustomersTable.findFirst({
+      where: eq(stripeCustomersTable.userId, userId),
+    });
+
+    if (existingCustomer?.stripeCustomerId) {
+      return existingCustomer.stripeCustomerId;
+    }
+
+    // Create new customer in Stripe
+    const customer = await stripe.customers.create({
+      metadata: {
+        userId,
+      },
+    });
+
+    // Store customer in database
+    await db.insert(stripeCustomersTable).values({
+      userId,
+      stripeCustomerId: customer.id,
+    });
+
+    logger.debug("Created new Stripe customer", {
+      component: "queries",
+      action: "getOrCreateStripeCustomer",
+      customerId: customer.id
+    });
+
+    return customer.id;
+  } catch (error) {
+    logger.error(
+      "Failed to get/create Stripe customer",
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        component: "queries",
+        action: "getOrCreateStripeCustomer",
+        userId
+      }
+    );
+    throw error;
+  }
 }
