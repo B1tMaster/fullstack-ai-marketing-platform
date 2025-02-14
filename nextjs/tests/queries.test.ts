@@ -1,6 +1,7 @@
 import { getProjectsForUser, getProject, getTemplatesForUser, getTemplate } from '../server/queries';
 import { auth } from "@clerk/nextjs/server";
 import { db } from "../server/db";
+import { Project, Template } from '../server/db/schema';
 
 // Mock the external dependencies
 jest.mock("@clerk/nextjs/server", () => ({
@@ -22,12 +23,19 @@ jest.mock("../server/db", () => ({
   }
 }));
 
+// Type the mocked functions
+const mockedAuth = auth as jest.MockedFunction<typeof auth>;
+const mockedProjectsFindMany = db.query.projectsTable.findMany as jest.MockedFunction<typeof db.query.projectsTable.findMany>;
+const mockedProjectsFindFirst = db.query.projectsTable.findFirst as jest.MockedFunction<typeof db.query.projectsTable.findFirst>;
+const mockedTemplatesFindMany = db.query.templatesTable.findMany as jest.MockedFunction<typeof db.query.templatesTable.findMany>;
+const mockedTemplatesFindFirst = db.query.templatesTable.findFirst as jest.MockedFunction<typeof db.query.templatesTable.findFirst>;
+
 describe('Queries', () => {
   const mockUserId = 'test-user-id';
   
   beforeEach(() => {
     jest.clearAllMocks();
-    (auth as jest.Mock).mockResolvedValue({ userId: mockUserId });
+    mockedAuth.mockResolvedValue({ userId: mockUserId });
   });
 
   describe('getProjectsForUser', () => {
@@ -37,17 +45,17 @@ describe('Queries', () => {
         { id: '2', name: 'Project 2', userId: mockUserId }
       ];
 
-      db.query.projectsTable.findMany.mockResolvedValue(mockProjects);
+      mockedProjectsFindMany.mockResolvedValue(mockProjects);
 
       const result = await getProjectsForUser();
 
       expect(result).toEqual(mockProjects);
-      expect(auth).toHaveBeenCalled();
-      expect(db.query.projectsTable.findMany).toHaveBeenCalled();
+      expect(mockedAuth).toHaveBeenCalled();
+      expect(mockedProjectsFindMany).toHaveBeenCalled();
     });
 
     it('should throw error if user is not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ userId: null });
 
       await expect(getProjectsForUser()).rejects.toThrow('User not found');
     });
@@ -59,17 +67,17 @@ describe('Queries', () => {
     it('should fetch single project for authenticated user', async () => {
       const mockProject = { id: projectId, name: 'Test Project', userId: mockUserId };
       
-      db.query.projectsTable.findFirst.mockResolvedValue(mockProject);
+      mockedProjectsFindFirst.mockResolvedValue(mockProject);
 
       const result = await getProject(projectId);
 
       expect(result).toEqual(mockProject);
-      expect(auth).toHaveBeenCalled();
-      expect(db.query.projectsTable.findFirst).toHaveBeenCalled();
+      expect(mockedAuth).toHaveBeenCalled();
+      expect(mockedProjectsFindFirst).toHaveBeenCalled();
     });
 
     it('should throw error if user is not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ userId: null });
 
       await expect(getProject(projectId)).rejects.toThrow('User not found');
     });
@@ -82,17 +90,17 @@ describe('Queries', () => {
         { id: '2', name: 'Template 2', userId: mockUserId }
       ];
 
-      db.query.templatesTable.findMany.mockResolvedValue(mockTemplates);
+      mockedTemplatesFindMany.mockResolvedValue(mockTemplates);
 
       const result = await getTemplatesForUser();
 
       expect(result).toEqual(mockTemplates);
-      expect(auth).toHaveBeenCalled();
-      expect(db.query.templatesTable.findMany).toHaveBeenCalled();
+      expect(mockedAuth).toHaveBeenCalled();
+      expect(mockedTemplatesFindMany).toHaveBeenCalled();
     });
 
     it('should throw error if user is not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ userId: null });
 
       await expect(getTemplatesForUser()).rejects.toThrow('User not found');
     });
@@ -104,17 +112,17 @@ describe('Queries', () => {
     it('should fetch single template for authenticated user', async () => {
       const mockTemplate = { id: templateId, name: 'Test Template', userId: mockUserId };
       
-      db.query.templatesTable.findFirst.mockResolvedValue(mockTemplate);
+      mockedTemplatesFindFirst.mockResolvedValue(mockTemplate);
 
       const result = await getTemplate(templateId);
 
       expect(result).toEqual(mockTemplate);
-      expect(auth).toHaveBeenCalled();
-      expect(db.query.templatesTable.findFirst).toHaveBeenCalled();
+      expect(mockedAuth).toHaveBeenCalled();
+      expect(mockedTemplatesFindFirst).toHaveBeenCalled();
     });
 
     it('should throw error if user is not authenticated', async () => {
-      (auth as jest.Mock).mockResolvedValue({ userId: null });
+      mockedAuth.mockResolvedValue({ userId: null });
 
       await expect(getTemplate(templateId)).rejects.toThrow('User not found');
     });
