@@ -108,6 +108,25 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
 
     // Get full subscription details from Stripe
     const subscription = await stripe.subscriptions.retrieve(
+      dbSubscription.stripeSubscriptionId,
+      {
+        expand: ['latest_invoice', 'customer']
+      }
+    );
+
+    // Only return active or past_due subscriptions
+    if (subscription.status !== 'active' && subscription.status !== 'past_due') {
+      logger.debug("Subscription exists but is not active", {
+        component: "queries",
+        action: "getUserSubscription",
+        userId,
+        status: subscription.status
+      });
+      return null;
+    }
+
+    // Get full subscription details from Stripe
+    const subscription = await stripe.subscriptions.retrieve(
       dbSubscription.stripeSubscriptionId
     );
 

@@ -41,10 +41,10 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const userId = subscription.metadata.userId;
+        const userId = subscription.metadata.userId || subscription.client_reference_id;
 
         if (!userId) {
-          logger.error("No userId in subscription metadata", undefined, {
+          logger.error("No userId in metadata or client_reference_id", undefined, {
             component: "webhook",
             action: "subscription.update",
             subscriptionId: subscription.id,

@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: "subscription",
-      success_url: `${request.nextUrl.origin}/settings?success=true`,
-      cancel_url: `${request.nextUrl.origin}/settings?canceled=true`,
+      success_url: `${process.env.APP_URL}/settings?success=true`,
+      cancel_url: `${process.env.APP_URL}/settings?canceled=true`,
       client_reference_id: userId,
     });
 
