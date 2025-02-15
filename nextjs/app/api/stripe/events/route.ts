@@ -30,6 +30,12 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET
     );
 
+    logger.debug("Webhook signature verified", {
+      component: "webhook",
+      action: "verification",
+      eventType: event.type
+    });
+
     logger.debug("Received Stripe webhook", {
       component: "webhook",
       action: "process",
@@ -52,19 +58,37 @@ export async function POST(req: NextRequest) {
           return new NextResponse("No userId found", { status: 400 });
         }
 
-        // Upsert subscription record
-        await db
-          .insert(subscriptionsTable)
-          .values({
-            userId,
-            stripeSubscriptionId: subscription.id,
-          })
-          .onConflictDoUpdate({
-            target: [subscriptionsTable.stripeSubscriptionId],
-            set: {
+        logger.debug("Processing subscription event", {
+          component: "webhook",
+          action: "subscription.update",
+          subscriptionId: subscription.id,
+          userId,
+          status: subscription.status
+        });
+
+        // Only save active or past_due subscriptions
+        if (subscription.status === 'active' || subscription.status === 'past_due') {
+          // Upsert subscription record
+          await db
+            .insert(subscriptionsTable)
+            .values({
               userId,
-            },
+              stripeSubscriptionId: subscription.id,
+            })
+            .onConflictDoUpdate({
+              target: [subscriptionsTable.stripeSubscriptionId],
+              set: {
+                userId,
+              },
+            });
+
+          logger.debug("Saved subscription to database", {
+            component: "webhook",
+            action: "subscription.save",
+            subscriptionId: subscription.id,
+            userId
           });
+        }
 
         break;
       }
