@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { HttpStatus } from "@/constants/http";
 import { headers } from "next/headers";
 import stripe from "@/lib/StripeClient";
 import { db } from "@/server/db";
@@ -16,11 +17,17 @@ export async function POST(req: NextRequest) {
       component: "webhook",
       action: "verification",
     });
-    return new NextResponse("Webhook secret not configured", { status: 500 });
+    return new NextResponse(
+      "Webhook secret not configured", 
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
+    );
   }
 
   if (!sig) {
-    return new NextResponse("No signature found", { status: 400 });
+    return new NextResponse(
+      "No signature found", 
+      { status: HttpStatus.BAD_REQUEST }
+    );
   }
 
   try {
@@ -55,7 +62,10 @@ export async function POST(req: NextRequest) {
             action: "subscription.update",
             subscriptionId: subscription.id,
           });
-          return new NextResponse("No userId found", { status: 400 });
+          return new NextResponse(
+            "No userId found", 
+            { status: HttpStatus.BAD_REQUEST }
+          );
         }
 
         logger.debug("Processing subscription event", {
@@ -160,7 +170,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return new NextResponse(null, { status: 200 });
+    return new NextResponse(null, { status: HttpStatus.OK });
   } catch (error) {
     logger.error(
       "Error processing webhook",
@@ -172,7 +182,7 @@ export async function POST(req: NextRequest) {
     );
     return new NextResponse(
       "Webhook error: " + (error instanceof Error ? error.message : "Unknown error"),
-      { status: 400 }
+      { status: HttpStatus.BAD_REQUEST }
     );
   }
 }
