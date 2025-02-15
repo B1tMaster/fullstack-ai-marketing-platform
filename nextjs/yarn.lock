@@ -2375,6 +2375,13 @@
   dependencies:
     undici-types "~6.20.0"
 
+"@types/node@>=8.1.0":
+  version "22.13.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-22.13.4.tgz#3fe454d77cd4a2d73c214008b3e331bfaaf5038a"
+  integrity sha512-ywP2X0DYtX3y08eFVx5fNIw7/uIv8hYUKgXoK8oayJlLnKcRfEYCxWMVE1XagUdVtCJlZT1AU4LXEABW+L1Peg==
+  dependencies:
+    undici-types "~6.20.0"
+
 "@types/node@^20":
   version "20.17.17"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-20.17.17.tgz#5cea2af2e271313742c14f418eaf5dcfa8ae2e3a"
@@ -6380,6 +6387,13 @@ pure-rand@^6.0.0:
   resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.1.0.tgz#d173cf23258231976ccbdb05247c9787957604f2"
   integrity sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==
 
+qs@^6.11.0:
+  version "6.14.0"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.14.0.tgz#c63fa40680d2c5c941412a0e899c89af60c0a930"
+  integrity sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==
+  dependencies:
+    side-channel "^1.1.0"
+
 querystringify@^2.1.1:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.2.0.tgz#3345941b4153cb9d082d8eee4cda2016a9aef7f6"
@@ -7183,6 +7197,14 @@ strip-json-comments@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-3.1.1.tgz#31f1281b3832630434831c310c01cccda8cbe006"
   integrity sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==
+
+stripe@^17.6.0:
+  version "17.6.0"
+  resolved "https://registry.yarnpkg.com/stripe/-/stripe-17.6.0.tgz#6495a42b7a20066e0d96068c362da793d684e79c"
+  integrity sha512-+HB6+SManp0gSRB0dlPmXO+io18krlAe0uimXhhIkL/RG/VIRigkfoM3QDJPkqbuSW0XsA6uzsivNCJU1ELEDA==
+  dependencies:
+    "@types/node" ">=8.1.0"
+    qs "^6.11.0"
 
 styled-jsx@5.1.6:
   version "5.1.6"

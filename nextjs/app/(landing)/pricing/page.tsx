@@ -49,7 +49,7 @@ export default function PricingPage() {
                 />
                 <div className="mt-4 sm:mt-6">
                   <span className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary">
-                    $14.99
+                    $15.00
                   </span>
                   <span className="text-xl sm:text-2xl text-secondary ml-2">
                     / month
