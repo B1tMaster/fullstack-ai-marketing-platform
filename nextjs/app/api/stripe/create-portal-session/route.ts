@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
         return_url: `${baseUrl}/settings`,
       });
 
-      logger.debug("Created portal session", {
+      logger.debug("Created billing portal session", {
         component: "api",
         action: "createPortalSession",
         sessionId: session.id,
