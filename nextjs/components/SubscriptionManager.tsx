@@ -27,6 +27,8 @@ export default function SubscriptionManager({
   const [isLoading, setIsLoading] = useState(false);
   const [price, setPrice] = useState<string>("");
 
+  const router = useRouter();
+
   useEffect(() => {
     // Fetch price from API
     const fetchPrice = async () => {
@@ -44,30 +46,24 @@ export default function SubscriptionManager({
     };
 
     fetchPrice();
+  }, []);
 
-    const router = useRouter();
-    
+  useEffect(() => {
     // Show success/error messages when returning from Stripe
     const urlParams = new URLSearchParams(window.location.search);
     
-    // Handle URL parameters and show toasts
-    const handleUrlParams = () => {
-      if (urlParams.get("success")) {
-        toast.success("Successfully subscribed to premium plan!");
-        router.replace("/settings");
-      }
-      if (urlParams.get("canceled")) {
-        toast.error("Subscription canceled.");
-        router.replace("/settings");
-      }
-      if (urlParams.get("portal")) {
-        router.replace("/settings");
-      }
-    };
-
-    // Run once after component mounts
-    handleUrlParams();
-  }, []);
+    if (urlParams.get("success")) {
+      toast.success("Successfully subscribed to premium plan!");
+      router.replace("/settings");
+    }
+    if (urlParams.get("canceled")) {
+      toast.error("Subscription canceled.");
+      router.replace("/settings");
+    }
+    if (urlParams.get("portal")) {
+      router.replace("/settings");
+    }
+  }, [router]);
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
