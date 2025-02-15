@@ -66,28 +66,83 @@ export async function POST(req: NextRequest) {
           status: subscription.status
         });
 
-        // Only save active or past_due subscriptions
-        if (subscription.status === 'active' || subscription.status === 'past_due') {
-          // Upsert subscription record
-          await db
-            .insert(subscriptionsTable)
-            .values({
-              userId,
-              stripeSubscriptionId: subscription.id,
-            })
-            .onConflictDoUpdate({
-              target: [subscriptionsTable.stripeSubscriptionId],
-              set: {
+        // Handle subscription based on status
+        switch (subscription.status) {
+          case 'active':
+          case 'past_due':
+          case 'trialing':
+            // Save or update subscription
+            await db
+              .insert(subscriptionsTable)
+              .values({
                 userId,
-              },
-            });
+                stripeSubscriptionId: subscription.id,
+              })
+              .onConflictDoUpdate({
+                target: [subscriptionsTable.stripeSubscriptionId],
+                set: {
+                  userId,
+                },
+              });
 
-          logger.debug("Saved subscription to database", {
-            component: "webhook",
-            action: "subscription.save",
-            subscriptionId: subscription.id,
-            userId
-          });
+            logger.debug("Saved subscription to database", {
+              component: "webhook",
+              action: "subscription.save",
+              subscriptionId: subscription.id,
+              userId,
+              status: subscription.status
+            });
+            break;
+
+          case 'incomplete':
+            // Save but log warning
+            await db
+              .insert(subscriptionsTable)
+              .values({
+                userId,
+                stripeSubscriptionId: subscription.id,
+              })
+              .onConflictDoUpdate({
+                target: [subscriptionsTable.stripeSubscriptionId],
+                set: {
+                  userId,
+                },
+              });
+
+            logger.warn("Subscription payment incomplete", {
+              component: "webhook",
+              action: "subscription.incomplete",
+              subscriptionId: subscription.id,
+              userId
+            });
+            break;
+
+          case 'incomplete_expired':
+          case 'canceled':
+          case 'unpaid':
+          case 'paused':
+            // Remove subscription from database
+            await db
+              .delete(subscriptionsTable)
+              .where(eq(subscriptionsTable.stripeSubscriptionId, subscription.id));
+
+            logger.debug("Removed subscription from database", {
+              component: "webhook",
+              action: "subscription.remove",
+              subscriptionId: subscription.id,
+              userId,
+              status: subscription.status
+            });
+            break;
+
+          default:
+            logger.warn("Unhandled subscription status", {
+              component: "webhook",
+              action: "subscription.unknown",
+              subscriptionId: subscription.id,
+              userId,
+              status: subscription.status
+            });
         }
 
         break;
