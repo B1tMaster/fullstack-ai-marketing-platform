@@ -53,19 +53,44 @@ export async function POST(request: NextRequest) {
     }
 
     // Create portal session
-    const session = await stripe.billingPortal.sessions.create({
-      customer: customer.stripeCustomerId,
-      return_url: `${baseUrl}/settings`,
-    });
+    try {
+      const session = await stripe.billingPortal.sessions.create({
+        customer: customer.stripeCustomerId,
+        return_url: `${baseUrl}/settings`,
+      });
 
-    logger.debug("Created portal session", {
-      component: "api",
-      action: "createPortalSession",
-      sessionId: session.id,
-      customerId: customer.stripeCustomerId,
-    });
+      logger.debug("Created portal session", {
+        component: "api",
+        action: "createPortalSession",
+        sessionId: session.id,
+        customerId: customer.stripeCustomerId,
+      });
 
-    return NextResponse.json({ url: session.url });
+      return NextResponse.json({ url: session.url });
+    } catch (portalError) {
+      if (portalError instanceof Error && 
+          portalError.message.includes('No configuration provided')) {
+        // Fallback to checkout portal if customer portal is not configured
+        const session = await stripe.checkout.sessions.create({
+          customer: customer.stripeCustomerId,
+          mode: 'setup',
+          payment_method_types: ['card'],
+          success_url: `${baseUrl}/settings?success=true`,
+          cancel_url: `${baseUrl}/settings?canceled=true`,
+        });
+
+        logger.debug("Created checkout session as portal fallback", {
+          component: "api",
+          action: "createPortalSession",
+          sessionId: session.id,
+          customerId: customer.stripeCustomerId,
+        });
+
+        return NextResponse.json({ url: session.url });
+      }
+      throw portalError;
+    }
+
   } catch (error) {
     logger.error(
       "Failed to create portal session",
