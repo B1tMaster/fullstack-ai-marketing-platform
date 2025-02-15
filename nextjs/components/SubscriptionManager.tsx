@@ -12,7 +12,12 @@ import type { Stripe } from "stripe";
 import logger from "@/utils/logger";
 
 interface SubscriptionManagerProps {
-  subscription: Stripe.Subscription | null;
+  subscription: {
+    id: string;
+    status: string;
+    current_period_end: number;
+    cancel_at_period_end: boolean;
+  } | null;
 }
 
 export default function SubscriptionManager({

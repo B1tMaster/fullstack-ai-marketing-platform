@@ -132,7 +132,13 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
       status: subscription.status,
     });
 
-    return subscription;
+    // Return only the necessary fields to avoid serialization issues
+    return {
+      id: subscription.id,
+      status: subscription.status,
+      current_period_end: subscription.current_period_end,
+      cancel_at_period_end: subscription.cancel_at_period_end,
+    };
   } catch (error) {
     // Only log as error if it's a real error, not an expected case
     if (error instanceof Error && !error.message.includes("does not exist")) {
