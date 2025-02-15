@@ -10,9 +10,9 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 // Initialize Stripe with the latest API version
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+const stripeclient = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-01-27.acacia", // Latest stable API version
   typescript: true,
 });
 
-export default stripe;
+export default stripeclient;

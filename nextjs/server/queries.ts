@@ -11,7 +11,7 @@ import {
   subscriptionsTable,
 } from "./db/schema";
 import { eq } from "drizzle-orm";
-import stripe from "@/lib/StripeClient";
+import stripeclient from "@/lib/StripeClient";
 import logger from "@/utils/logger";
 import Stripe from "stripe";
 
@@ -108,7 +108,7 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
     }
 
     // Get full subscription details from Stripe
-    const subscription = await stripe.subscriptions.retrieve(
+    const subscription = await stripeclient.subscriptions.retrieve(
       dbSubscription.stripeSubscriptionId
     );
 
@@ -170,7 +170,7 @@ export async function getOrCreateStripeCustomer(
     }
 
     // Create new customer in Stripe
-    const customer = await stripe.customers.create({
+    const customer = await stripeclient.customers.create({
       email: email,
       metadata: {
         userId: userId,
