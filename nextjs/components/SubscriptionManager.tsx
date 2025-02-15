@@ -52,6 +52,10 @@ export default function SubscriptionManager({
     if (urlParams.get("canceled")) {
       toast.error("Subscription canceled.");
     }
+    if (urlParams.get("portal")) {
+      // Refresh the page to get updated subscription status
+      window.location.href = "/settings";
+    }
   }, []);
 
   const formatDate = (timestamp: number) => {
