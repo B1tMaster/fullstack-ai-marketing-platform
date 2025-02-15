@@ -125,11 +125,6 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
       return null;
     }
 
-    // Get full subscription details from Stripe
-    const subscription = await stripe.subscriptions.retrieve(
-      dbSubscription.stripeSubscriptionId
-    );
-
     logger.debug("Retrieved user subscription", {
       component: "queries",
       action: "getUserSubscription",
