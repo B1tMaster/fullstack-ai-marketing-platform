@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { HttpStatus } from "@/constants/http";
 import stripe from "@/lib/StripeClient";
 import { getOrCreateStripeCustomer } from "@/server/queries";
 import logger from "@/utils/logger";
@@ -20,7 +21,10 @@ export async function POST(request: NextRequest) {
           action: "createCheckoutSession",
         }
       );
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized" }, 
+        { status: HttpStatus.UNAUTHORIZED }
+      );
     }
 
     if (!process.env.STRIPE_PRICE_ID) {
@@ -30,7 +34,7 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json(
         { error: "Stripe price ID not configured" },
-        { status: 500 }
+        { status: HttpStatus.INTERNAL_SERVER_ERROR }
       );
     }
 
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest) {
       sessionId: session.id,
     });
 
-    return NextResponse.json({ url: session.url }, { status: 200 });
+    return NextResponse.json({ url: session.url }, { status: HttpStatus.OK });
   } catch (error) {
     logger.error(
       "Failed to create checkout session",
@@ -85,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { error: "Failed to create checkout session" },
-      { status: 500 }
+      { status: HttpStatus.INTERNAL_SERVER_ERROR }
     );
   }
 }
