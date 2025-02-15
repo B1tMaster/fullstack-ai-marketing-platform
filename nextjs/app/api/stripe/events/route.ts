@@ -9,7 +9,7 @@ import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig = headers().get("stripe-signature");
+  const sig = (await headers()).get("stripe-signature");
 
   if (!process.env.STRIPE_WEBHOOK_SECRET) {
     logger.error("Missing STRIPE_WEBHOOK_SECRET", undefined, {
@@ -47,10 +47,10 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const userId = subscription.metadata.userId || subscription.client_reference_id;
+        const userId = subscription.metadata.userId;
 
         if (!userId) {
-          logger.error("No userId in metadata or client_reference_id", undefined, {
+          logger.error("No userId in metadata", undefined, {
             component: "webhook",
             action: "subscription.update",
             subscriptionId: subscription.id,
