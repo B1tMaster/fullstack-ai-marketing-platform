@@ -103,9 +103,9 @@ export default function SubscriptionManager({
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">
+    <Card className="w-full max-w-4xl mx-auto border border-gray-200 rounded-3xl shadow-sm hover:border-main hover:shadow-md hover:scale-[1.01] transition-all duration-300">
+      <CardHeader className="pb-3 sm:pb-4 lg:pb-5">
+        <CardTitle className="text-lg sm:text-xl lg:text-2xl font-semibold text-main">
           Subscription Settings
         </CardTitle>
       </CardHeader>
@@ -146,7 +146,7 @@ export default function SubscriptionManager({
             <Button
               onClick={handleManageSubscription}
               disabled={isLoading}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-main hover:bg-main/90 transition-colors duration-300"
             >
               Manage Subscription
             </Button>
@@ -154,7 +154,7 @@ export default function SubscriptionManager({
         ) : (
           // Free Plan View
           <div className="space-y-6">
-            <div className="text-lg font-medium">Free Plan</div>
+            <div className="text-lg font-medium text-main">Free Plan</div>
             <div className="space-y-4">
               <div className="space-y-3">
                 <h3 className="text-lg font-medium">
