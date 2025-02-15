@@ -1,15 +1,20 @@
+import SubscriptionMessage from "@/components/SubscriptionMessage";
 import TemplateList from "@/components/TemplateList";
 import { Button } from "@/components/ui/button";
 import { createTemplate } from "@/server/mutation";
-import { getTemplatesForUser } from "@/server/queries";
+import { getTemplatesForUser, getUserSubscription } from "@/server/queries";
 import { Plus } from "lucide-react";
 import React from "react";
 
 export default async function TemplatesPage() {
   const templates = await getTemplatesForUser();
+  const subscription = await getUserSubscription();
+  const isSubscribed =
+    subscription && subscription.status === "active" ? true : false;
 
   return (
     <div className="w-full">
+      {!isSubscribed && <SubscriptionMessage />}
       <div className="max-w-screen-2xl mx-auto p-4 sm:p-6 md:p-8 lg:p-12 mt-2 space-y-6 sm:space-y-8 lg:space-y-10">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
           <div className="space-y-2 sm:space-y-4 mb-4 sm:mb-0">
