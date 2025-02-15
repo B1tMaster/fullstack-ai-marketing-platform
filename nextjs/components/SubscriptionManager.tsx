@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Star, LayoutTemplate, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -44,18 +45,28 @@ export default function SubscriptionManager({
 
     fetchPrice();
 
+    const router = useRouter();
+    
     // Show success/error messages when returning from Stripe
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("success")) {
-      toast.success("Successfully subscribed to premium plan!");
-    }
-    if (urlParams.get("canceled")) {
-      toast.error("Subscription canceled.");
-    }
-    if (urlParams.get("portal")) {
-      // Refresh the page to get updated subscription status
-      window.location.href = "/settings";
-    }
+    
+    // Handle URL parameters and show toasts
+    const handleUrlParams = () => {
+      if (urlParams.get("success")) {
+        toast.success("Successfully subscribed to premium plan!");
+        router.replace("/settings");
+      }
+      if (urlParams.get("canceled")) {
+        toast.error("Subscription canceled.");
+        router.replace("/settings");
+      }
+      if (urlParams.get("portal")) {
+        router.replace("/settings");
+      }
+    };
+
+    // Run once after component mounts
+    handleUrlParams();
   }, []);
 
   const formatDate = (timestamp: number) => {
