@@ -2,7 +2,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { HttpStatus } from "./constants/http";
 
-const isPublicRoute = createRouteMatcher(["/", "/pricing", "/api/upload"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/pricing",
+  "/api/upload",
+  "/api/webhooks/stripe/events",
+]);
 const isSecureRoute = createRouteMatcher([
   "/api/asset-processing-job(.*)",
   "/api/asset(.*)",
