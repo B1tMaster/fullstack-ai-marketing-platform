@@ -13,6 +13,7 @@ import {
 import { eq } from "drizzle-orm";
 import stripe from "@/lib/StripeClient";
 import logger from "@/utils/logger";
+import Stripe from "stripe";
 
 export async function getProjectsForUser(): Promise<Project[]> {
   // Figure out who the user is
@@ -108,19 +109,19 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
 
     // Get full subscription details from Stripe
     const subscription = await stripe.subscriptions.retrieve(
-      dbSubscription.stripeSubscriptionId,
-      {
-        expand: ['latest_invoice', 'customer']
-      }
+      dbSubscription.stripeSubscriptionId
     );
 
     // Only return active or past_due subscriptions
-    if (subscription.status !== 'active' && subscription.status !== 'past_due') {
+    if (
+      subscription.status !== "active" &&
+      subscription.status !== "past_due"
+    ) {
       logger.debug("Subscription exists but is not active", {
         component: "queries",
         action: "getUserSubscription",
         userId,
-        status: subscription.status
+        status: subscription.status,
       });
       return null;
     }
@@ -132,13 +133,7 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
       status: subscription.status,
     });
 
-    // Return only the necessary fields to avoid serialization issues
-    return {
-      id: subscription.id,
-      status: subscription.status,
-      current_period_end: subscription.current_period_end,
-      cancel_at_period_end: subscription.cancel_at_period_end,
-    };
+    return JSON.parse(JSON.stringify(subscription));
   } catch (error) {
     // Only log as error if it's a real error, not an expected case
     if (error instanceof Error && !error.message.includes("does not exist")) {

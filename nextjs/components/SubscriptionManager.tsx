@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-import type { Stripe } from "stripe";
 import logger from "@/utils/logger";
 
 interface SubscriptionManagerProps {
@@ -37,10 +36,14 @@ export default function SubscriptionManager({
         const { unit_amount } = response.data;
         setPrice((unit_amount / 100).toFixed(2));
       } catch (error) {
-        logger.error("Failed to fetch price", error instanceof Error ? error : new Error(String(error)), {
-          component: "SubscriptionManager",
-          action: "fetchPrice"
-        });
+        logger.error(
+          "Failed to fetch price",
+          error instanceof Error ? error : new Error(String(error)),
+          {
+            component: "SubscriptionManager",
+            action: "fetchPrice",
+          }
+        );
         setPrice("Failed"); // Fallback price
       }
     };
@@ -51,7 +54,7 @@ export default function SubscriptionManager({
   useEffect(() => {
     // Show success/error messages when returning from Stripe
     const urlParams = new URLSearchParams(window.location.search);
-    
+
     if (urlParams.get("success")) {
       toast.success("Successfully subscribed to premium plan!");
       router.replace("/settings");
@@ -68,12 +71,12 @@ export default function SubscriptionManager({
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
     const now = new Date();
-    
+
     // Calculate full days remaining
     const oneDayMs = 1000 * 60 * 60 * 24;
     const diffTime = date.getTime() - now.getTime();
     const diffDays = Math.round(diffTime / oneDayMs);
-    
+
     return {
       date: date.toLocaleDateString(),
       daysRemaining: `${diffDays} days remaining`,
@@ -91,10 +94,14 @@ export default function SubscriptionManager({
           ? error.response.data.error
           : "Failed to start subscription process";
       toast.error(errorMessage);
-      logger.error("Subscription error", error instanceof Error ? error : new Error(String(error)), {
-        component: "SubscriptionManager",
-        action: "handleSubscribe"
-      });
+      logger.error(
+        "Subscription error",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "SubscriptionManager",
+          action: "handleSubscribe",
+        }
+      );
     } finally {
       setIsLoading(false);
     }
@@ -107,10 +114,14 @@ export default function SubscriptionManager({
       window.location.href = response.data.url;
     } catch (error) {
       toast.error("Failed to open subscription management");
-      logger.error("Portal session error", error instanceof Error ? error : new Error(String(error)), {
-        component: "SubscriptionManager",
-        action: "handleManageSubscription"
-      });
+      logger.error(
+        "Portal session error",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          component: "SubscriptionManager",
+          action: "handleManageSubscription",
+        }
+      );
     } finally {
       setIsLoading(false);
     }
