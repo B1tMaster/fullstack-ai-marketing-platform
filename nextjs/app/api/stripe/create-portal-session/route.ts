@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth } from "@clerk/nextjs/server";
-import { HttpStatus } from "@/lib/http-status";
+import { HttpStatus } from "@/constants/http";
 import stripe from "@/lib/StripeClient";
 import { db } from "@/server/db";
 import { stripeCustomersTable } from "@/server/db/schema";
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     if (!baseUrl) {
       logger.error("Missing APP_URL environment variable", undefined, {
         component: "api",
-        action: "createPortalSession"
+        action: "createPortalSession",
       });
       return NextResponse.json(
         { error: "Server configuration error" },
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       logger.error("Customer not found", undefined, {
         component: "api",
         action: "createPortalSession",
-        userId
+        userId,
       });
       return NextResponse.json(
         { error: "Customer not found" },
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       component: "api",
       action: "createPortalSession",
       sessionId: session.id,
-      customerId: customer.stripeCustomerId
+      customerId: customer.stripeCustomerId,
     });
 
     return NextResponse.json({ url: session.url });
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
       error instanceof Error ? error : new Error(String(error)),
       {
         component: "api",
-        action: "createPortalSession"
+        action: "createPortalSession",
       }
     );
 

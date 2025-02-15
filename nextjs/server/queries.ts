@@ -2,14 +2,13 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "./db";
-import { 
-  Project, 
-  projectsTable, 
-  Template, 
+import {
+  Project,
+  projectsTable,
+  Template,
   templatesTable,
   stripeCustomersTable,
   subscriptionsTable,
-  Subscription
 } from "./db/schema";
 import { eq } from "drizzle-orm";
 import stripe from "@/lib/StripeClient";
@@ -87,7 +86,7 @@ export async function getTemplate(id: string): Promise<Template | undefined> {
 
 export async function getUserSubscription(): Promise<Stripe.Subscription | null> {
   const { userId } = await auth();
-  
+
   if (!userId) {
     throw new Error("User not found");
   }
@@ -99,10 +98,10 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
     });
 
     if (!dbSubscription?.stripeSubscriptionId) {
-      logger.debug("No subscription found for user", {
+      logger.debug("No existing subscription found for user", {
         component: "queries",
         action: "getUserSubscription",
-        userId
+        userId,
       });
       return null;
     }
@@ -116,22 +115,20 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
       component: "queries",
       action: "getUserSubscription",
       subscriptionId: subscription.id,
-      status: subscription.status
+      status: subscription.status,
     });
 
     return subscription;
   } catch (error) {
     // Only log as error if it's a real error, not an expected case
-    if (error instanceof Error && 
-        !error.message.includes("relation") && 
-        !error.message.includes("does not exist")) {
+    if (error instanceof Error && !error.message.includes("does not exist")) {
       logger.error(
         "Failed to get user subscription",
         error instanceof Error ? error : new Error(String(error)),
         {
           component: "queries",
           action: "getUserSubscription",
-          userId
+          userId,
         }
       );
     }
@@ -139,9 +136,10 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
   }
 }
 
-export async function getOrCreateStripeCustomer(): Promise<string> {
-  const { userId } = await auth();
-  
+export async function getOrCreateStripeCustomer(
+  userId: string,
+  email: string
+): Promise<string> {
   if (!userId) {
     throw new Error("User not found");
   }
@@ -158,8 +156,9 @@ export async function getOrCreateStripeCustomer(): Promise<string> {
 
     // Create new customer in Stripe
     const customer = await stripe.customers.create({
+      email: email,
       metadata: {
-        userId,
+        userId: userId,
       },
     });
 
@@ -172,7 +171,7 @@ export async function getOrCreateStripeCustomer(): Promise<string> {
     logger.debug("Created new Stripe customer", {
       component: "queries",
       action: "getOrCreateStripeCustomer",
-      customerId: customer.id
+      customerId: customer.id,
     });
 
     return customer.id;
@@ -183,7 +182,7 @@ export async function getOrCreateStripeCustomer(): Promise<string> {
       {
         component: "queries",
         action: "getOrCreateStripeCustomer",
-        userId
+        userId,
       }
     );
     throw error;
